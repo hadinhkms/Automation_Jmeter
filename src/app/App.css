@@ -504,19 +504,21 @@ button:hover kbd {
 }
 
 .component-header textarea {
-  min-height: 43px;
-  height: 43px;
+  min-height: 28px;
+  height: 28px;
+  padding: 4px 7px;
+  line-height: 18px;
   resize: none;
 }
 
 .component-header .header-name-field input {
-  min-height: 43px;
-  height: 43px;
+  min-height: 28px;
+  height: 28px;
 }
 
 .component-header > .checkbox-field {
   align-self: end;
-  height: 43px;
+  height: 28px;
   padding: 0 4px;
   white-space: nowrap;
 }
