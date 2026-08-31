@@ -455,7 +455,7 @@ button:hover kbd {
 
 .component-header {
   display: grid;
-  grid-template-columns: minmax(260px, 1fr) minmax(260px, 1fr) auto;
+  grid-template-columns: repeat(2, minmax(260px, 1fr)) 92px;
   gap: 12px;
   align-items: end;
   padding: 10px 14px 9px;
@@ -507,6 +507,18 @@ button:hover kbd {
   min-height: 43px;
   height: 43px;
   resize: none;
+}
+
+.component-header .header-name-field input {
+  min-height: 43px;
+  height: 43px;
+}
+
+.component-header > .checkbox-field {
+  align-self: end;
+  height: 43px;
+  padding: 0 4px;
+  white-space: nowrap;
 }
 
 .checkbox-field {
@@ -930,7 +942,7 @@ button:hover kbd {
 @media (max-width: 1050px) {
   .workspace { grid-template-columns: minmax(235px, 280px) minmax(0, 1fr); }
   .component-header { grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr); }
-  .component-header > .checkbox-field { grid-column: 1 / -1; }
+  .component-header > .checkbox-field { grid-column: 1 / -1; height: 24px; padding: 0; }
   .status-bar span:nth-last-child(2) { display: none; }
 }
 
