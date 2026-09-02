@@ -35,8 +35,8 @@
       --inline-code-bg: #e2e8f0;
       --inline-code-text: #0f172a;
       
-      --sidebar-width: 290px;
-      --toc-width: 230px;
+      --sidebar-width: 310px;
+      --toc-width: 240px;
       --header-height: 60px;
       --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
       --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
@@ -58,43 +58,42 @@
       --primary: #38bdf8;
       --primary-hover: #7dd3fc;
       --primary-light: #0c4a6e33;
+      --success: #4ade80;
+      --danger: #f87171;
+      --warning: #fbbf24;
       
-      --code-bg: #020617;
-      --code-text: #f1f5f9;
+      --code-bg: #030712;
+      --code-text: #f8fafc;
       --inline-code-bg: #1e293b;
       --inline-code-text: #38bdf8;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.4);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.5);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    html {
-      scroll-behavior: smooth;
-      font-size: 15px;
-    }
 
     body {
       font-family: var(--font-sans);
-      background-color: var(--bg-body);
+      background: var(--bg-body);
       color: var(--text-main);
-      line-height: 1.65;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
     }
 
-    /* Top Header */
+    /* Header */
     header.doc-header {
       position: sticky;
       top: 0;
-      z-index: 50;
+      z-index: 100;
       height: var(--header-height);
       background: var(--bg-surface);
       border-bottom: 1px solid var(--border-color);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 24px;
-      backdrop-filter: blur(8px);
+      padding: 0 28px;
+      box-shadow: var(--shadow-sm);
     }
 
     .brand {
@@ -110,15 +109,14 @@
     .brand-logo {
       width: 32px;
       height: 32px;
-      background: linear-gradient(135deg, #0284c7, #0369a1);
+      background: #ea580c;
       color: #fff;
-      border-radius: 8px;
+      border-radius: 6px;
       display: grid;
       place-items: center;
       font-weight: 800;
-      font-size: 0.95rem;
+      font-size: 13px;
       letter-spacing: -0.5px;
-      box-shadow: var(--shadow-sm);
     }
 
     .header-actions {
@@ -135,58 +133,58 @@
       border-radius: 6px;
       font-size: 0.85rem;
       font-weight: 600;
-      text-decoration: none;
       cursor: pointer;
       border: 1px solid var(--border-color);
       background: var(--bg-surface);
       color: var(--text-main);
-      transition: all 0.15s ease;
+      transition: all 0.2s ease;
+      text-decoration: none;
     }
+
     .btn:hover {
-      background: var(--bg-sidebar);
+      background: var(--border-color);
     }
+
     .btn-primary {
       background: var(--primary);
-      color: #fff;
-      border-color: transparent;
+      color: #ffffff;
+      border-color: var(--primary);
     }
+
     .btn-primary:hover {
       background: var(--primary-hover);
     }
 
-    /* App Container */
+    /* Layout Structure */
     .doc-layout {
       display: flex;
-      flex: 1;
-      max-width: 1600px;
-      width: 100%;
-      margin: 0 auto;
+      min-height: calc(100vh - var(--header-height));
     }
 
-    /* Left Sidebar Navigation Tree */
+    /* Left Sidebar */
     aside.doc-sidebar {
       width: var(--sidebar-width);
-      position: sticky;
-      top: var(--header-height);
-      height: calc(100vh - var(--header-height));
-      overflow-y: auto;
+      flex-shrink: 0;
       background: var(--bg-sidebar);
       border-right: 1px solid var(--border-color);
-      padding: 16px 12px 32px 16px;
-      flex-shrink: 0;
+      height: calc(100vh - var(--header-height));
+      position: sticky;
+      top: var(--header-height);
+      overflow-y: auto;
+      padding: 20px 14px;
     }
 
     .sidebar-search {
       position: relative;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
     }
 
     .sidebar-search input {
       width: 100%;
-      padding: 8px 12px 8px 32px;
-      font-size: 0.85rem;
+      padding: 8px 12px 8px 34px;
       border-radius: 6px;
       border: 1px solid var(--border-color);
+      font-size: 0.88rem;
       background: var(--bg-surface);
       color: var(--text-main);
       outline: none;
@@ -258,21 +256,22 @@
     /* Right Sidebar Table of Contents */
     aside.doc-toc {
       width: var(--toc-width);
+      flex-shrink: 0;
       position: sticky;
       top: var(--header-height);
       height: calc(100vh - var(--header-height));
       overflow-y: auto;
-      padding: 32px 16px 32px 12px;
+      padding: 24px 16px;
       border-left: 1px solid var(--border-color);
-      flex-shrink: 0;
-      font-size: 0.8rem;
+      background: var(--bg-surface);
     }
 
     .toc-title {
+      font-size: 0.8rem;
       font-weight: 700;
-      color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      color: var(--text-muted);
       margin-bottom: 12px;
     }
 
@@ -280,27 +279,24 @@
       list-style: none;
     }
 
-    .toc-list li {
-      margin-bottom: 8px;
-    }
-
-    .toc-list a {
+    .toc-list li a {
+      display: block;
+      padding: 5px 0;
+      font-size: 0.82rem;
       color: var(--text-muted);
       text-decoration: none;
-      transition: color 0.15s;
-      line-height: 1.4;
-      display: block;
+      transition: color 0.15s ease;
     }
 
-    .toc-list a:hover,
-    .toc-list a.active {
+    .toc-list li a:hover,
+    .toc-list li a.active {
       color: var(--primary);
       font-weight: 600;
     }
 
-    /* Typography & Markdown Elements */
+    /* Typography & Sections */
     h1 {
-      font-size: 2.1rem;
+      font-size: 2.2rem;
       font-weight: 800;
       letter-spacing: -0.02em;
       margin-bottom: 12px;
@@ -311,22 +307,26 @@
       font-size: 1.05rem;
       color: var(--text-muted);
       margin-bottom: 32px;
-      padding-bottom: 16px;
+      padding-bottom: 20px;
       border-bottom: 1px solid var(--border-color);
     }
 
+    section {
+      margin-bottom: 52px;
+      scroll-margin-top: calc(var(--header-height) + 20px);
+    }
+
     h2 {
-      font-size: 1.45rem;
+      font-size: 1.5rem;
       font-weight: 700;
       letter-spacing: -0.01em;
-      margin-top: 48px;
       margin-bottom: 16px;
-      padding-top: 16px;
-      border-top: 1px dashed var(--border-color);
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
       color: var(--text-main);
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     h3 {
@@ -442,61 +442,50 @@
       font-weight: 500;
     }
 
-    .copy-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #fff;
-      padding: 4px 8px;
-      font-size: 0.75rem;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .copy-btn:hover {
-      background: rgba(255, 255, 255, 0.25);
+    /* Tables */
+    .table-container {
+      margin: 20px 0;
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
     }
 
-    /* Tables */
-    table {
+    table.doc-table {
       width: 100%;
       border-collapse: collapse;
-      margin: 20px 0;
       font-size: 0.88rem;
-    }
-
-    th, td {
-      padding: 10px 14px;
-      border: 1px solid var(--border-color);
       text-align: left;
     }
 
-    th {
-      background: var(--bg-sidebar);
+    table.doc-table th {
+      background: var(--bg-body);
+      padding: 10px 14px;
       font-weight: 600;
+      border-bottom: 1px solid var(--border-color);
       color: var(--text-main);
     }
 
-    tr:nth-child(even) {
-      background: var(--bg-body);
+    table.doc-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
     }
 
-    /* Modal Lightbox */
+    table.doc-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Lightbox Modal */
     .lightbox-modal {
       display: none;
       position: fixed;
+      inset: 0;
       z-index: 1000;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0, 0, 0, 0.82);
       backdrop-filter: blur(4px);
       align-items: center;
       justify-content: center;
-      padding: 24px;
+      padding: 20px;
       cursor: zoom-out;
     }
 
@@ -553,7 +542,17 @@
       </div>
 
       <div class="nav-group">
-        <div class="nav-group-title">2. Cây kịch bản (Test Plan)</div>
+        <div class="nav-group-title">2. Chuẩn UI/UX & Luồng Hộp Thoại</div>
+        <ul class="nav-list">
+          <li class="nav-item"><a href="#unified-modal">Single Active Modal & Overlay</a></li>
+          <li class="nav-item"><a href="#light-contrast-theme">High-Contrast Light Theme</a></li>
+          <li class="nav-item"><a href="#master-detail-git">Bố cục Master-Detail Song song</a></li>
+          <li class="nav-item"><a href="#editor-scrolling">Kiến trúc Cuộn Độc lập</a></li>
+        </ul>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-title">3. Cây kịch bản (Test Plan)</div>
         <ul class="nav-list">
           <li class="nav-item"><a href="#testplan-tree">Cây cấu trúc Test Plan</a></li>
           <li class="nav-item"><a href="#context-menu">Menu chuột phải & Thêm node</a></li>
@@ -562,7 +561,7 @@
       </div>
 
       <div class="nav-group">
-        <div class="nav-group-title">3. Tính năng Import cURL</div>
+        <div class="nav-group-title">4. Tính năng Import cURL</div>
         <ul class="nav-list">
           <li class="nav-item"><a href="#import-curl">Tools -> Import from cURL</a></li>
           <li class="nav-item"><a href="#curl-live-preview">Live Preview & Phân giải</a></li>
@@ -571,7 +570,7 @@
       </div>
 
       <div class="nav-group">
-        <div class="nav-group-title">4. Xem kết quả (Results Tree)</div>
+        <div class="nav-group-title">5. Xem kết quả (Results Tree)</div>
         <ul class="nav-list">
           <li class="nav-item"><a href="#results-tree">View Results Tree</a></li>
           <li class="nav-item"><a href="#sampler-result-tab">Tab Sampler Result</a></li>
@@ -581,16 +580,28 @@
       </div>
 
       <div class="nav-group">
-        <div class="nav-group-title">5. Plugins Manager</div>
+        <div class="nav-group-title">6. Browser Recorder & Tương Quan</div>
         <ul class="nav-list">
-          <li class="nav-item"><a href="#plugins-manager">JMeter Plugins Manager</a></li>
-          <li class="nav-item"><a href="#available-plugins">Kho Available Plugins</a></li>
-          <li class="nav-item"><a href="#installed-plugins">Quản lý Installed Plugins</a></li>
+          <li class="nav-item"><a href="#browser-recorder">Browser Network Recorder</a></li>
+          <li class="nav-item"><a href="#har-importer">Import file HAR</a></li>
+          <li class="nav-item"><a href="#auto-correlation">Auto-Correlation Wizard</a></li>
         </ul>
       </div>
 
       <div class="nav-group">
-        <div class="nav-group-title">6. Điều khiển & Runner</div>
+        <div class="nav-group-title">7. Doanh nghiệp & Chất lượng</div>
+        <ul class="nav-list">
+          <li class="nav-item"><a href="#sla-quality-gates">Cổng SLA & Webhook Alert</a></li>
+          <li class="nav-item"><a href="#template-gallery">Thư viện Blueprint Mẫu</a></li>
+          <li class="nav-item"><a href="#workload-curve">Biểu đồ Workload Curve</a></li>
+          <li class="nav-item"><a href="#git-manager">Git Version Control & Diff</a></li>
+          <li class="nav-item"><a href="#asset-manager">Quản lý Asset & CSV Data</a></li>
+          <li class="nav-item"><a href="#plugins-manager">JMeter Plugins Manager</a></li>
+        </ul>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-title">8. Thực thi & Điều khiển</div>
         <ul class="nav-list">
           <li class="nav-item"><a href="#run-execution">Chạy test & Live Console</a></li>
           <li class="nav-item"><a href="#runner-controls">Stop, Shutdown & Force Stop</a></li>
@@ -599,10 +610,9 @@
       </div>
 
       <div class="nav-group">
-        <div class="nav-group-title">7. Soạn thảo & Đồng bộ</div>
+        <div class="nav-group-title">9. Soạn thảo & Phím tắt</div>
         <ul class="nav-list">
           <li class="nav-item"><a href="#code-editors">JSON & Groovy Editors</a></li>
-          <li class="nav-item"><a href="#asset-sync">Đồng bộ file CSV & Data</a></li>
           <li class="nav-item"><a href="#shortcuts">Bảng phím tắt tiện ích</a></li>
         </ul>
       </div>
@@ -651,243 +661,363 @@
           </div>
         </section>
 
-        <!-- Section 2: Test Plan Tree -->
+        <!-- Section 2: UI/UX Standards & Unified Modal Flow -->
+        <section id="unified-modal">
+          <h2>🎨 2. Tiêu chuẩn UI/UX Mới & Luồng Hộp Thoại Tập Trung (Unified Modal System)</h2>
+          <p>
+            Nhằm mang lại trải nghiệm tiện lợi, dễ dùng mà không cần mất thời gian tìm hiểu, toàn bộ hệ thống popup / modal đã được tái thiết kế theo tiêu chuẩn công nghiệp thống nhất:
+          </p>
+
+          <div class="callout tip">
+            <div class="callout-title">💡 3 Nguyên Tắc Cốt Lõi Của Trải Nghiệm Mới</div>
+            <ul>
+              <li><strong>Lớp phủ Mờ Cố định (Fixed Overlay)</strong>: Hộp thoại hiển thị trên lớp phủ mờ (<code>position: fixed; inset: 0; z-index: 9999; backdrop-filter: blur(5px)</code>). Tuyệt đối không xô đẩy thanh Toolbar, cây Test Plan hay Editor.</li>
+              <li><strong>Single Active Modal Flow (Không chồng chéo)</strong>: Mở một modal mới sẽ tự động đóng modal đang mở trước đó. Bấm phím <code>Escape</code> hoặc click ra ngoài để đóng tức thì.</li>
+              <li><strong>High-Contrast Light Theme</strong>: Chuyển đổi toàn bộ nền đen mờ sang nền trắng sáng với chữ màu xám đen đậm (<code>#0f172a</code>), nhãn form rõ ràng, đạt chuẩn độ tương phản cao <strong>WCAG AAA</strong>.</li>
+            </ul>
+          </div>
+
+          <div id="light-contrast-theme">
+            <h3>Giao diện Sáng Độ Tương Phản Cao (High-Contrast Light Theme)</h3>
+            <p>
+              Toàn bộ các hộp thoại (SLA Quality Gates, Template Gallery, Git Manager, Workload Graph,...) có nền trắng tinh khiết <code>#ffffff</code>, đường viền mềm <code>#cbd5e1</code> và chữ đen đậm nét cực kỳ dễ đọc.
+            </p>
+            <div class="img-card">
+              <img src="./images/sla_modal_light_theme_1788369020692.png" alt="Hộp thoại SLA Quality Gates Light Theme" onclick="openLightbox(this.src)">
+              <div class="img-caption">
+                <span>📸 Hình 3: Hộp thoại SLA Quality Gates với Theme sáng, chữ đậm rõ ràng, không bị mờ</span>
+                <span>🔍 Click ảnh để phóng to</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="master-detail-git">
+            <h3>Bố cục Master-Detail Song Song (Side-by-Side View)</h3>
+            <p>
+              Đối với các hộp thoại hiển thị danh sách và nội dung chi tiết (như <strong>Git Version Control & Visual Diff Viewer</strong>):
+            </p>
+            <ul>
+              <li><strong>Cột bên trái (380px)</strong>: Danh sách toàn bộ file thay đổi kèm thanh tìm kiếm lọc file tức thì + khung commit ghim cố định ở đáy.</li>
+              <li><strong>Cột bên phải (phần còn lại)</strong>: Khung xem visual diff code với chiều cao tối đa, tô màu cú pháp rõ ràng.</li>
+              <li>Click chọn bất kỳ file nào bên trái, diff bên phải cập nhật tức thì mà <strong>cả 2 bên đều giữ nguyên kích thước ổn định</strong>, không co rúm hay chèn ép nhau.</li>
+            </ul>
+            <div class="img-card">
+              <img src="./images/git_side_by_side_1788370118380.png" alt="Git Master-Detail Side-by-Side View" onclick="openLightbox(this.src)">
+              <div class="img-caption">
+                <span>📸 Hình 4: Bố cục 2 cột song song của Git Version Control & Visual Diff Viewer</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="editor-scrolling">
+            <h3>Kiến trúc Cuộn Độc Lập Cho Editor & Bảng Biến</h3>
+            <p>
+              Khung cấu hình component và các bảng biến dài (như <em>User Defined Variables, HTTP Parameters</em>) được tách biệt luồng cuộn riêng (<code>.editor-scroll</code>). Dù có hàng chục hoặc hàng trăm dòng biến, thanh cuộn hoạt động mượt mà và nút <strong><code>+ Add</code></strong> ở đáy bảng luôn luôn tiếp cận được.
+            </p>
+            <div class="img-card">
+              <img src="./images/table_bottom_add_button_1788372015140.png" alt="Editor Scrolling Architecture" onclick="openLightbox(this.src)">
+              <div class="img-caption">
+                <span>📸 Hình 5: Thanh cuộn dọc hoạt động trơn tru trong bảng User Defined Variables</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 3: Test Plan Tree -->
         <section id="testplan-tree">
-          <h2>🌲 2. Quản lý Cây kịch bản (Test Plan Tree)</h2>
-          <p>Cây kịch bản bên trái quản lý toàn bộ cấu trúc phân cấp các thành phần kiểm thử theo đúng chuẩn Apache JMeter.</p>
+          <h2>🌲 3. Cây kịch bản (Test Plan Tree) & Thao tác kéo thả</h2>
+          <p>Cây kịch bản bên trái quản lý toàn bộ cấu trúc phân cấp chuẩn Apache JMeter:</p>
 
           <div id="context-menu">
             <h3>Menu ngữ cảnh chuột phải (Context Menu)</h3>
-            <p>Click chuột phải vào bất kỳ node nào trên cây để mở menu thao tác phân nhóm:</p>
-            <ul>
-              <li><strong>Add</strong>: Phân nhóm chuẩn (<em>Threads, Samplers, Logic Controllers, Pre/Post Processors, Assertions, Timers, Listeners</em>).</li>
-              <li><strong>Import from cURL…</strong>: Nhập nhanh request từ cURL vào node đang chọn.</li>
-              <li><strong>Cut / Copy / Paste / Duplicate / Remove / Rename (F2)</strong>.</li>
-            </ul>
+            <p>Click chuột phải vào bất kỳ node nào trên cây để mở menu thao tác phân cấp chuẩn:</p>
             <div class="img-card">
-              <img src="./images/expanded_add_menu_1788199666132.png" alt="Menu chuột phải thêm component" onclick="openLightbox(this.src)">
+              <img src="./images/expanded_add_menu_1788199666132.png" alt="Context Menu Add Elements" onclick="openLightbox(this.src)">
               <div class="img-caption">
-                <span>📸 Hình 3: Menu ngữ cảnh chuột phải với danh mục thành phần phân loại chuẩn JMeter</span>
+                <span>📸 Hình 6: Menu chuột phải phân nhóm rõ ràng (Threads, Samplers, Controllers, Extractors,...)</span>
               </div>
             </div>
           </div>
 
           <div id="drag-drop">
-            <h3>Kéo thả (Drag & Drop) và nạp file</h3>
-            <p>Hỗ trợ kéo thả sắp xếp các node trong cây hoặc kéo thả file <code>.jmx</code>, <code>.jtl</code>, <code>.csv</code> trực tiếp từ máy tính vào trình duyệt:</p>
+            <h3>Thao tác Kéo & Thả (Drag & Drop)</h3>
+            <ul>
+              <li><strong>Sắp xếp thứ tự</strong>: Kéo một component thả lên trên hoặc dưới component khác để đổi vị trí.</li>
+              <li><strong>Di chuyển vào container</strong>: Kéo Sampler/Timer thả vào bên trong một Thread Group hoặc Controller.</li>
+              <li><strong>Kéo thả File từ máy tính</strong>: Kéo file <code>.jmx</code>, <code>.jtl</code>, <code>.csv</code> từ Windows Explorer thả trực tiếp vào trình duyệt để nạp dữ liệu.</li>
+            </ul>
             <div class="img-card">
-              <img src="./images/csv_data_config_1788200276044.png" alt="CSV Data Config Element" onclick="openLightbox(this.src)">
+              <img src="./images/csv_data_config_1788200276044.png" alt="CSV Data Config Tree View" onclick="openLightbox(this.src)">
               <div class="img-caption">
-                <span>📸 Hình 4: Giao diện cấu hình CSV Data Set Config và danh sách node trên cây</span>
+                <span>📸 Hình 7: Cấu trúc phân cấp các node trên Cây Test Plan</span>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- Section 3: Import from cURL -->
+        <!-- Section 4: Import cURL -->
         <section id="import-curl">
-          <h2>⚡ 3. Tính năng Import từ cURL (Tools -> Import from cURL)</h2>
-          <p>Nhập nhanh bất kỳ request API nào từ DevTools của trình duyệt hoặc Postman thành component JMeter chỉ trong vài giây.</p>
+          <h2>🌐 4. Tính năng Import từ cURL (Tools -> Import from cURL)</h2>
+          <p>Cho phép nhập nhanh bất kỳ yêu cầu API nào từ DevTools của trình duyệt hoặc Postman thành component của JMeter:</p>
 
           <div class="img-card">
-            <img src="./images/tools_menu_open_1788206333133.png" alt="Menu Tools Import from cURL" onclick="openLightbox(this.src)">
+            <img src="./images/tools_menu_open_1788206333133.png" alt="Tools Menu Import cURL" onclick="openLightbox(this.src)">
             <div class="img-caption">
-              <span>📸 Hình 5: Menu Tools -> Import from cURL… trên thanh menu chính</span>
+              <span>📸 Hình 8: Mở menu Tools -> Import from cURL...</span>
             </div>
           </div>
 
           <div id="curl-live-preview">
-            <h3>Hộp thoại Live Preview cURL</h3>
-            <p>Dán câu lệnh cURL vào ô nhập liệu. Hệ thống sẽ tự động phân tích Method, URL, Headers và Body Data:</p>
+            <h3>Live Preview & Phân giải thời gian thực</h3>
+            <p>Dán câu lệnh cURL vào ô nhập liệu. Hệ thống sẽ tự động phân giải Method, Domain, Path, Headers và Body Data ngay lập tức:</p>
             <div class="img-card">
-              <img src="./images/curl_preview_loaded_1788206358155.png" alt="Hộp thoại Live Preview cURL" onclick="openLightbox(this.src)">
+              <img src="./images/curl_preview_loaded_1788206358155.png" alt="cURL Live Preview Modal" onclick="openLightbox(this.src)">
               <div class="img-caption">
-                <span>📸 Hình 6: Hộp thoại Import cURL với tính năng Live Preview thông số trực quan</span>
+                <span>📸 Hình 9: Hộp thoại Live Preview cURL phân tích đầy đủ tham số</span>
               </div>
             </div>
           </div>
 
           <div id="curl-generated-nodes">
-            <h3>Tự động sinh HTTP Request & Header Manager</h3>
-            <p>Sau khi bấm <strong>Import into Test Plan</strong>, hệ thống tự động tạo sampler HTTP Request và node con HTTP Header Manager chứa đầy đủ headers:</p>
+            <h3>Tự động sinh Sampler & Headers</h3>
+            <p>Bấm <strong>Import into Test Plan</strong>, hệ thống tự động tạo cặp <code>HTTP Request</code> và <code>HTTP Header Manager</code>:</p>
             <div class="img-card">
-              <img src="./images/imported_request_details_1788206379501.png" alt="HTTP Request được tạo tự động" onclick="openLightbox(this.src)">
+              <img src="./images/imported_request_details_1788206379501.png" alt="Imported HTTP Request" onclick="openLightbox(this.src)">
               <div class="img-caption">
-                <span>📸 Hình 7: Node HTTP Request được sinh tự động và gắn vào cây kịch bản</span>
-              </div>
-            </div>
-            <div class="img-card">
-              <img src="./images/imported_headers_details_1788206402412.png" alt="HTTP Header Manager con" onclick="openLightbox(this.src)">
-              <div class="img-caption">
-                <span>📸 Hình 8: Node con HTTP Header Manager chứa đầy đủ các headers trích xuất từ cURL</span>
+                <span>📸 Hình 10: Component HTTP Request được sinh tự động chuẩn xác</span>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- Section 4: Results Tree -->
+        <!-- Section 5: View Results Tree -->
         <section id="results-tree">
-          <h2>📊 4. Trình xem kết quả (View Results Tree)</h2>
-          <p>Tái hiện 100% sức mạnh của View Results Tree trên Apache JMeter với đầy đủ 3 tab chi tiết.</p>
+          <h2>📊 5. Trình xem kết quả (View Results Tree) chuẩn Apache JMeter</h2>
+          <p>Bộ hiển thị kết quả chi tiết của JMeter được tái hiện đầy đủ với 3 tab trực quan:</p>
 
           <div id="sampler-result-tab">
             <h3>Tab Sampler Result</h3>
-            <p>Hiển thị mã phản hồi (200/500), Load time, Connect time, Latency, Data size:</p>
+            <p>Xem toàn bộ thông số chi tiết: Mã phản hồi, Load time, Connect time, Latency, Data size, Headers size:</p>
             <div class="img-card">
-              <img src="./images/results_tree_mock_1788204505660.png" alt="Tổng quan View Results Tree" onclick="openLightbox(this.src)">
+              <img src="./images/results_tree_mock_1788204505660.png" alt="View Results Tree Overview" onclick="openLightbox(this.src)">
               <div class="img-caption">
-                <span>📸 Hình 9: Tab Sampler Result hiển thị các chỉ số đo lường chi tiết của sample</span>
+                <span>📸 Hình 11: Tab Sampler Result hiển thị đầy đủ thông số hiệu năng</span>
               </div>
             </div>
           </div>
 
           <div id="request-curl-tab">
-            <h3>Tab Request & Tự động sinh cURL Code Snippet (Chuẩn Postman)</h3>
-            <p>Xem toàn bộ request payload, headers và câu lệnh cURL được định dạng chuẩn Postman (từng header trên mỗi dòng, JSON Body trong <code>--data-raw</code>) kèm nút Copy cURL:</p>
+            <h3>Tab Request & Tự động sinh cURL (Chuẩn Postman)</h3>
+            <p>Tự động xuất cú pháp lệnh cURL để bạn có thể sao chép chạy ngay trong Terminal hoặc import vào Postman:</p>
             <div class="img-card">
-              <img src="./images/postman_curl_request_verified_1788214264768.png" alt="Tab Request có cURL Code snippet chuẩn Postman" onclick="openLightbox(this.src)">
+              <img src="./images/postman_curl_request_verified_1788214264768.png" alt="Request Tab with Postman cURL" onclick="openLightbox(this.src)">
               <div class="img-caption">
-                <span>📸 Hình 10: Tab Request tự động sinh cURL Code Snippet chuẩn Postman với đầy đủ Headers và Body</span>
+                <span>📸 Hình 12: Tab Request với định dạng cURL rõ ràng, kèm nút Copy cURL</span>
               </div>
             </div>
           </div>
 
           <div id="response-data-tab">
-            <h3>Tab Response data (Giao diện chuẩn Postman & JMeter)</h3>
-            <p>Tái hiện chính xác giao diện Postman: Thanh trạng thái hiển thị mã <strong>200 OK</strong>, thời gian phản hồi (<strong>894 ms</strong>), dung lượng (<strong>29.81 KB</strong>), nút <strong>Save Response</strong>, các tab con <strong>Body</strong>, <strong>Cookies</strong>, <strong>Headers (7)</strong>, <strong>Test Results</strong> cùng bộ định dạng JSON Pretty thụt lề 2 spaces và giải mã Unicode tiếng Việt:</p>
+            <h3>Tab Response data (Giao diện Postman & Tự động giải mã Unicode)</h3>
+            <p>Hỗ trợ JSON Pretty, tìm kiếm nội dung và tự động giải mã toàn bộ ký tự tiếng Việt có dấu chuẩn đẹp:</p>
             <div class="img-card">
-              <img src="./images/postman_response_view_verified_1788214300938.png" alt="Tab Response data chuẩn Postman & JMeter" onclick="openLightbox(this.src)">
+              <img src="./images/postman_response_view_verified_1788214300938.png" alt="Response Body JSON View" onclick="openLightbox(this.src)">
               <div class="img-caption">
-                <span>📸 Hình 11: Tab Response data hiển thị JSON đẹp mắt, giải mã tiếng Việt và đầy đủ thanh trạng thái Postman</span>
+                <span>📸 Hình 13: Tab Response Body với thanh trạng thái 200 OK và định dạng JSON</span>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- Section 5: Plugins Manager -->
-        <section id="plugins-manager">
-          <h2>📦 5. Trình quản lý Plugins (JMeter Plugins Manager)</h2>
-          <p>Mở từ menu <strong>Options -> Plugins Manager…</strong> hoặc <strong>Tools -> Plugins Manager…</strong></p>
+        <!-- Section 6: Browser Network Recorder & Auto-Correlation -->
+        <section id="browser-recorder">
+          <h2>🌐 6. Trình Ghi Mạng Trình Duyệt & Tự Động Bắt Biến (Auto-Correlation)</h2>
+          <p>
+            Bộ công cụ tự động hóa mạnh mẽ giúp bạn tiết kiệm hàng giờ thao tác thủ công khi dựng kịch bản từ ứng dụng web:
+          </p>
 
-          <div id="available-plugins">
-            <h3>Kho Available Plugins</h3>
-            <p>Kho plugin chính thức phong phú (<em>Custom Thread Groups, Dummy Sampler, Throughput Shaping Timer, WebSocket Samplers, 3 Basic Graphs...</em>). Cài đặt tự động chỉ với 1 click:</p>
+          <div id="har-importer">
+            <h3>6.1. Browser Network Recorder & Nhập HAR</h3>
+            <ul>
+              <li><strong>Live CDP Recording</strong>: Tự động khởi chạy Chrome/Edge tách biệt để ghi lại 100% request và response payload người dùng thao tác.</li>
+              <li><strong>Import File HAR</strong>: Kéo thả tệp <code>.har</code> xuất từ bất kỳ trình duyệt nào vào để phân tích.</li>
+              <li><strong>Bộ lọc thông minh</strong>: Tự động loại bỏ ảnh, css, fonts tĩnh; tự động gom header vào Header Manager.</li>
+            </ul>
+          </div>
+
+          <div id="auto-correlation">
+            <h3>6.2. Thuật toán Tự Động Bắt Biến & Tương Quan (Auto-Correlation Wizard)</h3>
+            <p>
+              Tự động quét chuỗi request/response để phát hiện các token phiên làm việc (Access Token, JWT, CSRF, Session ID). Tự động chèn <code>JSONExtractor</code> ở request trước và thay thế các chuỗi giá trị cứng ở các request sau thành biến động <code>${access_token}</code>.
+            </p>
+          </div>
+        </section>
+
+        <!-- Section 7: Enterprise Features -->
+        <section id="sla-quality-gates">
+          <h2>🏛️ 7. Tính Năng Doanh Nghiệp & Đảm Bảo Chất Lượng</h2>
+
+          <div class="callout success">
+            <div class="callout-title">🎯 Cổng Chất Lượng Hiệu Năng (SLA Quality Gates)</div>
+            <p>Thiết lập các tiêu chí chặn kiểm thử CI/CD tự động: Max Average Latency, Max P95 Latency, Max Tolerated Error Rate, Min Throughput. Tích hợp gửi Webhook Rich Embed đến Discord, Slack, MS Teams khi hoàn thành.</p>
+          </div>
+
+          <div id="template-gallery">
+            <h3>Thư Viện Kịch Bản Mẫu Chuẩn Doanh Nghiệp (Enterprise Template Gallery)</h3>
+            <p>Cung cấp 6 blueprint công nghiệp sẵn sàng chạy chỉ với 1 click:</p>
+            <ul>
+              <li><strong>E-Commerce End-to-End</strong>: Luồng Catalog -> Cart -> Checkout kèm CSV Data.</li>
+              <li><strong>Microservices REST API</strong>: Kiểm thử Smoke/Load kèm UUID sinh bằng Groovy.</li>
+              <li><strong>OAuth2 Endurance Soak</strong>: Kiểm tra ngâm tải phát hiện Memory Leak.</li>
+              <li><strong>Step-Up Concurrency Stress Test</strong>: Tăng dần tải theo từng bước tìm điểm quá tải.</li>
+              <li><strong>GraphQL API Queries & Mutations</strong>: Kịch bản truy vấn GraphQL tham số hóa.</li>
+              <li><strong>WebSocket Realtime Messaging</strong>: Kiểm thử luồng gửi nhận frame WebSocket bền vững.</li>
+            </ul>
             <div class="img-card">
-              <img src="./images/plugins_avail_1788209016653.png" alt="Kho Available Plugins" onclick="openLightbox(this.src)">
+              <img src="./images/template_gallery_light_theme_1788369070786.png" alt="Enterprise Template Gallery" onclick="openLightbox(this.src)">
               <div class="img-caption">
-                <span>📸 Hình 12: Kho Available Plugins với mô tả chi tiết và nút Install Plugin tự động</span>
+                <span>📸 Hình 14: Thư viện Enterprise Template Gallery với giao diện thẻ sáng rõ</span>
               </div>
             </div>
           </div>
 
-          <div id="installed-plugins">
-            <h3>Quản lý Installed Plugins</h3>
-            <p>Tự động quét thư mục <code>lib/ext</code> và <code>lib</code>, hiển thị phiên bản, dung lượng và hỗ trợ gỡ cài đặt an toàn:</p>
+          <div id="workload-curve">
+            <h3>Biểu Đồ Đường Cong Tải (Workload Curve & Concurrency Profile)</h3>
+            <p>
+              Tự động tổng hợp và vẽ biểu đồ số người dùng ảo đồng thời (VUs) theo thời gian của toàn bộ các Thread Group trong kịch bản. Giúp bạn nắm bắt chính xác điểm tải cao nhất (Peak Concurrency) trước khi thực thi.
+            </p>
+          </div>
+
+          <div id="asset-manager">
+            <h3>Trình Quản Lý Tài Nguyên (Project Asset Manager)</h3>
+            <p>
+              Quản lý tập trung các tệp CSV, file ảnh/PDF đính kèm (<code>data/</code>, <code>GPKD/</code>). Hệ thống tự động đồng bộ các file này vào thư mục chạy <code>runs/run_XXXX/</code> của JMeter, đảm bảo không bao giờ bị lỗi thiếu file khi chạy test.
+            </p>
+          </div>
+
+          <div id="plugins-manager">
+            <h3>Trình Quản Lý Plugins (JMeter Plugins Manager)</h3>
+            <p>Tương thích hoàn toàn với <code>jmeter-plugins.org</code>, hỗ trợ tìm kiếm, tải và kích hoạt plugin chính thức trực tiếp trên Web UI:</p>
             <div class="img-card">
-              <img src="./images/plugins_inst_1788209029965.png" alt="Quản lý Installed Plugins" onclick="openLightbox(this.src)">
+              <img src="./images/plugins_avail_1788209016653.png" alt="Available Plugins Tab" onclick="openLightbox(this.src)">
               <div class="img-caption">
-                <span>📸 Hình 13: Tab Installed Plugins quản lý toàn bộ các thư viện JAR đã cài đặt</span>
+                <span>📸 Hình 15: Kho plugin phong phú trong Plugins Manager</span>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- Section 6: Execution & Runner -->
+        <!-- Section 8: Execution & Controls -->
         <section id="run-execution">
-          <h2>🏃 6. Thực thi & Điều khiển Runner (Stop / Force Stop)</h2>
-          <p>Bấm nút <strong>Play (▶️)</strong> hoặc phím tắt <strong>Ctrl+R</strong> để khởi chạy. Mở Live Console Log (icon Terminal 🖥️) để theo dõi thời gian thực:</p>
-          <div class="img-card">
-            <img src="./images/load_test_running_1788207901712.png" alt="Chạy test thời gian thực" onclick="openLightbox(this.src)">
-            <div class="img-caption">
-              <span>📸 Hình 14: Kịch bản đang chạy thực tế với Live Console Log và thông số tiến độ</span>
-            </div>
-          </div>
+          <h2>⚡ 8. Thực thi, Giám sát Console & Điều khiển Runner</h2>
 
           <div id="runner-controls">
-            <h3>Cơ chế Dừng Test & Force Stop</h3>
-            <p>Nút <strong>Stop (⏹️)</strong> và <strong>Shutdown (⏸️)</strong> trên Toolbar luôn luôn sáng và bấm được bất kỳ lúc nào. Khi có tiến trình ngầm cần giải phóng, nút đỏ <strong>Force Stop & Reset</strong> trên banner sẽ lập tức dọn dẹp tiến trình Java:</p>
+            <h3>Khởi chạy & Giám sát Live Console</h3>
+            <p>Bấm nút <strong>Play (▶️)</strong> hoặc phím tắt <code>Ctrl + R</code> để bắt đầu. Mở Live Console để xem log hệ thống thời gian thực:</p>
             <div class="img-card">
-              <img src="./images/stop_test_executed_1788207017284.png" alt="Dừng test và dọn dẹp" onclick="openLightbox(this.src)">
+              <img src="./images/load_test_running_1788207901712.png" alt="Live Load Test Running" onclick="openLightbox(this.src)">
               <div class="img-caption">
-                <span>📸 Hình 15: Nút Stop và thanh thông báo Force Stop giúp kiểm soát hoàn toàn tiến trình test</span>
+                <span>📸 Hình 16: Tiến trình kiểm thử đang chạy với các chỉ số cập nhật liên tục</span>
+              </div>
+            </div>
+
+            <div class="callout warning">
+              <div class="callout-title">🛑 Điều khiển Dừng An Toàn & Force Stop</div>
+              <p>Nút <strong>Stop (⏹️ ô vuông đỏ)</strong> và <strong>Shutdown (⏸️)</strong> luôn luôn sẵn sàng. Khi cần dọn dẹp tiến trình Java ngầm bị treo, bấm nút <strong>Force Stop & Reset</strong> màu đỏ để giải phóng hệ thống ngay lập tức.</p>
+            </div>
+            <div class="img-card">
+              <img src="./images/stop_test_executed_1788207017284.png" alt="Stop Test Executed" onclick="openLightbox(this.src)">
+              <div class="img-caption">
+                <span>📸 Hình 17: Nút Stop và Force Stop kích hoạt ngay lập tức</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="html-report">
+            <h3>Báo cáo HTML Dashboard Chính Thức</h3>
+            <p>Sau khi test hoàn tất, nút <strong>HTML Report</strong> sẽ sáng lên. Click vào để mở báo cáo thống kê chính thức của Apache JMeter:</p>
+            <div class="img-card">
+              <img src="./images/jmeter_dashboard_report_1788211396480.png" alt="Apache JMeter Dashboard Report" onclick="openLightbox(this.src)">
+              <div class="img-caption">
+                <span>📸 Hình 18: Báo cáo HTML Dashboard Report với APDEX, Response Times Over Time</span>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- Section 7: Code Editors & Sync -->
+        <!-- Section 9: Code Editors & Shortcuts -->
         <section id="code-editors">
-          <h2>💻 7. Trình soạn thảo mã & Đồng bộ tài nguyên</h2>
-          <h3>Trình soạn thảo JSON & Groovy JSR223</h3>
-          <p>Hỗ trợ định dạng JSON tự động, tô màu cú pháp và code snippet mẫu cho các bộ xử lý JSR223:</p>
-          <div class="img-card">
-            <img src="./images/json_editor_prettified_correctly_1788194997408.png" alt="JSON Editor có Prettify" onclick="openLightbox(this.src)">
-            <div class="img-caption">
-              <span>📸 Hình 16: Trình soạn thảo JSON Body với tính năng Prettify và số dòng code</span>
-            </div>
-          </div>
+          <h2>💻 9. Soạn thảo mã nguồn & Bảng phím tắt</h2>
 
-          <div id="asset-sync">
-            <h3>Cơ chế tự động đồng bộ dữ liệu (Asset Sync)</h3>
-            <div class="callout tip">
-              <div class="callout-title">💡 Tự động sao chép file data:</div>
-              Hệ thống tự động sao chép các thư mục <code>data/</code> (ví dụ <code>data/provinces.csv</code>), <code>GPKD/</code>, <code>downloads/</code> vào thư mục chạy <code>runs/run_XXXX/</code> để hàm <code>FileServer.getFileServer().getBaseDir()</code> luôn tìm thấy file chính xác 100%.
+          <h3>Trình soạn thảo JSON Body & JSR223 Groovy</h3>
+          <p>Tích hợp số dòng code, tô màu cú pháp và nút <strong>Prettify JSON</strong> tự động căn lề chuẩn đẹp:</p>
+          <div class="img-card">
+            <img src="./images/json_editor_prettified_correctly_1788194997408.png" alt="JSON Code Editor Prettified" onclick="openLightbox(this.src)">
+            <div class="img-caption">
+              <span>📸 Hình 19: Trình soạn thảo JSON Body với tính năng Prettify tự động</span>
             </div>
           </div>
 
           <div id="shortcuts">
-            <h3>⌨️ Bảng phím tắt tiện ích</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>Phím tắt</th>
-                  <th>Thao tác</th>
-                  <th>Chức năng</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><code>Ctrl + N</code></td>
-                  <td>New Plan</td>
-                  <td>Tạo kịch bản kiểm thử mới</td>
-                </tr>
-                <tr>
-                  <td><code>Ctrl + O</code></td>
-                  <td>Open JMX</td>
-                  <td>Mở file kịch bản .jmx từ máy tính</td>
-                </tr>
-                <tr>
-                  <td><code>Ctrl + S</code></td>
-                  <td>Save</td>
-                  <td>Lưu kịch bản vào bộ nhớ trình duyệt</td>
-                </tr>
-                <tr>
-                  <td><code>Ctrl + R</code></td>
-                  <td>Start Run</td>
-                  <td>Khởi chạy kịch bản kiểm thử</td>
-                </tr>
-                <tr>
-                  <td><code>Ctrl + X / C / V</code></td>
-                  <td>Cut / Copy / Paste</td>
-                  <td>Cắt, sao chép và dán node</td>
-                </tr>
-                <tr>
-                  <td><code>Ctrl + D</code></td>
-                  <td>Duplicate</td>
-                  <td>Nhân bản node đang chọn</td>
-                </tr>
-                <tr>
-                  <td><code>Delete</code></td>
-                  <td>Remove</td>
-                  <td>Xóa node đang chọn</td>
-                </tr>
-                <tr>
-                  <td><code>F2</code></td>
-                  <td>Rename</td>
-                  <td>Đổi tên node đang chọn</td>
-                </tr>
-              </tbody>
-            </table>
+            <h3>Bảng phím tắt thao tác nhanh (Keyboard Shortcuts)</h3>
+            <div class="table-container">
+              <table class="doc-table">
+                <thead>
+                  <tr>
+                    <th>Phím tắt</th>
+                    <th>Thao tác</th>
+                    <th>Mô tả</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>Ctrl + N</code></td>
+                    <td>New Plan</td>
+                    <td>Tạo kịch bản kiểm thử mới</td>
+                  </tr>
+                  <tr>
+                    <td><code>Ctrl + O</code></td>
+                    <td>Open JMX</td>
+                    <td>Mở file kịch bản .jmx từ máy tính</td>
+                  </tr>
+                  <tr>
+                    <td><code>Ctrl + S</code></td>
+                    <td>Save</td>
+                    <td>Lưu kịch bản vào bộ nhớ trình duyệt</td>
+                  </tr>
+                  <tr>
+                    <td><code>Ctrl + R</code></td>
+                    <td>Start Run</td>
+                    <td>Khởi chạy kịch bản kiểm thử với JMeter</td>
+                  </tr>
+                  <tr>
+                    <td><code>Ctrl + X / C / V</code></td>
+                    <td>Cut / Copy / Paste</td>
+                    <td>Cắt, sao chép và dán node trên cây</td>
+                  </tr>
+                  <tr>
+                    <td><code>Ctrl + D</code></td>
+                    <td>Duplicate</td>
+                    <td>Nhân bản node đang chọn</td>
+                  </tr>
+                  <tr>
+                    <td><code>Delete</code></td>
+                    <td>Remove</td>
+                    <td>Xóa node đang chọn</td>
+                  </tr>
+                  <tr>
+                    <td><code>F2</code></td>
+                    <td>Rename</td>
+                    <td>Đổi tên node trực tiếp trên cây</td>
+                  </tr>
+                  <tr>
+                    <td><code>Escape</code></td>
+                    <td>Close Modal</td>
+                    <td>Đóng nhanh bất kỳ hộp thoại nào đang mở</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
       </article>
@@ -898,12 +1028,14 @@
       <div class="toc-title">Mục Lục Trang</div>
       <ul class="toc-list" id="tocList">
         <li><a href="#overview">1. Tổng quan & Giao diện</a></li>
-        <li><a href="#testplan-tree">2. Cây kịch bản Test Plan</a></li>
-        <li><a href="#import-curl">3. Import từ cURL</a></li>
-        <li><a href="#results-tree">4. View Results Tree</a></li>
-        <li><a href="#plugins-manager">5. Plugins Manager</a></li>
-        <li><a href="#run-execution">6. Thực thi & Điều khiển</a></li>
-        <li><a href="#code-editors">7. Soạn thảo & Phím tắt</a></li>
+        <li><a href="#unified-modal">2. Chuẩn UI/UX & Luồng Hộp Thoại</a></li>
+        <li><a href="#testplan-tree">3. Cây kịch bản Test Plan</a></li>
+        <li><a href="#import-curl">4. Import từ cURL</a></li>
+        <li><a href="#results-tree">5. View Results Tree</a></li>
+        <li><a href="#browser-recorder">6. Browser Recorder & Bắt biến</a></li>
+        <li><a href="#sla-quality-gates">7. Doanh nghiệp & Chất lượng</a></li>
+        <li><a href="#run-execution">8. Thực thi & Điều khiển</a></li>
+        <li><a href="#code-editors">9. Soạn thảo & Phím tắt</a></li>
       </ul>
     </aside>
   </div>

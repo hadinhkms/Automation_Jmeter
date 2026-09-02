@@ -6,21 +6,22 @@
 
 ## 📑 Mục lục
 1. [Giới thiệu tổng quan & Giao diện chính](#1-giới-thiệu-tổng-quan--giao-diện-chính)
-2. [Quản lý Cây kịch bản kiểm thử (Test Plan Tree) & Kéo thả](#2-quản-lý-cây-kịch-bản-kiểm-thử-test-plan-tree--kéo-thả)
-3. [Tính năng Import từ cURL (Tools -> Import from cURL)](#3-tính-năng-import-từ-curl-tools---import-from-curl)
-4. [Trình xem kết quả (View Results Tree) chuẩn Apache JMeter](#4-trình-xem-kết-quả-view-results-tree-chuẩn-apache-jmeter)
-5. [Trình quản lý Plugins (JMeter Plugins Manager)](#5-trình-quản-lý-plugins-jmeter-plugins-manager)
-6. [Thực thi, Giám sát Console & Điều khiển Runner (Stop / Force Stop)](#6-thực-thi-giám-sát-console--điều-khiển-runner-stop--force-stop)
-7. [Trình soạn thảo mã (Code Editor) cho JSON & Groovy JSR223](#7-trình-soạn-thảo-mã-code-editor-cho-json--groovy-jsr223)
-8. [Cơ chế tự động đồng bộ dữ liệu & File CSV (Asset Sync)](#8-cơ-chế-tự-động-đồng-bộ-dữ-liệu--file-csv-asset-sync)
-9. [Trình ghi lưu lượng mạng trình duyệt (Browser Network Recorder) & Nhập HAR](#9-trình-ghi-lưu-lượng-mạng-trình-duyệt-browser-network-recorder--nhập-har)
-10. [Tự động bắt biến & Tương quan thông minh (Auto-Correlation Engine)](#10-tự-động-bắt-biến--tương-quan-thông-minh-auto-correlation-engine)
-11. [Cổng chất lượng SLA & Thông báo Webhook (SLA Quality Gates & Alerting)](#11-cổng-chất-lượng-sla--thông-báo-webhook-sla-quality-gates--alerting)
-12. [Thư viện kịch bản mẫu doanh nghiệp (Enterprise Template Gallery)](#12-thư-viện-kịch-bản-mẫu-doanh-nghiệp-enterprise-template-gallery)
-13. [Biểu đồ đường cong tải & Mô hình đồng thời (Workload Curve & Concurrency Profile)](#13-biểu-đồ-đường-cong-tải--mô-hình-đồng-thời-workload-curve--concurrency-profile)
-14. [Quản lý phiên bản Git & So sánh trực quan (Git Version Control & Visual Diff)](#14-quản-lý-phiên-bản-git--so-sánh-trực-quan-git-version-control--visual-diff)
-15. [Trình quản lý tài nguyên dự án (Project Asset Manager)](#15-trình-quản-lý-tài-nguyên-dự-án-project-asset-manager)
-16. [Bảng tổng hợp Phím tắt (Keyboard Shortcuts)](#16-bảng-tổng-hợp-phím-tắt-keyboard-shortcuts)
+2. [Tiêu chuẩn UI/UX Mới & Luồng Hộp Thoại Tập Trung (Unified Modal System)](#2-tiêu-chuẩn-uiux-mới--luồng-hộp-thoại-tập-trung-unified-modal-system)
+3. [Quản lý Cây kịch bản kiểm thử (Test Plan Tree) & Kéo thả](#3-quản-lý-cây-kịch-bản-kiểm-thử-test-plan-tree--kéo-thả)
+4. [Tính năng Import từ cURL (Tools -> Import from cURL)](#4-tính-năng-import-từ-curl-tools---import-from-curl)
+5. [Trình xem kết quả (View Results Tree) chuẩn Apache JMeter](#5-trình-xem-kết-quả-view-results-tree-chuẩn-apache-jmeter)
+6. [Trình quản lý Plugins (JMeter Plugins Manager)](#6-trình-quản-lý-plugins-jmeter-plugins-manager)
+7. [Thực thi, Giám sát Console & Điều khiển Runner (Stop / Force Stop)](#7-thực-thi-giám-sát-console--điều-khiển-runner-stop--force-stop)
+8. [Trình soạn thảo mã (Code Editor) cho JSON & Groovy JSR223](#8-trình-soạn-thảo-mã-code-editor-cho-json--groovy-jsr223)
+9. [Cơ chế tự động đồng bộ dữ liệu & File CSV (Asset Sync)](#9-cơ-chế-tự-động-đồng-bộ-dữ-liệu--file-csv-asset-sync)
+10. [Trình ghi lưu lượng mạng trình duyệt (Browser Network Recorder) & Nhập HAR](#10-trình-ghi-lưu-lượng-mạng-trình-duyệt-browser-network-recorder--nhập-har)
+11. [Tự động bắt biến & Tương quan thông minh (Auto-Correlation Engine)](#11-tự-động-bắt-biến--tương-quan-thông-minh-auto-correlation-engine)
+12. [Cổng chất lượng SLA & Thông báo Webhook (SLA Quality Gates & Alerting)](#12-cổng-chất-lượng-sla--thông-báo-webhook-sla-quality-gates--alerting)
+13. [Thư viện kịch bản mẫu doanh nghiệp (Enterprise Template Gallery)](#13-thư-viện-kịch-bản-mẫu-doanh-nghiệp-enterprise-template-gallery)
+14. [Biểu đồ đường cong tải & Mô hình đồng thời (Workload Curve & Concurrency Profile)](#14-biểu-đồ-đường-cong-tải--mô-hình-đồng-thời-workload-curve--concurrency-profile)
+15. [Quản lý phiên bản Git & So sánh trực quan (Git Version Control & Visual Diff)](#15-quản-lý-phiên-bản-git--so-sánh-trực-quan-git-version-control--visual-diff)
+16. [Trình quản lý tài nguyên dự án (Project Asset Manager)](#16-trình-quản-lý-tài-nguyên-dự-án-project-asset-manager)
+17. [Bảng tổng hợp Phím tắt (Keyboard Shortcuts)](#17-bảng-tổng-hợp-phím-tắt-keyboard-shortcuts)
 
 ---
 
@@ -55,7 +56,45 @@ graph TD
 
 ---
 
-## 2. Quản lý Cây kịch bản kiểm thử (Test Plan Tree) & Kéo thả
+## 2. Tiêu chuẩn UI/UX Mới & Luồng Hộp Thoại Tập Trung (Unified Modal System)
+
+Để mang lại trải nghiệm làm việc mượt mà, tiện lợi, đạt chuẩn thiết kế công nghiệp và không làm gián đoạn người dùng, JMeter Web UI đã được tái thiết kế toàn diện với hệ thống quy chuẩn sau:
+
+### 2.1. Lớp phủ Mờ Cố định (Fixed Overlay - Tuyệt đối không xô đẩy giao diện)
+- **Vấn đề trước đây**: Khi click mở các tính năng trên thanh công cụ, hộp thoại bị render chèn vào tài liệu làm dịch chuyển thanh toolbar, cây Test Plan và editor xuống dưới, gây giật màn hình và khó chịu.
+- **Giải pháp chuẩn hóa**: Mọi hộp thoại giờ đây đều hiển thị trên một lớp phủ mờ cố định (`position: fixed; inset: 0; z-index: 9999; backdrop-filter: blur(5px)`). Cây Test Plan, Toolbar và Editor hoàn toàn đứng yên, ổn định 100%.
+
+### 2.2. Luồng Điều khiển Hộp thoại Duy nhất (Single Active Modal Flow)
+- **Không chồng chéo (No Modal Stacking)**: Khi bạn đang mở một hộp thoại (ví dụ: Git) và bấm sang một nút khác trên Toolbar (ví dụ: SLA hoặc Templates), hệ thống sẽ **tự động đóng hộp thoại cũ và kích hoạt hộp thoại mới**.
+- **Đóng nhanh tiện lợi**:
+  - Nhấn phím **`Escape`** bất kỳ lúc nào để đóng hộp thoại đang mở.
+  - Hoặc click chuột vào vùng nền mờ bên ngoài hộp thoại.
+  - Hoặc bấm lại chính nút icon đó trên thanh công cụ (toggle behavior).
+- **Đồng bộ trạng thái trực quan**: Nút công cụ tương ứng trên Toolbar tự động hiển thị viền xanh nổi bật (`.active-tool`) giúp bạn luôn nhận biết rõ ràng tính năng nào đang được mở.
+
+### 2.3. Giao diện Sáng Độ Tương Phản Cao (High-Contrast Light Theme)
+- Khắc phục triệt để tình trạng chữ mờ, chìm vào nền tối trước đây. Toàn bộ hộp thoại được chuẩn hóa sang **Theme Sáng Tinh Khiết (`#ffffff`)** với viền xám mềm (`#cbd5e1`) và bóng đổ nổi bật.
+- **Tiêu đề & Nhãn form**: Sử dụng màu xám đen đậm (`#0f172a` / `#1e293b`), font chữ sắc nét đạt chuẩn độ tương phản cao **WCAG AAA**.
+- **Ô nhập liệu (Inputs & Selects)**: Nền trắng với viền rõ ràng, khi focus có viền xanh dương hiện đại (`#2563eb`), chữ nhập màu đen đậm cực kỳ dễ đọc.
+
+![SLA Quality Gates Modal - High Contrast Light Theme](./docs/images/sla_modal_light_theme_1788369020692.png)
+
+### 2.4. Bố cục Master-Detail Song Song (Side-by-Side View)
+- Đối với các hộp thoại có luồng danh sách và nội dung chi tiết (như **Git Version Control & Visual Diff**):
+  - **Cột trái (380px)**: Danh sách file thay đổi kèm ô tìm kiếm lọc nhanh tức thì, thông tin trạng thái file và khung soạn tin nhắn commit ghim cố định ở đáy.
+  - **Cột phải (toàn bộ phần còn lại)**: Khung xem diff mã nguồn với chiều cao tối đa, hiển thị trực quan dòng thêm/xóa.
+  - Khi click chọn bất kỳ file nào ở cột trái, khung diff bên phải cập nhật ngay lập tức mà **cả 2 bên đều giữ nguyên kích thước ổn định**, không bị co giật hay chèn ép lẫn nhau.
+
+![Git Master-Detail Side-by-Side View](./docs/images/git_side_by_side_1788370118380.png)
+
+### 2.5. Kiến trúc Cuộn Độc Lập Cho Editor & Bảng Biến
+- Khung cấu hình component và các bảng biến dài (User Defined Variables, Parameters) được tách biệt luồng cuộn dọc riêng biệt (`.editor-scroll`). Dù bảng có hàng chục hoặc hàng trăm dòng dữ liệu, thanh cuộn hoạt động mượt mà và nút **`+ Add`** ở chân bảng luôn luôn tiếp cận được.
+
+![Editor Scrolling Architecture](./docs/images/table_bottom_add_button_1788372015140.png)
+
+---
+
+## 3. Quản lý Cây kịch bản kiểm thử (Test Plan Tree) & Kéo thả
 
 Cây kịch bản bên trái quản lý toàn bộ cấu trúc phân cấp của Test Plan theo chuẩn Apache JMeter.
 
