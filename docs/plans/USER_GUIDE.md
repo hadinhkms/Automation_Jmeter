@@ -13,7 +13,14 @@
 6. [Thực thi, Giám sát Console & Điều khiển Runner (Stop / Force Stop)](#6-thực-thi-giám-sát-console--điều-khiển-runner-stop--force-stop)
 7. [Trình soạn thảo mã (Code Editor) cho JSON & Groovy JSR223](#7-trình-soạn-thảo-mã-code-editor-cho-json--groovy-jsr223)
 8. [Cơ chế tự động đồng bộ dữ liệu & File CSV (Asset Sync)](#8-cơ-chế-tự-động-đồng-bộ-dữ-liệu--file-csv-asset-sync)
-9. [Bảng tổng hợp Phím tắt (Keyboard Shortcuts)](#9-bảng-tổng-hợp-phím-tắt-keyboard-shortcuts)
+9. [Trình ghi lưu lượng mạng trình duyệt (Browser Network Recorder) & Nhập HAR](#9-trình-ghi-lưu-lượng-mạng-trình-duyệt-browser-network-recorder--nhập-har)
+10. [Tự động bắt biến & Tương quan thông minh (Auto-Correlation Engine)](#10-tự-động-bắt-biến--tương-quan-thông-minh-auto-correlation-engine)
+11. [Cổng chất lượng SLA & Thông báo Webhook (SLA Quality Gates & Alerting)](#11-cổng-chất-lượng-sla--thông-báo-webhook-sla-quality-gates--alerting)
+12. [Thư viện kịch bản mẫu doanh nghiệp (Enterprise Template Gallery)](#12-thư-viện-kịch-bản-mẫu-doanh-nghiệp-enterprise-template-gallery)
+13. [Biểu đồ đường cong tải & Mô hình đồng thời (Workload Curve & Concurrency Profile)](#13-biểu-đồ-đường-cong-tải--mô-hình-đồng-thời-workload-curve--concurrency-profile)
+14. [Quản lý phiên bản Git & So sánh trực quan (Git Version Control & Visual Diff)](#14-quản-lý-phiên-bản-git--so-sánh-trực-quan-git-version-control--visual-diff)
+15. [Trình quản lý tài nguyên dự án (Project Asset Manager)](#15-trình-quản-lý-tài-nguyên-dự-án-project-asset-manager)
+16. [Bảng tổng hợp Phím tắt (Keyboard Shortcuts)](#16-bảng-tổng-hợp-phím-tắt-keyboard-shortcuts)
 
 ---
 
@@ -194,7 +201,110 @@ Khi chạy kịch bản với JMeter CLI, đường dẫn làm việc mặc đ�
 
 ---
 
-## 9. Bảng tổng hợp Phím tắt (Keyboard Shortcuts)
+## 9. Trình ghi lưu lượng mạng trình duyệt (Browser Network Recorder) & Nhập HAR
+
+Bộ ghi lưu lượng mạng tích hợp cho phép bạn bắt trọn vẹn hành vi người dùng thực tế trên trình duyệt web và tự động chuyển đổi thành kịch bản JMeter:
+
+### 9.1. Khởi chạy Browser Recorder
+- Bấm vào icon **Recorder (Quả cầu / Radar)** trên thanh Toolbar hoặc menu `Tools -> Browser Network Recorder…`.
+- Hệ thống hỗ trợ 2 chế độ:
+  1. **Live Chrome/Edge CDP Recording**: Tự động mở một cửa sổ Chrome/Edge độc lập, đính kèm kết nối qua Chrome DevTools Protocol để ghi lại toàn bộ request và response payload.
+  2. **Import HAR File**: Kéo thả hoặc duyệt file `.har` được xuất từ bất kỳ công cụ nào (Chrome, Firefox, Safari, Charles Proxy, Fiddler).
+
+### 9.2. Lọc thông minh & Tự động tạo Sampler
+- Tự động bỏ qua các tài nguyên tĩnh không cần thiết (`.png`, `.jpg`, `.css`, `.woff2`, `.svg`).
+- Lọc theo Domain hoặc URL Pattern để chỉ giữ lại các API cốt lõi.
+- Tự động tách Header thành `HTTP Header Manager` tương ứng cho từng request.
+- Bấm **Import into Test Plan** để đưa toàn bộ luồng vừa ghi vào cây kịch bản.
+
+---
+
+## 10. Tự động bắt biến & Tương quan thông minh (Auto-Correlation Engine)
+
+Giải quyết bài toán tốn nhiều thời gian nhất của kiểm thử hiệu năng: xử lý dynamic tokens (Access Tokens, JWT, CSRF, Session IDs).
+
+### 10.1. Mở Correlation Wizard
+- Click menu `Tools -> Auto-Correlation Wizard…` hoặc nút Correlation trên Toolbar.
+- Thuật toán tự động quét toàn bộ chuỗi Request và Response trong kịch bản.
+
+### 10.2. Cơ chế nhận diện & Thay thế
+- **Phát hiện thông minh**: Nhận diện chuỗi token trong JSON body (ví dụ `token`, `access_token`, `accessToken`, `jwt`, `csrf_token`, `_csrf`, `sessionId`).
+- **Tự động chèn Post-Processor**: Tự động sinh `JSONExtractor` (hoặc `RegexExtractor`) tại sampler sinh token.
+- **Tự động tham số hóa**: Thay thế toàn bộ các chuỗi giá trị cứng ở các request tiếp theo thành `${access_token}` hoặc `${session_id}`.
+
+---
+
+## 11. Cổng chất lượng SLA & Thông báo Webhook (SLA Quality Gates & Alerting)
+
+Tích hợp tiêu chuẩn đánh giá hiệu năng vào quy trình CI/CD với hệ thống cảnh báo tự động:
+
+### 11.1. Thiết lập ngưỡng SLA (Thresholds)
+- Mở hộp thoại **SLA Quality Gates** (icon chiếc khiên xanh trên Toolbar).
+- Cấu hình các tiêu chí chặn:
+  - **Max Average Latency (ms)**: Độ trễ trung bình tối đa cho phép.
+  - **Max 95th Percentile Latency (ms)**: Ngưỡng P95 tối đa.
+  - **Max 99th Percentile Latency (ms)**: Ngưỡng P99 tối đa.
+  - **Max Tolerated Error Rate (%)**: Tỷ lệ lỗi tối đa cho phép (ví dụ `0.5%`).
+  - **Min Expected Throughput (req/s)**: Thông lượng tối thiểu kỳ vọng.
+
+### 11.2. Cấu hình Webhook Thông báo (Discord, Slack, MS Teams)
+- Bật tùy chọn **Send Webhook notification on test run completion**.
+- Chọn nền tảng (Discord / Slack / Teams) và dán URL Webhook.
+- Chọn gửi khi **SLA Passed** hoặc **SLA Failed/Breached**.
+- Bấm **Test Webhook Notification** để kiểm tra gửi thử một tin nhắn Rich Embed trực tiếp vào channel chat của team.
+
+---
+
+## 12. Thư viện kịch bản mẫu doanh nghiệp (Enterprise Template Gallery)
+
+Cung cấp 6 blueprint kịch bản kiểm thử chuẩn công nghiệp để scaffold nhanh trong 1 giây:
+
+1. **E-Commerce End-to-End Checkout Flow**: Kịch bản luồng người dùng hoàn chỉnh (Browse Catalog -> Product Search -> Add to Cart -> Token Authentication -> Order Checkout) kèm bộ dữ liệu CSV.
+2. **Microservices REST API Smoke & Load**: Kiểm tra tự động các API Health Checks, REST CRUD operations với UUID động từ script JSR223 Groovy.
+3. **OAuth2 Concurrency & Endurance Soak**: Thiết kế cho kiểm thử độ chịu tải ngâm dài hạn (3600s) để phát hiện rò rỉ bộ nhớ (Memory Leaks) và suy giảm hiệu năng.
+4. **Step-Up Concurrency Stress Test**: Tăng dần tải theo từng bước (+50 users mỗi 30s) để tìm điểm gãy của hệ thống và đẩy chỉ số về InfluxDB.
+5. **GraphQL API Queries & Mutations**: Kịch bản thực thi các câu truy vấn và biến đổi GraphQL tham số hóa kèm kiểm tra schema.
+6. **WebSocket Realtime Messaging & Stream**: Mở kết nối WebSocket TLS bền bỉ, gửi nhận ping heartbeat và frames dữ liệu thời gian thực.
+
+---
+
+## 13. Biểu đồ đường cong tải & Mô hình đồng thời (Workload Curve & Concurrency Profile)
+
+Mở hộp thoại **Workload Curve** (icon sóng nhịp tim trên Toolbar) để xem trực quan mô hình tải:
+- **Combined System Workload Curve**: Biểu đồ mô phỏng tổng số người dùng đồng thời (VUs) theo thời gian của toàn bộ các Thread Group cộng gộp.
+- **Thống kê tổng thể**: Peak Concurrency (VUs cao nhất), Total Duration (thời gian chạy tổng), số Thread Groups đang hoạt động.
+- **Phân tách chi tiết**: Xem biểu đồ riêng cho từng Stepping Thread Group, Ultimate Thread Group hoặc Concurrency Thread Group trong kịch bản.
+
+---
+
+## 14. Quản lý phiên bản Git & So sánh trực quan (Git Version Control & Visual Diff)
+
+Tích hợp giao diện quản lý phiên bản chuẩn mực theo phong cách Master-Detail song song (Side-by-Side):
+
+### 14.1. Khung bên trái (Danh sách thay đổi & Commit)
+- **Thống kê thay đổi**: Đếm số file đang sửa đổi (MOD), tạo mới (NEW/ADD) hoặc xóa (DEL).
+- **Lọc file nhanh**: Ô `Search changed files...` giúp tìm ngay lập tức file cần kiểm tra trong hàng chục file.
+- **Nút Pull**: Kéo mã mới nhất từ remote Git repository.
+- **Soạn tin nhắn Commit**: Khung nhập tin nhắn và 2 nút **Commit** hoặc **Commit & Push** trực tiếp lên GitHub/GitLab.
+
+### 14.2. Khung bên phải (Visual Diff Code)
+- Hiển thị toàn bộ chiều cao của phần diff code tương ứng với file đang chọn bên trái.
+- Tô màu cú pháp chuẩn: Màu xanh lá cho dòng thêm mới (`+`), màu đỏ cho dòng bị xóa (`-`), màu xanh dương cho chunk header (`@@`).
+- Kích thước hai bên độc lập, cuộn mượt mà không bị co giật hay chèn ép khung hình.
+
+---
+
+## 15. Trình quản lý tài nguyên dự án (Project Asset Manager)
+
+Mở hộp thoại **Asset Manager** (icon thư mục trên Toolbar) để quản lý tập trung các tệp đính kèm phục vụ kiểm thử:
+- Quản lý các file CSV tham số hóa dữ liệu trong thư mục `data/`.
+- Quản lý các file PDF/ảnh upload trong thư mục `GPKD/` hoặc `downloads/`.
+- Hỗ trợ tải tệp mới lên, tải tệp về máy tính hoặc xóa tệp cũ an toàn.
+- Hệ thống tự động đồng bộ các tệp này vào thư mục chạy `runs/run_XXXX/` của JMeter khi khởi động test run.
+
+---
+
+## 16. Bảng tổng hợp Phím tắt (Keyboard Shortcuts)
 
 | Phím tắt | Thao tác | Mô tả |
 | :--- | :--- | :--- |
@@ -208,7 +318,7 @@ Khi chạy kịch bản với JMeter CLI, đường dẫn làm việc mặc đ�
 | **`Ctrl + D`** | Duplicate | Nhân bản node đang chọn |
 | **`Delete`** | Remove | Xóa node đang chọn |
 | **`F2`** | Rename | Đổi tên node đang chọn |
-| **`Escape`** | Close | Đóng modal / menu ngữ cảnh |
+| **`Escape`** | Close | Đóng nhanh bất kỳ hộp thoại popup nào |
 
 ---
 
