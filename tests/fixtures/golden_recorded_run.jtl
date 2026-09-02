@@ -1,0 +1,4 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1788341215971,131,Login Page,Non HTTP response code: java.net.UnknownHostException,"Number of samples in transaction : 2, number of failing samples : 2",Thread Group 1-1,,false,,4692,0,1,1,null,0,99,131
+1788341216064,126,1.0 GET /v1/users,Non HTTP response code: java.net.UnknownHostException,Non HTTP response message: No such host is known (api.example.com),Thread Group 1-1,text,false,,2530,0,1,1,https://api.example.com/v1/users?page=1&limit=20&search=h%C3%A0+n%E1%BB%99i,0,0,126
+1788341216201,5,2.0 POST /v1/login,Non HTTP response code: java.net.UnknownHostException,Non HTTP response message: api.example.com,Thread Group 1-1,text,false,,2162,0,1,1,https://api.example.com/v1/login,0,0,5

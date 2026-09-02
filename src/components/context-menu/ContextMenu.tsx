@@ -19,6 +19,8 @@ interface ContextMenuProps {
   clipboardType?: JMeterComponentType
   onClose: () => void
   onAdd: (type: JMeterComponentType) => void
+  onImportCurl?: () => void
+  onOpenRecorder?: () => void
   onCut: () => void
   onCopy: () => void
   onPaste: () => void
@@ -28,6 +30,8 @@ interface ContextMenuProps {
   onRename: () => void
   onMoveUp: () => void
   onMoveDown: () => void
+  onMoveToTop?: () => void
+  onMoveToBottom?: () => void
 }
 
 export function ContextMenu({
@@ -38,6 +42,8 @@ export function ContextMenu({
   clipboardType,
   onClose,
   onAdd,
+  onImportCurl,
+  onOpenRecorder,
   onCut,
   onCopy,
   onPaste,
@@ -47,6 +53,8 @@ export function ContextMenu({
   onRename,
   onMoveUp,
   onMoveDown,
+  onMoveToTop,
+  onMoveToBottom,
 }: ContextMenuProps) {
   const parent = findParent(root, node.id)
   const index = parent?.children.findIndex((child) => child.id === node.id) ?? -1
@@ -96,6 +104,16 @@ export function ContextMenu({
             ))}
           </div>
         ) : null}
+        {onOpenRecorder ? (
+          <button type="button" role="menuitem" onClick={() => invoke(onOpenRecorder)}>
+            Browser & Network Recorder…
+          </button>
+        ) : null}
+        {onImportCurl ? (
+          <button type="button" role="menuitem" onClick={() => invoke(onImportCurl)}>
+            Import from cURL…
+          </button>
+        ) : null}
       </div>
       {!menu.addOnly ? (
         <>
@@ -109,10 +127,17 @@ export function ContextMenu({
           <button type="button" role="menuitem" onClick={() => invoke(onToggleEnabled)}>{node.enabled ? 'Disable' : 'Enable'}</button>
           <button type="button" role="menuitem" onClick={() => invoke(onRename)}>Rename <kbd>F2</kbd></button>
           <div className="menu-separator" />
+          {onMoveToTop ? (
+            <button type="button" role="menuitem" onClick={() => invoke(onMoveToTop)} disabled={!parent || index <= 0}>Move to Top</button>
+          ) : null}
           <button type="button" role="menuitem" onClick={() => invoke(onMoveUp)} disabled={!parent || index <= 0}>Move Up</button>
           <button type="button" role="menuitem" onClick={() => invoke(onMoveDown)} disabled={!parent || index >= parent.children.length - 1}>Move Down</button>
+          {onMoveToBottom ? (
+            <button type="button" role="menuitem" onClick={() => invoke(onMoveToBottom)} disabled={!parent || index >= parent.children.length - 1}>Move to Bottom</button>
+          ) : null}
         </>
       ) : null}
     </div>
   )
 }
+

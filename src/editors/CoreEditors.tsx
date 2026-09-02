@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useRef, useState, useMemo } from 'react'
+import { UploadCloud } from 'lucide-react'
+import { CodeEditor } from '../components/common/CodeEditor'
 import { EditableTable } from '../components/common/EditableTable'
 import {
   CheckboxField,
@@ -6,40 +8,69 @@ import {
   RadioGroup,
   Section,
   SelectField,
-  TextAreaField,
 } from '../components/common/FormControls'
+
+
 import type { EditorProps } from './editorUtils'
 import { boolProp, numberProp, rowsProp, textProp } from './editorUtils'
+import { projectAssetService } from '../services/projectAssetService'
 
 export function TestPlanEditor({ node, updateProperties }: EditorProps) {
   return (
     <>
       <Section title="User Defined Variables">
         <EditableTable
-          columns={[{ key: 'name', label: 'Name' }, { key: 'value', label: 'Value' }]}
+          columns={[
+            { key: 'name', label: 'Name' },
+            { key: 'value', label: 'Value' },
+            { key: 'description', label: 'Description' },
+          ]}
           rows={rowsProp(node, 'variables')}
-          newRow={{ name: '', value: '' }}
+          newRow={{ name: '', value: '', description: '' }}
           onChange={(variables) => updateProperties({ variables })}
         />
       </Section>
+
       <Section title="Test Plan Options">
         <div className="checkbox-stack">
-          <CheckboxField label="Functional Test Mode" checked={boolProp(node, 'functionalMode')} onChange={(functionalMode) => updateProperties({ functionalMode })} />
-          <CheckboxField label="Run tearDown Thread Groups after shutdown" checked={boolProp(node, 'tearDownAfterShutdown', true)} onChange={(tearDownAfterShutdown) => updateProperties({ tearDownAfterShutdown })} />
-          <CheckboxField label="Serialize Thread Groups" checked={boolProp(node, 'serializeThreadGroups')} onChange={(serializeThreadGroups) => updateProperties({ serializeThreadGroups })} />
+          <CheckboxField
+            label="Run Thread Groups consecutively (i.e. run one at a time)"
+            checked={boolProp(node, 'serializeThreadGroups')}
+            onChange={(serializeThreadGroups) => updateProperties({ serializeThreadGroups })}
+          />
+          <CheckboxField
+            label="Run tearDown Thread Groups after shutdown of main threads"
+            checked={boolProp(node, 'tearDownAfterShutdown', true)}
+            onChange={(tearDownAfterShutdown) => updateProperties({ tearDownAfterShutdown })}
+          />
+          <CheckboxField
+            label="Functional Test Mode (i.e. save Response Data and SamplerData)"
+            checked={boolProp(node, 'functionalMode')}
+            onChange={(functionalMode) => updateProperties({ functionalMode })}
+          />
         </div>
+      </Section>
+
+      <Section title="Add directory or jar to classpath">
+        <EditableTable
+          columns={[{ key: 'path', label: 'Library / JAR / Directory Path' }]}
+          rows={rowsProp(node, 'userDefinedClasspath')}
+          newRow={{ path: '' }}
+          onChange={(userDefinedClasspath) => updateProperties({ userDefinedClasspath })}
+        />
       </Section>
     </>
   )
 }
 
+
 export function UserDefinedVariablesEditor({ node, updateProperties }: EditorProps) {
   return (
     <Section title="Variables">
       <EditableTable
-        columns={[{ key: 'name', label: 'Name' }, { key: 'value', label: 'Value' }]}
+        columns={[{ key: 'name', label: 'Name' }, { key: 'value', label: 'Value' }, { key: 'description', label: 'Description' }]}
         rows={rowsProp(node, 'variables')}
-        newRow={{ name: '', value: '' }}
+        newRow={{ name: '', value: '', description: '' }}
         onChange={(variables) => updateProperties({ variables })}
       />
     </Section>
@@ -114,7 +145,63 @@ function HttpConnectionFields({ node, updateProperties, includeMethod }: EditorP
 }
 
 export function HTTPRequestEditor({ node, updateProperties }: EditorProps) {
-  const [tab, setTab] = useState<'parameters' | 'body' | 'files'>('parameters')
+  const [tab, setTab] = useState<'parameters' | 'body' | 'files' | 'curl'>('parameters')
+  const [fileUploadStatus, setFileUploadStatus] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const generatedCurl = useMemo(() => {
+    const protocol = textProp(node, 'protocol') || 'https'
+    const domain = textProp(node, 'domain') || 'apiv2.vieclam24h.vn'
+    const port = textProp(node, 'port') ? `:${textProp(node, 'port')}` : ''
+    const path = textProp(node, 'path') || '/'
+    const method = (textProp(node, 'method') || 'GET').toUpperCase()
+    const body = textProp(node, 'body') || ''
+    const params = rowsProp(node, 'parameters')
+
+    let queryString = ''
+    if (params.length > 0) {
+      const validParams = params.filter((p) => p.name)
+      if (validParams.length > 0) {
+        queryString =
+          (path.includes('?') ? '&' : '?') +
+          validParams.map((p) => `${encodeURIComponent(p.name)}=${encodeURIComponent(p.value || '')}`).join('&')
+      }
+    }
+
+    const url = `${protocol}://${domain}${port}${path}${queryString}`
+    const parts: string[] = []
+    parts.push(`curl --location --request ${method} '${url}'`)
+    parts.push(`  --header 'Accept: application/json'`)
+    if (body || method === 'POST' || method === 'PUT' || method === 'PATCH') {
+      parts.push(`  --header 'Content-Type: application/json'`)
+    }
+    if (body) {
+      parts.push(`  --data-raw '${body.replace(/'/g, "\\'")}'`)
+    }
+    return parts.join(' \\\n')
+  }, [node])
+
+  const handleUploadRequestFile = async (file: File) => {
+    setFileUploadStatus('Uploading request file...')
+    try {
+      const uploaded = await projectAssetService.uploadAsset(file, 'data')
+      updateProperties({
+        files: [
+          ...rowsProp(node, 'files'),
+          {
+            path: uploaded.relativePath,
+            parameterName: file.name.replace(/\.[^.]+$/, ''),
+            mimeType: file.type || 'application/octet-stream',
+          },
+        ],
+        multipart: true,
+      })
+      setFileUploadStatus(`Uploaded ${uploaded.relativePath}`)
+    } catch (error) {
+      setFileUploadStatus(error instanceof Error ? `Upload failed: ${error.message}` : 'Upload failed')
+    }
+  }
+
   return (
     <>
       <Section title="Web Server">
@@ -131,9 +218,9 @@ export function HTTPRequestEditor({ node, updateProperties }: EditorProps) {
       </Section>
       <div className="tabbed-panel">
         <div className="tab-list" role="tablist">
-          {(['parameters', 'body', 'files'] as const).map((item) => (
+          {(['parameters', 'body', 'files', 'curl'] as const).map((item) => (
             <button key={item} type="button" role="tab" aria-selected={tab === item} className={tab === item ? 'active' : ''} onClick={() => setTab(item)}>
-              {item === 'parameters' ? 'Parameters' : item === 'body' ? 'Body Data' : 'Files Upload'}
+              {item === 'parameters' ? 'Parameters' : item === 'body' ? 'Body Data' : item === 'files' ? 'Files Upload' : 'cURL Command'}
             </button>
           ))}
         </div>
@@ -147,15 +234,55 @@ export function HTTPRequestEditor({ node, updateProperties }: EditorProps) {
             />
           ) : null}
           {tab === 'body' ? (
-            <TextAreaField label="Body Data" value={textProp(node, 'body')} rows={13} monospace placeholder="Request body" onChange={(body) => updateProperties({ body })} />
+            <div className="http-body-editor-wrap">
+              <CodeEditor
+                label="Body Data (JSON / Payload)"
+                language="json"
+                value={textProp(node, 'body')}
+                minHeight={340}
+                placeholder={'{\n  "key": "value"\n}'}
+                onChange={(body) => updateProperties({ body })}
+              />
+            </div>
           ) : null}
+
           {tab === 'files' ? (
-            <EditableTable
-              columns={[{ key: 'path', label: 'File Path' }, { key: 'parameterName', label: 'Parameter Name' }, { key: 'mimeType', label: 'MIME Type' }]}
-              rows={rowsProp(node, 'files')}
-              newRow={{ path: '', parameterName: '', mimeType: '' }}
-              onChange={(files) => updateProperties({ files })}
-            />
+            <div className="request-files-panel">
+              <input
+                ref={fileInputRef}
+                type="file"
+                hidden
+                onChange={(event) => {
+                  const file = event.target.files?.[0]
+                  event.target.value = ''
+                  if (file) handleUploadRequestFile(file)
+                }}
+              />
+              <div className="asset-toolbar">
+                <button type="button" className="text-button" onClick={() => fileInputRef.current?.click()}>
+                  <UploadCloud size={14} /> Upload File
+                </button>
+                {fileUploadStatus ? <span className="asset-upload-status inline">{fileUploadStatus}</span> : null}
+              </div>
+              <EditableTable
+                columns={[{ key: 'path', label: 'File Path' }, { key: 'parameterName', label: 'Parameter Name' }, { key: 'mimeType', label: 'MIME Type' }]}
+                rows={rowsProp(node, 'files')}
+                newRow={{ path: '', parameterName: '', mimeType: '' }}
+                onChange={(files) => updateProperties({ files })}
+              />
+            </div>
+          ) : null}
+
+          {tab === 'curl' ? (
+            <div className="http-curl-editor-wrap">
+              <CodeEditor
+                label="cURL Command (Bash / CLI)"
+                language="curl"
+                value={generatedCurl}
+                minHeight={340}
+                onChange={() => {}}
+              />
+            </div>
           ) : null}
         </div>
       </div>
@@ -163,6 +290,54 @@ export function HTTPRequestEditor({ node, updateProperties }: EditorProps) {
   )
 }
 
+
 export function HTTPRequestDefaultsEditor(props: EditorProps) {
   return <Section title="Web Server Defaults"><HttpConnectionFields {...props} includeMethod={false} /></Section>
+}
+
+export function DebugSamplerEditor({ node, updateProperties }: EditorProps) {
+  return (
+    <>
+      <Section title="Debug Sampler Properties">
+        <div className="two-columns">
+          <SelectField
+            label="JMeter properties"
+            value={boolProp(node, 'displayJMeterProperties', false) ? 'true' : 'false'}
+            options={[
+              { label: 'False', value: 'false' },
+              { label: 'True', value: 'true' },
+            ]}
+            onChange={(val) => updateProperties({ displayJMeterProperties: val === 'true' })}
+          />
+          <SelectField
+            label="JMeter variables"
+            value={boolProp(node, 'displayJMeterVariables', true) ? 'true' : 'false'}
+            options={[
+              { label: 'True', value: 'true' },
+              { label: 'False', value: 'false' },
+            ]}
+            onChange={(val) => updateProperties({ displayJMeterVariables: val === 'true' })}
+          />
+          <SelectField
+            label="Sampler properties"
+            value={boolProp(node, 'displaySamplerProperties', false) ? 'true' : 'false'}
+            options={[
+              { label: 'False', value: 'false' },
+              { label: 'True', value: 'true' },
+            ]}
+            onChange={(val) => updateProperties({ displaySamplerProperties: val === 'true' })}
+          />
+          <SelectField
+            label="System properties"
+            value={boolProp(node, 'displaySystemProperties', false) ? 'true' : 'false'}
+            options={[
+              { label: 'False', value: 'false' },
+              { label: 'True', value: 'true' },
+            ]}
+            onChange={(val) => updateProperties({ displaySystemProperties: val === 'true' })}
+          />
+        </div>
+      </Section>
+    </>
+  )
 }

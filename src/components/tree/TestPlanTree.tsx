@@ -1,3 +1,4 @@
+import { useState, useRef } from 'react'
 import { ChevronDown, ChevronRight, PanelLeftClose, Plus } from 'lucide-react'
 import { componentMeta } from '../componentMeta'
 import type { TestPlanNode } from '../../models/jmeter'
@@ -15,39 +16,137 @@ interface TreeProps {
   onRenameEnd: () => void
   onAddClick: (event: React.MouseEvent) => void
   onCollapsePanel: () => void
+  onMoveNode?: (sourceId: string, targetId: string, position: 'before' | 'inside' | 'after') => void
+  fileName?: string | null
+  dirty?: boolean
 }
+
+type DropPosition = 'before' | 'inside' | 'after' | null
 
 function TreeRow({
   node,
   level,
+  parentName,
   props,
+  draggedNodeId,
+  setDraggedNodeId,
 }: {
   node: TestPlanNode
   level: number
+  parentName?: string
   props: TreeProps
+  draggedNodeId: string | null
+  setDraggedNodeId: (id: string | null) => void
 }) {
+  const [dropPosition, setDropPosition] = useState<DropPosition>(null)
+  const rowRef = useRef<HTMLDivElement>(null)
+
   const expanded = props.expandedIds.has(node.id)
   const selected = props.selectedId === node.id
   const isRenaming = props.renameId === node.id
+  const isRoot = node.id === props.root.id
   const Icon = componentMeta[node.type].icon
+  const childCount = node.children.length
+  const rowTitle = parentName
+    ? `${node.name} - child of ${parentName} - level ${level + 1}`
+    : `${node.name} - level ${level + 1}`
 
   const finishRename = (target: HTMLInputElement) => {
     props.onRename(node.id, target.value)
     props.onRenameEnd()
   }
 
+  const handleDragStart = (event: React.DragEvent) => {
+    if (isRoot) {
+      event.preventDefault()
+      return
+    }
+    event.stopPropagation()
+    setDraggedNodeId(node.id)
+    event.dataTransfer.setData('text/plain', node.id)
+    event.dataTransfer.effectAllowed = 'move'
+  }
+
+  const handleDragOver = (event: React.DragEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+    if (!draggedNodeId || draggedNodeId === node.id) return
+
+    if (!rowRef.current) return
+    const rect = rowRef.current.getBoundingClientRect()
+    const relativeY = event.clientY - rect.top
+    const height = rect.height
+
+    const isContainer = node.id === props.root.id || node.type === 'ThreadGroup' || node.type === 'TransactionController' || node.type === 'IfController' || node.type === 'LoopController'
+
+    let pos: DropPosition = 'after'
+    if (relativeY < height * 0.3) {
+      pos = isRoot ? 'inside' : 'before'
+    } else if (relativeY > height * 0.7) {
+      pos = 'after'
+    } else if (isContainer) {
+      pos = 'inside'
+    } else {
+      pos = relativeY < height * 0.5 ? 'before' : 'after'
+    }
+
+    setDropPosition(pos)
+  }
+
+  const handleDragLeave = (event: React.DragEvent) => {
+    if (!rowRef.current?.contains(event.relatedTarget as Node)) {
+      setDropPosition(null)
+    }
+  }
+
+  const handleDrop = (event: React.DragEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+    const sourceId = event.dataTransfer.getData('text/plain') || draggedNodeId
+    const targetPos = dropPosition
+    setDropPosition(null)
+    setDraggedNodeId(null)
+
+    if (sourceId && sourceId !== node.id && targetPos && props.onMoveNode) {
+      props.onMoveNode(sourceId, node.id, targetPos)
+    }
+  }
+
   return (
     <li>
       <div
-        className={`tree-row ${selected ? 'selected' : ''} ${node.enabled ? '' : 'disabled-node'}`}
+        ref={rowRef}
+        className={`tree-row ${selected ? 'selected' : ''} ${node.enabled ? '' : 'disabled-node'} ${
+          dropPosition ? `drop-target-${dropPosition}` : ''
+        } ${draggedNodeId === node.id ? 'is-dragging' : ''}`}
         style={{ paddingLeft: 6 + level * 18 }}
+        data-level={level}
+        title={rowTitle}
         role="treeitem"
         aria-selected={selected}
+        aria-level={level + 1}
         aria-expanded={node.children.length ? expanded : undefined}
+        aria-label={rowTitle}
+        draggable={!isRoot && !isRenaming}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
         onClick={() => props.onSelect(node.id)}
         onDoubleClick={() => props.onBeginRename(node.id)}
         onContextMenu={(event) => props.onContextMenu(event, node.id)}
       >
+        {level > 0 ? (
+          <span className="tree-guides" aria-hidden="true">
+            {Array.from({ length: level }).map((_, index) => (
+              <span
+                key={index}
+                className={`tree-guide ${index === level - 1 ? 'tree-guide-current' : ''}`}
+                style={{ left: 14 + index * 18 }}
+              />
+            ))}
+          </span>
+        ) : null}
         <button
           type="button"
           className="tree-chevron"
@@ -78,11 +177,20 @@ function TreeRow({
         ) : (
           <span className="tree-label">{node.name}</span>
         )}
+        {childCount > 0 ? <span className="tree-child-count">{childCount}</span> : null}
       </div>
       {expanded && node.children.length > 0 ? (
         <ul role="group">
           {node.children.map((child) => (
-            <TreeRow key={child.id} node={child} level={level + 1} props={props} />
+            <TreeRow
+              key={child.id}
+              node={child}
+              level={level + 1}
+              parentName={node.name}
+              props={props}
+              draggedNodeId={draggedNodeId}
+              setDraggedNodeId={setDraggedNodeId}
+            />
           ))}
         </ul>
       ) : null}
@@ -91,10 +199,14 @@ function TreeRow({
 }
 
 export function TestPlanTree(props: TreeProps) {
+  const [draggedNodeId, setDraggedNodeId] = useState<string | null>(null)
+
   return (
     <aside className="tree-panel" aria-label="Test Plan Tree">
       <div className="panel-heading">
-        <span>Test Plan</span>
+        <span title={props.fileName ? `Kịch bản: ${props.fileName}` : 'Test Plan'}>
+          Test Plan {props.fileName ? <small style={{ fontWeight: 500, color: props.dirty ? '#f59e0b' : '#38bdf8', fontSize: '11px', marginLeft: '4px' }}>({props.fileName}{props.dirty ? ' *' : ''})</small> : null}
+        </span>
         <div className="panel-heading-actions">
           <button type="button" title="Add component" aria-label="Add component" onClick={props.onAddClick}>
             <Plus size={15} />
@@ -106,7 +218,13 @@ export function TestPlanTree(props: TreeProps) {
       </div>
       <div className="tree-scroll">
         <ul className="test-plan-tree" role="tree" aria-label="Test Plan components">
-          <TreeRow node={props.root} level={0} props={props} />
+          <TreeRow
+            node={props.root}
+            level={0}
+            props={props}
+            draggedNodeId={draggedNodeId}
+            setDraggedNodeId={setDraggedNodeId}
+          />
         </ul>
       </div>
     </aside>

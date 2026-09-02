@@ -1,60 +1,49 @@
-import { useState } from 'react'
-import { CheckCircle2, XCircle } from 'lucide-react'
-import { aggregateRows, mockSamples, summaryRows } from '../mock/sampleResults'
+import { ExternalLink } from 'lucide-react'
+import { aggregateRows as mockAggregateRows, mockSamples, summaryRows as mockSummaryRows } from '../mock/sampleResults'
+import { useJMeterStore } from '../store/jmeterStore'
+import { jmeterRunnerService } from '../services/jmeterRunnerService'
+
+
+import { ViewResultsTree } from '../components/results/ViewResultsTree'
 
 export function ViewResultsTreeEditor({ cleared = false }: { cleared?: boolean }) {
-  const [selectedId, setSelectedId] = useState(mockSamples[0].id)
-  const [tab, setTab] = useState<'result' | 'request' | 'response'>('result')
-  const sample = mockSamples.find((item) => item.id === selectedId) ?? mockSamples[0]
+  const store = useJMeterStore()
+  const hasRealRun = store.realSamples.length > 0 || Boolean(store.activeRunId)
+  const rawSamples = store.realSamples.length > 0 ? store.realSamples : hasRealRun ? [] : mockSamples
+  const isReal = hasRealRun
 
-  if (cleared) return <div className="listener-empty">No samples to display. Start a mock run to generate results.</div>
+  if (cleared || (!hasRealRun && rawSamples.length === 0)) {
+    return <div className="listener-empty">No samples to display. Start a test run to generate results.</div>
+  }
+
+  const samples = rawSamples.map((s, idx) => ({
+    id: s.id || `sample-${idx}`,
+    label: s.label || 'Sample',
+    code: s.code || 200,
+    elapsed: s.elapsed || 0,
+    success: Boolean(s.success),
+    method: s.method || 'HTTP',
+    url: s.url || '',
+    request: s.request || '',
+    response: s.response || '',
+    threadName: s.threadName || 'Thread Group 1-1',
+    timestamp: s.timestamp || '',
+    bytes: s.bytes || 0,
+    sentBytes: s.sentBytes || 0,
+    latency: s.latency || 0,
+    connectTime: s.connectTime || 0,
+  }))
 
   return (
-    <div className="results-tree-view">
-      <div className="samples-pane">
-        <div className="listener-pane-heading">Samples</div>
-        <div className="sample-list">
-          {mockSamples.map((item) => (
-            <button key={item.id} type="button" className={item.id === selectedId ? 'selected' : ''} onClick={() => setSelectedId(item.id)}>
-              {item.success ? <CheckCircle2 size={15} className="success-icon" /> : <XCircle size={15} className="failure-icon" />}
-              <span>{item.label}</span>
-              <code>{item.code}</code>
-              <small>{item.elapsed} ms</small>
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className="sample-detail-pane">
-        <div className="listener-pane-heading">Selected Sample Detail</div>
-        <div className="tab-list" role="tablist">
-          {([
-            ['result', 'Sampler Result'],
-            ['request', 'Request'],
-            ['response', 'Response Data'],
-          ] as const).map(([value, label]) => (
-            <button key={value} type="button" role="tab" aria-selected={tab === value} className={tab === value ? 'active' : ''} onClick={() => setTab(value)}>{label}</button>
-          ))}
-        </div>
-        <div className="sample-detail-content">
-          {tab === 'result' ? (
-            <dl className="result-properties">
-              <div><dt>Thread Name</dt><dd>Thread Group - Login Load Test 1-42</dd></div>
-              <div><dt>Sample Start</dt><dd>2026-08-31 09:44:21 ICT</dd></div>
-              <div><dt>Load time</dt><dd>{sample.elapsed} ms</dd></div>
-              <div><dt>Connect Time</dt><dd>41 ms</dd></div>
-              <div><dt>Latency</dt><dd>78 ms</dd></div>
-              <div><dt>Response code</dt><dd>{sample.code}</dd></div>
-              <div><dt>Response message</dt><dd>{sample.success ? 'OK' : 'Internal Server Error'}</dd></div>
-              <div><dt>URL</dt><dd>{sample.url}</dd></div>
-            </dl>
-          ) : (
-            <pre className="payload-view">{tab === 'request' ? sample.request : sample.response}</pre>
-          )}
-        </div>
-      </div>
-    </div>
+    <ViewResultsTree
+      samples={samples}
+      isReal={isReal}
+      activeRunId={store.activeRunId}
+    />
   )
 }
+
+
 
 function ReportTable({ columns, rows }: { columns: string[]; rows: string[][] }) {
   return (
@@ -74,21 +63,73 @@ function ReportTable({ columns, rows }: { columns: string[]; rows: string[][] })
 }
 
 export function SummaryReportEditor({ cleared = false }: { cleared?: boolean }) {
-  if (cleared) return <div className="listener-empty">No summary data. Start a mock run to generate results.</div>
+  const store = useJMeterStore()
+  const hasRealRun = store.realSummaryRows.length > 0 || Boolean(store.activeRunId)
+  const rows = store.realSummaryRows.length > 0 ? store.realSummaryRows : hasRealRun ? [] : mockSummaryRows
+  const isReal = hasRealRun
+
+  if (cleared || rows.length === 0) {
+    return <div className="listener-empty">No summary data. Start a test run to generate results.</div>
+  }
+
   return (
     <div className="listener-report">
-      <div className="report-toolbar"><span>Mock run snapshot</span><strong>2,000 samples</strong></div>
-      <ReportTable columns={['Label', '# Samples', 'Average', 'Min', 'Max', 'Std. Dev.', 'Error %', 'Throughput', 'Received KB/sec', 'Sent KB/sec', 'Avg. Bytes']} rows={summaryRows} />
+      <div className="report-toolbar">
+        <div>
+          <span>{isReal ? 'JMeter CLI Execution Summary' : 'Mock run snapshot'}</span>
+          {isReal ? <span className="source-badge">Live JTL</span> : null}
+        </div>
+        <div className="report-toolbar-right">
+          <strong>{store.metrics.samples.toLocaleString()} samples</strong>
+          {store.hasHtmlReport && store.activeRunId ? (
+            <button
+              type="button"
+              className="text-button"
+              onClick={() => window.open(jmeterRunnerService.getReportUrl(store.activeRunId || undefined), '_blank')}
+            >
+              <ExternalLink size={13} />
+              <span>HTML Dashboard Report</span>
+            </button>
+          ) : null}
+        </div>
+      </div>
+      <ReportTable columns={['Label', '# Samples', 'Average', 'Min', 'Max', 'Std. Dev.', 'Error %', 'Throughput', 'Received KB/sec', 'Sent KB/sec', 'Avg. Bytes']} rows={rows} />
     </div>
   )
 }
 
 export function AggregateReportEditor({ cleared = false }: { cleared?: boolean }) {
-  if (cleared) return <div className="listener-empty">No aggregate data. Start a mock run to generate results.</div>
+  const store = useJMeterStore()
+  const hasRealRun = store.realAggregateRows.length > 0 || Boolean(store.activeRunId)
+  const rows = store.realAggregateRows.length > 0 ? store.realAggregateRows : hasRealRun ? [] : mockAggregateRows
+  const isReal = hasRealRun
+
+  if (cleared || rows.length === 0) {
+    return <div className="listener-empty">No aggregate data. Start a test run to generate results.</div>
+  }
+
   return (
     <div className="listener-report">
-      <div className="report-toolbar"><span>Mock run aggregate</span><strong>330.2 req/s</strong></div>
-      <ReportTable columns={['Label', '# Samples', 'Average', 'Median', '90% Line', '95% Line', '99% Line', 'Min', 'Max', 'Error %', 'Throughput', 'Received KB/sec', 'Sent KB/sec']} rows={aggregateRows} />
+      <div className="report-toolbar">
+        <div>
+          <span>{isReal ? 'JMeter CLI Aggregate Stats' : 'Mock run aggregate'}</span>
+          {isReal ? <span className="source-badge">Live JTL</span> : null}
+        </div>
+        <div className="report-toolbar-right">
+          <strong>{store.metrics.throughput.toFixed(1)} req/s</strong>
+          {store.hasHtmlReport && store.activeRunId ? (
+            <button
+              type="button"
+              className="text-button"
+              onClick={() => window.open(jmeterRunnerService.getReportUrl(store.activeRunId || undefined), '_blank')}
+            >
+              <ExternalLink size={13} />
+              <span>HTML Dashboard Report</span>
+            </button>
+          ) : null}
+        </div>
+      </div>
+      <ReportTable columns={['Label', '# Samples', 'Average', 'Median', '90% Line', '95% Line', '99% Line', 'Min', 'Max', 'Error %', 'Throughput', 'Received KB/sec', 'Sent KB/sec']} rows={rows} />
     </div>
   )
 }

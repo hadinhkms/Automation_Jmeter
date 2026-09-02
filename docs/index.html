@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hướng Dẫn Sử Dụng & Sổ Tay Tính Năng - JMeter Web UI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      
+      --bg-body: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-sidebar: #f1f5f9;
+      --bg-sidebar-active: #e0f2fe;
+      --border-color: #e2e8f0;
+      
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-sidebar: #334155;
+      --text-sidebar-active: #0284c7;
+      
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --primary-light: #f0f9ff;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #d97706;
+      
+      --code-bg: #0f172a;
+      --code-text: #f8fafc;
+      --inline-code-bg: #e2e8f0;
+      --inline-code-text: #0f172a;
+      
+      --sidebar-width: 290px;
+      --toc-width: 230px;
+      --header-height: 60px;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.05);
+    }
+
+    [data-theme="dark"] {
+      --bg-body: #090d16;
+      --bg-surface: #0f172a;
+      --bg-sidebar: #0b1120;
+      --bg-sidebar-active: #1e293b;
+      --border-color: #1e293b;
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-sidebar: #cbd5e1;
+      --text-sidebar-active: #38bdf8;
+      
+      --primary: #38bdf8;
+      --primary-hover: #7dd3fc;
+      --primary-light: #0c4a6e33;
+      
+      --code-bg: #020617;
+      --code-text: #f1f5f9;
+      --inline-code-bg: #1e293b;
+      --inline-code-text: #38bdf8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    html {
+      scroll-behavior: smooth;
+      font-size: 15px;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.65;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Top Header */
+    header.doc-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      height: var(--header-height);
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      backdrop-filter: blur(8px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: 700;
+      font-size: 1.15rem;
+    }
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: #fff;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 0.95rem;
+      letter-spacing: -0.5px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      background: var(--bg-sidebar);
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: transparent;
+    }
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    /* App Container */
+    .doc-layout {
+      display: flex;
+      flex: 1;
+      max-width: 1600px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Left Sidebar Navigation Tree */
+    aside.doc-sidebar {
+      width: var(--sidebar-width);
+      position: sticky;
+      top: var(--header-height);
+      height: calc(100vh - var(--header-height));
+      overflow-y: auto;
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border-color);
+      padding: 16px 12px 32px 16px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-search {
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .sidebar-search input {
+      width: 100%;
+      padding: 8px 12px 8px 32px;
+      font-size: 0.85rem;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .sidebar-search svg {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    .nav-group {
+      margin-bottom: 20px;
+    }
+
+    .nav-group-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+      color: var(--text-muted);
+      padding: 6px 10px;
+      margin-bottom: 4px;
+    }
+
+    .nav-list {
+      list-style: none;
+    }
+
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--text-sidebar);
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+
+    .nav-item a:hover {
+      background: rgba(0, 0, 0, 0.04);
+      color: var(--text-main);
+    }
+
+    .nav-item.active a {
+      background: var(--bg-sidebar-active);
+      color: var(--text-sidebar-active);
+      font-weight: 600;
+    }
+
+    /* Main Content Area */
+    main.doc-content {
+      flex: 1;
+      min-width: 0;
+      padding: 32px 48px 64px 48px;
+      background: var(--bg-surface);
+    }
+
+    .doc-article {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* Right Sidebar Table of Contents */
+    aside.doc-toc {
+      width: var(--toc-width);
+      position: sticky;
+      top: var(--header-height);
+      height: calc(100vh - var(--header-height));
+      overflow-y: auto;
+      padding: 32px 16px 32px 12px;
+      border-left: 1px solid var(--border-color);
+      flex-shrink: 0;
+      font-size: 0.8rem;
+    }
+
+    .toc-title {
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+
+    .toc-list {
+      list-style: none;
+    }
+
+    .toc-list li {
+      margin-bottom: 8px;
+    }
+
+    .toc-list a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+      line-height: 1.4;
+      display: block;
+    }
+
+    .toc-list a:hover,
+    .toc-list a.active {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Typography & Markdown Elements */
+    h1 {
+      font-size: 2.1rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+      color: var(--text-main);
+    }
+
+    .doc-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    h2 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin-top: 48px;
+      margin-bottom: 16px;
+      padding-top: 16px;
+      border-top: 1px dashed var(--border-color);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-top: 28px;
+      margin-bottom: 12px;
+      color: var(--text-main);
+    }
+
+    p {
+      margin-bottom: 16px;
+      color: var(--text-main);
+    }
+
+    ul, ol {
+      margin-bottom: 20px;
+      padding-left: 24px;
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    /* Alerts / Callouts */
+    .callout {
+      padding: 14px 18px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 4px solid;
+      background: var(--bg-body);
+      font-size: 0.92rem;
+    }
+    .callout-title {
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .callout.tip {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--text-main);
+    }
+    .callout.warning {
+      border-color: var(--warning);
+      background: #fffbeb;
+      color: #92400e;
+    }
+    .callout.success {
+      border-color: var(--success);
+      background: #f0fdf4;
+      color: #166534;
+    }
+
+    /* Image Display & Zoom */
+    .img-card {
+      margin: 24px 0;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .img-card:hover {
+      box-shadow: var(--shadow-lg);
+    }
+
+    .img-card img {
+      width: 100%;
+      height: auto;
+      display: block;
+      cursor: zoom-in;
+    }
+
+    .img-caption {
+      padding: 8px 14px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background: var(--bg-body);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Code Blocks */
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 18px 0;
+      position: relative;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.85em;
+    }
+
+    p code, li code {
+      background: var(--inline-code-bg);
+      color: var(--inline-code-text);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 0.88rem;
+    }
+
+    th, td {
+      padding: 10px 14px;
+      border: 1px solid var(--border-color);
+      text-align: left;
+    }
+
+    th {
+      background: var(--bg-sidebar);
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    tr:nth-child(even) {
+      background: var(--bg-body);
+    }
+
+    /* Modal Lightbox */
+    .lightbox-modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      cursor: zoom-out;
+    }
+
+    .lightbox-modal.active {
+      display: flex;
+    }
+
+    .lightbox-modal img {
+      max-width: 95%;
+      max-height: 95%;
+      border-radius: 8px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    @media (max-width: 1100px) {
+      aside.doc-toc { display: none; }
+      main.doc-content { padding: 24px; }
+    }
+
+    @media (max-width: 768px) {
+      aside.doc-sidebar { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="doc-header">
+    <a href="#overview" class="brand">
+      <div class="brand-logo">JM</div>
+      <span>JMeter Web UI Docs</span>
+    </a>
+    <div class="header-actions">
+      <button class="btn" onclick="toggleTheme()" id="themeToggleBtn">🌓 Dark / Light</button>
+      <a href="http://127.0.0.1:58936/" target="_blank" class="btn btn-primary">🚀 Mở Ứng Dụng</a>
+    </div>
+  </header>
+
+  <div class="doc-layout">
+    <!-- Left Sidebar: Interactive Navigation Tree -->
+    <aside class="doc-sidebar">
+      <div class="sidebar-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" placeholder="Tìm kiếm tài liệu..." id="sidebarSearch" oninput="filterNav()">
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-title">1. Giới thiệu & Bắt đầu</div>
+        <ul class="nav-list">
+          <li class="nav-item active"><a href="#overview">Tổng quan & Giao diện</a></li>
+          <li class="nav-item"><a href="#execution-modes">2 Chế độ thực thi</a></li>
+          <li class="nav-item"><a href="#settings-detection">Cấu hình & Nhận diện</a></li>
+        </ul>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-title">2. Cây kịch bản (Test Plan)</div>
+        <ul class="nav-list">
+          <li class="nav-item"><a href="#testplan-tree">Cây cấu trúc Test Plan</a></li>
+          <li class="nav-item"><a href="#context-menu">Menu chuột phải & Thêm node</a></li>
+          <li class="nav-item"><a href="#drag-drop">Kéo thả & Nạp file JMX/JTL</a></li>
+        </ul>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-title">3. Tính năng Import cURL</div>
+        <ul class="nav-list">
+          <li class="nav-item"><a href="#import-curl">Tools -> Import from cURL</a></li>
+          <li class="nav-item"><a href="#curl-live-preview">Live Preview & Phân giải</a></li>
+          <li class="nav-item"><a href="#curl-generated-nodes">Sinh Sampler & Headers</a></li>
+        </ul>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-title">4. Xem kết quả (Results Tree)</div>
+        <ul class="nav-list">
+          <li class="nav-item"><a href="#results-tree">View Results Tree</a></li>
+          <li class="nav-item"><a href="#sampler-result-tab">Tab Sampler Result</a></li>
+          <li class="nav-item"><a href="#request-curl-tab">Tab Request & Copy cURL</a></li>
+          <li class="nav-item"><a href="#response-data-tab">Tab Response Body thực tế</a></li>
+        </ul>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-title">5. Plugins Manager</div>
+        <ul class="nav-list">
+          <li class="nav-item"><a href="#plugins-manager">JMeter Plugins Manager</a></li>
+          <li class="nav-item"><a href="#available-plugins">Kho Available Plugins</a></li>
+          <li class="nav-item"><a href="#installed-plugins">Quản lý Installed Plugins</a></li>
+        </ul>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-title">6. Điều khiển & Runner</div>
+        <ul class="nav-list">
+          <li class="nav-item"><a href="#run-execution">Chạy test & Live Console</a></li>
+          <li class="nav-item"><a href="#runner-controls">Stop, Shutdown & Force Stop</a></li>
+          <li class="nav-item"><a href="#html-report">Báo cáo HTML Dashboard</a></li>
+        </ul>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-title">7. Soạn thảo & Đồng bộ</div>
+        <ul class="nav-list">
+          <li class="nav-item"><a href="#code-editors">JSON & Groovy Editors</a></li>
+          <li class="nav-item"><a href="#asset-sync">Đồng bộ file CSV & Data</a></li>
+          <li class="nav-item"><a href="#shortcuts">Bảng phím tắt tiện ích</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="doc-content">
+      <article class="doc-article">
+        <h1>📖 Sổ Tay Hướng Dẫn Sử Dụng JMeter Web UI</h1>
+        <div class="doc-subtitle">
+          Tài liệu hướng dẫn trực quan toàn diện dành cho Performance Tester & Automation QA với hình ảnh chụp thực tế từ trình duyệt.
+        </div>
+
+        <!-- Section 1: Overview -->
+        <section id="overview">
+          <h2>🌟 1. Giới thiệu tổng quan & Giao diện chính</h2>
+          <p>
+            <strong>JMeter Web UI</strong> là ứng dụng web hiện đại, mượt mà được xây dựng trên nền tảng <strong>React, TypeScript và Vite</strong>, kết nối trực tiếp với <strong>Apache JMeter Engine</strong> chạy trên máy tính của bạn.
+          </p>
+
+          <div class="img-card">
+            <img src="./images/reloaded_ui_check_1788207657903.png" alt="Giao diện tổng quan JMeter Web UI" onclick="openLightbox(this.src)">
+            <div class="img-caption">
+              <span>📸 Hình 1: Giao diện làm việc chính với Cây Test Plan, Thanh công cụ Toolbar và Trình soạn thảo</span>
+              <span>🔍 Click ảnh để phóng to</span>
+            </div>
+          </div>
+
+          <div id="execution-modes">
+            <h3>2 Chế độ thực thi linh hoạt</h3>
+            <ul>
+              <li><strong>Real JMeter Execution Mode (Chế độ thật)</strong>: Hệ thống tự động biên dịch Test Plan thành file XML <code>.jmx</code> và khởi chạy tiến trình Java JMeter Non-GUI (<code>jmeter.bat -n -t ...</code>), nạp kết quả và báo cáo HTML thời gian thực.</li>
+              <li><strong>Mock Simulation Mode (Chế độ mô phỏng)</strong>: Chạy mô phỏng kiểm thử nhanh không cần môi trường Java, phù hợp để dựng nhanh luồng kịch bản.</li>
+            </ul>
+          </div>
+
+          <div id="settings-detection">
+            <h3>Cấu hình & Nhận diện tự động</h3>
+            <p>Bấm vào nút huy hiệu <strong>Mode Badge</strong> ở góc phải thanh công cụ để mở hộp thoại cài đặt đường dẫn JMeter:</p>
+            <div class="img-card">
+              <img src="./images/settings_modal_1788190642131.png" alt="Hộp thoại cấu hình JMeter" onclick="openLightbox(this.src)">
+              <div class="img-caption">
+                <span>📸 Hình 2: Hộp thoại cấu hình đường dẫn và nhận diện phiên bản Apache JMeter</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 2: Test Plan Tree -->
+        <section id="testplan-tree">
+          <h2>🌲 2. Quản lý Cây kịch bản (Test Plan Tree)</h2>
+          <p>Cây kịch bản bên trái quản lý toàn bộ cấu trúc phân cấp các thành phần kiểm thử theo đúng chuẩn Apache JMeter.</p>
+
+          <div id="context-menu">
+            <h3>Menu ngữ cảnh chuột phải (Context Menu)</h3>
+            <p>Click chuột phải vào bất kỳ node nào trên cây để mở menu thao tác phân nhóm:</p>
+            <ul>
+              <li><strong>Add</strong>: Phân nhóm chuẩn (<em>Threads, Samplers, Logic Controllers, Pre/Post Processors, Assertions, Timers, Listeners</em>).</li>
+              <li><strong>Import from cURL…</strong>: Nhập nhanh request từ cURL vào node đang chọn.</li>
+              <li><strong>Cut / Copy / Paste / Duplicate / Remove / Rename (F2)</strong>.</li>
+            </ul>
+            <div class="img-card">
+              <img src="./images/expanded_add_menu_1788199666132.png" alt="Menu chuột phải thêm component" onclick="openLightbox(this.src)">
+              <div class="img-caption">
+                <span>📸 Hình 3: Menu ngữ cảnh chuột phải với danh mục thành phần phân loại chuẩn JMeter</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="drag-drop">
+            <h3>Kéo thả (Drag & Drop) và nạp file</h3>
+            <p>Hỗ trợ kéo thả sắp xếp các node trong cây hoặc kéo thả file <code>.jmx</code>, <code>.jtl</code>, <code>.csv</code> trực tiếp từ máy tính vào trình duyệt:</p>
+            <div class="img-card">
+              <img src="./images/csv_data_config_1788200276044.png" alt="CSV Data Config Element" onclick="openLightbox(this.src)">
+              <div class="img-caption">
+                <span>📸 Hình 4: Giao diện cấu hình CSV Data Set Config và danh sách node trên cây</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 3: Import from cURL -->
+        <section id="import-curl">
+          <h2>⚡ 3. Tính năng Import từ cURL (Tools -> Import from cURL)</h2>
+          <p>Nhập nhanh bất kỳ request API nào từ DevTools của trình duyệt hoặc Postman thành component JMeter chỉ trong vài giây.</p>
+
+          <div class="img-card">
+            <img src="./images/tools_menu_open_1788206333133.png" alt="Menu Tools Import from cURL" onclick="openLightbox(this.src)">
+            <div class="img-caption">
+              <span>📸 Hình 5: Menu Tools -> Import from cURL… trên thanh menu chính</span>
+            </div>
+          </div>
+
+          <div id="curl-live-preview">
+            <h3>Hộp thoại Live Preview cURL</h3>
+            <p>Dán câu lệnh cURL vào ô nhập liệu. Hệ thống sẽ tự động phân tích Method, URL, Headers và Body Data:</p>
+            <div class="img-card">
+              <img src="./images/curl_preview_loaded_1788206358155.png" alt="Hộp thoại Live Preview cURL" onclick="openLightbox(this.src)">
+              <div class="img-caption">
+                <span>📸 Hình 6: Hộp thoại Import cURL với tính năng Live Preview thông số trực quan</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="curl-generated-nodes">
+            <h3>Tự động sinh HTTP Request & Header Manager</h3>
+            <p>Sau khi bấm <strong>Import into Test Plan</strong>, hệ thống tự động tạo sampler HTTP Request và node con HTTP Header Manager chứa đầy đủ headers:</p>
+            <div class="img-card">
+              <img src="./images/imported_request_details_1788206379501.png" alt="HTTP Request được tạo tự động" onclick="openLightbox(this.src)">
+              <div class="img-caption">
+                <span>📸 Hình 7: Node HTTP Request được sinh tự động và gắn vào cây kịch bản</span>
+              </div>
+            </div>
+            <div class="img-card">
+              <img src="./images/imported_headers_details_1788206402412.png" alt="HTTP Header Manager con" onclick="openLightbox(this.src)">
+              <div class="img-caption">
+                <span>📸 Hình 8: Node con HTTP Header Manager chứa đầy đủ các headers trích xuất từ cURL</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 4: Results Tree -->
+        <section id="results-tree">
+          <h2>📊 4. Trình xem kết quả (View Results Tree)</h2>
+          <p>Tái hiện 100% sức mạnh của View Results Tree trên Apache JMeter với đầy đủ 3 tab chi tiết.</p>
+
+          <div id="sampler-result-tab">
+            <h3>Tab Sampler Result</h3>
+            <p>Hiển thị mã phản hồi (200/500), Load time, Connect time, Latency, Data size:</p>
+            <div class="img-card">
+              <img src="./images/results_tree_mock_1788204505660.png" alt="Tổng quan View Results Tree" onclick="openLightbox(this.src)">
+              <div class="img-caption">
+                <span>📸 Hình 9: Tab Sampler Result hiển thị các chỉ số đo lường chi tiết của sample</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="request-curl-tab">
+            <h3>Tab Request & Tự động sinh cURL Code Snippet (Chuẩn Postman)</h3>
+            <p>Xem toàn bộ request payload, headers và câu lệnh cURL được định dạng chuẩn Postman (từng header trên mỗi dòng, JSON Body trong <code>--data-raw</code>) kèm nút Copy cURL:</p>
+            <div class="img-card">
+              <img src="./images/postman_curl_request_verified_1788214264768.png" alt="Tab Request có cURL Code snippet chuẩn Postman" onclick="openLightbox(this.src)">
+              <div class="img-caption">
+                <span>📸 Hình 10: Tab Request tự động sinh cURL Code Snippet chuẩn Postman với đầy đủ Headers và Body</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="response-data-tab">
+            <h3>Tab Response data (Giao diện chuẩn Postman & JMeter)</h3>
+            <p>Tái hiện chính xác giao diện Postman: Thanh trạng thái hiển thị mã <strong>200 OK</strong>, thời gian phản hồi (<strong>894 ms</strong>), dung lượng (<strong>29.81 KB</strong>), nút <strong>Save Response</strong>, các tab con <strong>Body</strong>, <strong>Cookies</strong>, <strong>Headers (7)</strong>, <strong>Test Results</strong> cùng bộ định dạng JSON Pretty thụt lề 2 spaces và giải mã Unicode tiếng Việt:</p>
+            <div class="img-card">
+              <img src="./images/postman_response_view_verified_1788214300938.png" alt="Tab Response data chuẩn Postman & JMeter" onclick="openLightbox(this.src)">
+              <div class="img-caption">
+                <span>📸 Hình 11: Tab Response data hiển thị JSON đẹp mắt, giải mã tiếng Việt và đầy đủ thanh trạng thái Postman</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 5: Plugins Manager -->
+        <section id="plugins-manager">
+          <h2>📦 5. Trình quản lý Plugins (JMeter Plugins Manager)</h2>
+          <p>Mở từ menu <strong>Options -> Plugins Manager…</strong> hoặc <strong>Tools -> Plugins Manager…</strong></p>
+
+          <div id="available-plugins">
+            <h3>Kho Available Plugins</h3>
+            <p>Kho plugin chính thức phong phú (<em>Custom Thread Groups, Dummy Sampler, Throughput Shaping Timer, WebSocket Samplers, 3 Basic Graphs...</em>). Cài đặt tự động chỉ với 1 click:</p>
+            <div class="img-card">
+              <img src="./images/plugins_avail_1788209016653.png" alt="Kho Available Plugins" onclick="openLightbox(this.src)">
+              <div class="img-caption">
+                <span>📸 Hình 12: Kho Available Plugins với mô tả chi tiết và nút Install Plugin tự động</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="installed-plugins">
+            <h3>Quản lý Installed Plugins</h3>
+            <p>Tự động quét thư mục <code>lib/ext</code> và <code>lib</code>, hiển thị phiên bản, dung lượng và hỗ trợ gỡ cài đặt an toàn:</p>
+            <div class="img-card">
+              <img src="./images/plugins_inst_1788209029965.png" alt="Quản lý Installed Plugins" onclick="openLightbox(this.src)">
+              <div class="img-caption">
+                <span>📸 Hình 13: Tab Installed Plugins quản lý toàn bộ các thư viện JAR đã cài đặt</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 6: Execution & Runner -->
+        <section id="run-execution">
+          <h2>🏃 6. Thực thi & Điều khiển Runner (Stop / Force Stop)</h2>
+          <p>Bấm nút <strong>Play (▶️)</strong> hoặc phím tắt <strong>Ctrl+R</strong> để khởi chạy. Mở Live Console Log (icon Terminal 🖥️) để theo dõi thời gian thực:</p>
+          <div class="img-card">
+            <img src="./images/load_test_running_1788207901712.png" alt="Chạy test thời gian thực" onclick="openLightbox(this.src)">
+            <div class="img-caption">
+              <span>📸 Hình 14: Kịch bản đang chạy thực tế với Live Console Log và thông số tiến độ</span>
+            </div>
+          </div>
+
+          <div id="runner-controls">
+            <h3>Cơ chế Dừng Test & Force Stop</h3>
+            <p>Nút <strong>Stop (⏹️)</strong> và <strong>Shutdown (⏸️)</strong> trên Toolbar luôn luôn sáng và bấm được bất kỳ lúc nào. Khi có tiến trình ngầm cần giải phóng, nút đỏ <strong>Force Stop & Reset</strong> trên banner sẽ lập tức dọn dẹp tiến trình Java:</p>
+            <div class="img-card">
+              <img src="./images/stop_test_executed_1788207017284.png" alt="Dừng test và dọn dẹp" onclick="openLightbox(this.src)">
+              <div class="img-caption">
+                <span>📸 Hình 15: Nút Stop và thanh thông báo Force Stop giúp kiểm soát hoàn toàn tiến trình test</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 7: Code Editors & Sync -->
+        <section id="code-editors">
+          <h2>💻 7. Trình soạn thảo mã & Đồng bộ tài nguyên</h2>
+          <h3>Trình soạn thảo JSON & Groovy JSR223</h3>
+          <p>Hỗ trợ định dạng JSON tự động, tô màu cú pháp và code snippet mẫu cho các bộ xử lý JSR223:</p>
+          <div class="img-card">
+            <img src="./images/json_editor_prettified_correctly_1788194997408.png" alt="JSON Editor có Prettify" onclick="openLightbox(this.src)">
+            <div class="img-caption">
+              <span>📸 Hình 16: Trình soạn thảo JSON Body với tính năng Prettify và số dòng code</span>
+            </div>
+          </div>
+
+          <div id="asset-sync">
+            <h3>Cơ chế tự động đồng bộ dữ liệu (Asset Sync)</h3>
+            <div class="callout tip">
+              <div class="callout-title">💡 Tự động sao chép file data:</div>
+              Hệ thống tự động sao chép các thư mục <code>data/</code> (ví dụ <code>data/provinces.csv</code>), <code>GPKD/</code>, <code>downloads/</code> vào thư mục chạy <code>runs/run_XXXX/</code> để hàm <code>FileServer.getFileServer().getBaseDir()</code> luôn tìm thấy file chính xác 100%.
+            </div>
+          </div>
+
+          <div id="shortcuts">
+            <h3>⌨️ Bảng phím tắt tiện ích</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Phím tắt</th>
+                  <th>Thao tác</th>
+                  <th>Chức năng</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>Ctrl + N</code></td>
+                  <td>New Plan</td>
+                  <td>Tạo kịch bản kiểm thử mới</td>
+                </tr>
+                <tr>
+                  <td><code>Ctrl + O</code></td>
+                  <td>Open JMX</td>
+                  <td>Mở file kịch bản .jmx từ máy tính</td>
+                </tr>
+                <tr>
+                  <td><code>Ctrl + S</code></td>
+                  <td>Save</td>
+                  <td>Lưu kịch bản vào bộ nhớ trình duyệt</td>
+                </tr>
+                <tr>
+                  <td><code>Ctrl + R</code></td>
+                  <td>Start Run</td>
+                  <td>Khởi chạy kịch bản kiểm thử</td>
+                </tr>
+                <tr>
+                  <td><code>Ctrl + X / C / V</code></td>
+                  <td>Cut / Copy / Paste</td>
+                  <td>Cắt, sao chép và dán node</td>
+                </tr>
+                <tr>
+                  <td><code>Ctrl + D</code></td>
+                  <td>Duplicate</td>
+                  <td>Nhân bản node đang chọn</td>
+                </tr>
+                <tr>
+                  <td><code>Delete</code></td>
+                  <td>Remove</td>
+                  <td>Xóa node đang chọn</td>
+                </tr>
+                <tr>
+                  <td><code>F2</code></td>
+                  <td>Rename</td>
+                  <td>Đổi tên node đang chọn</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </article>
+    </main>
+
+    <!-- Right Sidebar Table of Contents -->
+    <aside class="doc-toc">
+      <div class="toc-title">Mục Lục Trang</div>
+      <ul class="toc-list" id="tocList">
+        <li><a href="#overview">1. Tổng quan & Giao diện</a></li>
+        <li><a href="#testplan-tree">2. Cây kịch bản Test Plan</a></li>
+        <li><a href="#import-curl">3. Import từ cURL</a></li>
+        <li><a href="#results-tree">4. View Results Tree</a></li>
+        <li><a href="#plugins-manager">5. Plugins Manager</a></li>
+        <li><a href="#run-execution">6. Thực thi & Điều khiển</a></li>
+        <li><a href="#code-editors">7. Soạn thảo & Phím tắt</a></li>
+      </ul>
+    </aside>
+  </div>
+
+  <!-- Lightbox Modal for Fullscreen Image Zoom -->
+  <div class="lightbox-modal" id="lightboxModal" onclick="closeLightbox()">
+    <img id="lightboxImg" src="" alt="Zoomed preview">
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('doc-theme', next);
+    }
+
+    const savedTheme = localStorage.getItem('doc-theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    }
+
+    function openLightbox(src) {
+      const modal = document.getElementById('lightboxModal');
+      const img = document.getElementById('lightboxImg');
+      img.src = src;
+      modal.classList.add('active');
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightboxModal').classList.remove('active');
+    }
+
+    function filterNav() {
+      const query = document.getElementById('sidebarSearch').value.toLowerCase();
+      const items = document.querySelectorAll('.nav-item');
+      items.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(query) ? 'block' : 'none';
+      });
+    }
+
+    // Active TOC link on scroll
+    window.addEventListener('scroll', () => {
+      const sections = document.querySelectorAll('section[id]');
+      const scrollY = window.pageYOffset;
+      sections.forEach(sec => {
+        const top = sec.offsetTop - 100;
+        const height = sec.offsetHeight;
+        const id = sec.getAttribute('id');
+        if (scrollY >= top && scrollY < top + height) {
+          document.querySelectorAll('.toc-list a').forEach(a => {
+            a.classList.remove('active');
+            if (a.getAttribute('href') === '#' + id) a.classList.add('active');
+          });
+          document.querySelectorAll('.nav-item a').forEach(a => {
+            a.parentElement.classList.remove('active');
+            if (a.getAttribute('href') === '#' + id) a.parentElement.classList.add('active');
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

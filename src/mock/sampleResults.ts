@@ -8,7 +8,14 @@ export interface MockSample {
   url: string
   request: string
   response: string
+  threadName?: string
+  timestamp?: string
+  bytes?: number
+  sentBytes?: number
+  latency?: number
+  connectTime?: number
 }
+
 
 export const mockSamples: MockSample[] = [
   {
@@ -52,8 +59,48 @@ export const mockSamples: MockSample[] = [
     success: true,
     method: 'POST',
     url: 'https://api.example.com/logout',
-    request: 'POST /logout HTTP/1.1\nAuthorization: Bearer eyJhbGciOi...',
-    response: '(empty response body)',
+    request: 'POST /logout HTTP/1.1\nAuthorization: Bearer eyJhbGciOi...\n\n{}',
+    response: '',
+  },
+  {
+    id: 'sample-debug-1',
+    label: 'Debug Sampler',
+    code: 200,
+    elapsed: 2,
+    success: true,
+    method: 'GET',
+    url: '',
+    request: 'Sampler: Debug Sampler\nThread: Thread Group 1-1',
+    response: `JMeterVariables:
+JMeterThread.last_sample_ok=true
+account_name=Admin RE
+baseUrl=https://api.example.com
+channel_code=vl24h
+id=201238842
+loginEmail=admin@example.com
+phone=0987654321
+salary=negotiable
+tax_number=0102030405
+token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+userId=201238842
+START.HMS=003905
+START.MS=1788197945150
+START.YMD=20260901
+TESTSTART.MS=1788197945150
+
+--------------------------------------------------
+SamplerProperties:
+DebugSampler.JMeterProperties=false
+DebugSampler.JMeterVariables=true
+DebugSampler.samplerProperties=false
+DebugSampler.systemProperties=false
+TestElement.name=Debug Sampler`,
+    threadName: 'Thread Group 1-1',
+    timestamp: '2026-09-01 00:39:05 ICT',
+    bytes: 420,
+    sentBytes: 0,
+    latency: 0,
+    connectTime: 0,
   },
 ]
 

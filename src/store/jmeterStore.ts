@@ -11,13 +11,17 @@ import {
   createNode,
   createSampleTestPlan,
 } from '../mock/sampleTestPlan'
+import { normalizeDirectoryVariablesInTree } from '../utils/jmeterPathVariables'
 import {
   collectNodeIds,
   deepCloneWithNewIds,
   findNode,
   findParent,
   mapNode,
+  moveNodeInTree,
+  moveNodeToTopInTree,
 } from '../utils/treeUtils'
+
 
 const emptyMetrics: RunMetrics = {
   activeThreads: 0,
@@ -28,10 +32,109 @@ const emptyMetrics: RunMetrics = {
   durationSeconds: 0,
 }
 
+const STORAGE_KEY = 'jmeter_web_active_plan_v1'
+
+function defaultExpandedNodeIds(testPlan: TestPlanNode): Set<string> {
+  return new Set([testPlan.id])
+}
+
+function restoreExpandedNodeIds(testPlan: TestPlanNode, savedExpandedIds: unknown): Set<string> {
+  if (!Array.isArray(savedExpandedIds)) return defaultExpandedNodeIds(testPlan)
+
+  const expandedNodeIds = new Set(savedExpandedIds.filter((id): id is string => typeof id === 'string'))
+  const allNodeIds = collectNodeIds(testPlan)
+  const isLegacyFullExpand = allNodeIds.length > 20 && allNodeIds.every((id) => expandedNodeIds.has(id))
+
+  return isLegacyFullExpand ? defaultExpandedNodeIds(testPlan) : expandedNodeIds
+}
+
+interface PersistedState {
+  testPlan: TestPlanNode
+  selectedNodeId: string
+  expandedNodeIds: string[]
+  dirty: boolean
+  fileName: string | null
+}
+
+function loadInitialState(): {
+  testPlan: TestPlanNode
+  selectedNodeId: string
+  expandedNodeIds: Set<string>
+  dirty: boolean
+  fileName: string | null
+} {
+  try {
+    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null
+    if (raw) {
+      const parsed = JSON.parse(raw) as PersistedState
+      if (parsed && parsed.testPlan && parsed.testPlan.id) {
+        const testPlan = normalizeDirectoryVariablesInTree(parsed.testPlan)
+        const selectedNodeId = findNode(testPlan, parsed.selectedNodeId) ? parsed.selectedNodeId : testPlan.id
+        const expandedNodeIds = restoreExpandedNodeIds(testPlan, parsed.expandedNodeIds)
+        return {
+          testPlan,
+          selectedNodeId,
+          expandedNodeIds,
+          dirty: Boolean(parsed.dirty),
+          fileName: parsed.fileName || null,
+        }
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to load persisted state from localStorage:', error)
+  }
+
+  const testPlan = normalizeDirectoryVariablesInTree(createSampleTestPlan())
+  return {
+    testPlan,
+    selectedNodeId: testPlan.id,
+    expandedNodeIds: defaultExpandedNodeIds(testPlan),
+    dirty: false,
+    fileName: null,
+  }
+}
+
+function persistState(state: {
+  testPlan: TestPlanNode
+  selectedNodeId: string
+  expandedNodeIds: Set<string>
+  dirty: boolean
+  fileName: string | null
+}) {
+  try {
+    if (typeof localStorage === 'undefined') return
+    const payload: PersistedState = {
+      testPlan: state.testPlan,
+      selectedNodeId: state.selectedNodeId,
+      expandedNodeIds: Array.from(state.expandedNodeIds),
+      dirty: state.dirty,
+      fileName: state.fileName,
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
+  } catch (error) {
+    console.warn('Failed to persist state to localStorage:', error)
+  }
+}
+
+import type { JtlSample } from '../services/jmeterRunnerService'
+
 interface ClipboardState {
   node: TestPlanNode
   mode: 'copy' | 'cut'
   sourceId: string
+}
+
+export interface LiveLogEntry {
+  id: string
+  line: string
+  type: 'stdout' | 'stderr'
+  time: string
+}
+
+export interface JMeterLocalConfig {
+  path: string
+  found: boolean
+  version: string | null
 }
 
 interface JMeterStore {
@@ -39,16 +142,28 @@ interface JMeterStore {
   selectedNodeId: string
   expandedNodeIds: Set<string>
   dirty: boolean
+  fileName: string | null
   clipboard: ClipboardState | null
   runState: RunState
   metrics: RunMetrics
   resultsCleared: boolean
+  executionMode: 'real' | 'mock'
+  jmeterConfig: JMeterLocalConfig
+  liveLogs: LiveLogEntry[]
+  realSamples: JtlSample[]
+  realSummaryRows: string[][]
+  realAggregateRows: string[][]
+  hasHtmlReport: boolean
+  activeRunId: string | null
+  isConsoleOpen: boolean
+  isSettingsOpen: boolean
   selectNode: (id: string) => void
   toggleExpanded: (id: string) => void
   expandNodes: (ids: string[]) => void
   updateNode: (id: string, updates: Partial<TestPlanNode>) => void
   updateNodeProperties: (id: string, updates: Record<string, unknown>) => void
   addNode: (parentId: string, type: JMeterComponentType) => void
+  insertNode: (parentId: string, node: TestPlanNode) => void
   deleteNode: (id: string) => void
   copyNode: (id: string) => void
   cutNode: (id: string) => void
@@ -58,13 +173,42 @@ interface JMeterStore {
   renameNode: (id: string, name: string) => void
   moveNodeUp: (id: string) => void
   moveNodeDown: (id: string) => void
-  replaceTestPlan: (testPlan: TestPlanNode) => void
+  moveNodeToTop: (id: string) => void
+  moveNodeToBottom: (id: string) => void
+  moveNode: (sourceId: string, targetId: string, position?: 'before' | 'inside' | 'after') => void
+  replaceTestPlan: (testPlan: TestPlanNode, fileName?: string) => void
+
+  setFileName: (name: string | null) => void
   newTestPlan: () => void
-  markSaved: () => void
+  markSaved: (fileName?: string) => void
   startRun: () => void
   stopRun: () => void
   tickRun: () => void
   clearResults: () => void
+  setExecutionMode: (mode: 'real' | 'mock') => void
+  setJMeterConfig: (config: Partial<JMeterLocalConfig>) => void
+  setConsoleOpen: (open: boolean) => void
+  setSettingsOpen: (open: boolean) => void
+  addLog: (line: string, type?: 'stdout' | 'stderr') => void
+  clearLogs: () => void
+  startRunResults: (runId: string) => void
+  appendRunSamples: (update: {
+    runId: string
+    samples: JtlSample[]
+    summaryRows: string[][]
+    aggregateRows: string[][]
+    totalSamples: number
+    totalErrors: number
+    hasReport: boolean
+  }) => void
+  setRunResults: (results: {
+    samples: JtlSample[]
+    summaryRows: string[][]
+    aggregateRows: string[][]
+    hasReport: boolean
+    runId?: string
+  }) => void
+  updateProgressMetrics: (metrics: Partial<RunMetrics>) => void
 }
 
 function getTotalThreads(root: TestPlanNode): number {
@@ -79,22 +223,28 @@ function getTotalThreads(root: TestPlanNode): number {
   return Math.max(total, 1)
 }
 
-function initialState() {
-  const testPlan = createSampleTestPlan()
-  return {
-    testPlan,
-    selectedNodeId: testPlan.id,
-    expandedNodeIds: new Set(collectNodeIds(testPlan)),
-  }
-}
+const initial = loadInitialState()
 
 export const useJMeterStore = create<JMeterStore>((set, get) => ({
-  ...initialState(),
-  dirty: false,
+  testPlan: initial.testPlan,
+  selectedNodeId: initial.selectedNodeId,
+  expandedNodeIds: initial.expandedNodeIds,
+  dirty: initial.dirty,
+  fileName: initial.fileName,
   clipboard: null,
   runState: 'READY',
   metrics: emptyMetrics,
   resultsCleared: false,
+  executionMode: 'real',
+  jmeterConfig: { path: '', found: false, version: null },
+  liveLogs: [],
+  realSamples: [],
+  realSummaryRows: [],
+  realAggregateRows: [],
+  hasHtmlReport: false,
+  activeRunId: null,
+  isConsoleOpen: false,
+  isSettingsOpen: false,
 
   selectNode: (id) => set({ selectedNodeId: id }),
   toggleExpanded: (id) =>
@@ -131,6 +281,33 @@ export const useJMeterStore = create<JMeterStore>((set, get) => ({
         })),
         selectedNodeId: node.id,
         expandedNodeIds: new Set([...state.expandedNodeIds, parentId]),
+        dirty: true,
+      }
+    }),
+  insertNode: (parentId, node) =>
+    set((state) => {
+      let targetParent = findNode(state.testPlan, parentId)
+      if (!targetParent || !canAddChild(targetParent.type, node.type)) {
+        const parentOfTarget = targetParent ? findParent(state.testPlan, targetParent.id) : null
+        if (parentOfTarget && canAddChild(parentOfTarget.type, node.type)) {
+          targetParent = parentOfTarget
+        } else {
+          const firstTg = state.testPlan.children.find((c) => c.type === 'ThreadGroup')
+          if (firstTg) {
+            targetParent = firstTg
+          } else {
+            targetParent = state.testPlan
+          }
+        }
+      }
+
+      return {
+        testPlan: mapNode(state.testPlan, targetParent.id, (current) => ({
+          ...current,
+          children: [...current.children, node],
+        })),
+        selectedNodeId: node.id,
+        expandedNodeIds: new Set([...state.expandedNodeIds, targetParent.id]),
         dirty: true,
       }
     }),
@@ -247,36 +424,77 @@ export const useJMeterStore = create<JMeterStore>((set, get) => ({
         dirty: true,
       }
     }),
-  replaceTestPlan: (testPlan) =>
+  moveNodeToTop: (id) =>
+    set((state) => ({
+      testPlan: moveNodeToTopInTree(state.testPlan, id),
+      dirty: true,
+    })),
+  moveNodeToBottom: (id) =>
+    set((state) => {
+      const parent = findParent(state.testPlan, id)
+      if (!parent) return state
+      const node = findNode(state.testPlan, id)
+      if (!node) return state
+      return {
+        testPlan: mapNode(state.testPlan, parent.id, (p) => ({
+          ...p,
+          children: [...p.children.filter((c) => c.id !== id), node],
+        })),
+        dirty: true,
+      }
+    }),
+  moveNode: (sourceId, targetId, position = 'before') =>
+    set((state) => {
+      const updated = moveNodeInTree(state.testPlan, sourceId, targetId, position)
+      if (!updated) return state
+      return {
+        testPlan: updated,
+        dirty: true,
+      }
+    }),
+  replaceTestPlan: (testPlan, fileName) =>
+
     set({
-      testPlan,
+      testPlan: normalizeDirectoryVariablesInTree(testPlan),
       selectedNodeId: testPlan.id,
-      expandedNodeIds: new Set(collectNodeIds(testPlan)),
+      expandedNodeIds: defaultExpandedNodeIds(testPlan),
       dirty: false,
+      fileName: fileName ?? null,
       clipboard: null,
       runState: 'READY',
       metrics: { ...emptyMetrics, totalThreads: getTotalThreads(testPlan) },
       resultsCleared: false,
     }),
   newTestPlan: () => {
-    const testPlan = createNewTestPlan()
+    const testPlan = normalizeDirectoryVariablesInTree(createNewTestPlan())
     set({
       testPlan,
       selectedNodeId: testPlan.id,
-      expandedNodeIds: new Set(collectNodeIds(testPlan)),
+      expandedNodeIds: defaultExpandedNodeIds(testPlan),
       dirty: false,
+      fileName: null,
       clipboard: null,
       runState: 'READY',
       metrics: { ...emptyMetrics, totalThreads: getTotalThreads(testPlan) },
       resultsCleared: false,
     })
   },
-  markSaved: () => set({ dirty: false }),
+  setFileName: (name) => set({ fileName: name ? (name.endsWith('.jmx') ? name : `${name}.jmx`) : null }),
+  markSaved: (fileName) =>
+    set((state) => ({
+      dirty: false,
+      fileName: fileName ? (fileName.endsWith('.jmx') ? fileName : `${fileName}.jmx`) : state.fileName,
+    })),
   startRun: () =>
     set((state) => ({
       runState: 'RUNNING',
       metrics: { ...emptyMetrics, totalThreads: getTotalThreads(state.testPlan) },
       resultsCleared: false,
+      realSamples: [],
+      realSummaryRows: [],
+      realAggregateRows: [],
+      hasHtmlReport: false,
+      activeRunId: null,
     })),
   stopRun: () => set({ runState: 'STOPPED', metrics: { ...get().metrics, activeThreads: 0 } }),
   tickRun: () =>
@@ -305,5 +523,120 @@ export const useJMeterStore = create<JMeterStore>((set, get) => ({
       metrics: { ...emptyMetrics, totalThreads: getTotalThreads(state.testPlan) },
       runState: state.runState === 'RUNNING' ? 'RUNNING' : 'READY',
       resultsCleared: true,
+      realSamples: [],
+      realSummaryRows: [],
+      realAggregateRows: [],
+      liveLogs: [],
+      hasHtmlReport: false,
+    })),
+  setExecutionMode: (executionMode) => set({ executionMode }),
+  setJMeterConfig: (config) =>
+    set((state) => ({ jmeterConfig: { ...state.jmeterConfig, ...config } })),
+  setConsoleOpen: (isConsoleOpen) => set({ isConsoleOpen }),
+  setSettingsOpen: (isSettingsOpen) => set({ isSettingsOpen }),
+  addLog: (line, type = 'stdout') =>
+    set((state) => ({
+      liveLogs: [
+        ...state.liveLogs.slice(-299),
+        {
+          id: `log-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          line,
+          type,
+          time: new Date().toLocaleTimeString(),
+        },
+      ],
+    })),
+  clearLogs: () => set({ liveLogs: [] }),
+  startRunResults: (runId) =>
+    set((state) => {
+      if (state.activeRunId === runId) {
+        return {
+          activeRunId: runId,
+          hasHtmlReport: false,
+          resultsCleared: false,
+        }
+      }
+
+      return {
+        activeRunId: runId,
+        realSamples: [],
+        realSummaryRows: [],
+        realAggregateRows: [],
+        hasHtmlReport: false,
+        resultsCleared: false,
+      }
+    }),
+  appendRunSamples: (update) =>
+    set((state) => {
+      const shouldReplace = Boolean(state.activeRunId && state.activeRunId !== update.runId)
+      const currentSamples = shouldReplace ? [] : state.realSamples
+      const merged = shouldReplace ? [...update.samples] : [...currentSamples]
+      const indexById = new Map(merged.map((sample, index) => [sample.id, index]))
+
+      if (!shouldReplace) {
+        for (const sample of update.samples) {
+          const index = indexById.get(sample.id)
+          if (index === undefined) {
+            indexById.set(sample.id, merged.length)
+            merged.push(sample)
+          } else {
+            merged[index] = sample
+          }
+        }
+      }
+
+      const errors = merged.filter((sample) => !sample.success).length
+
+      return {
+        activeRunId: update.runId,
+        realSamples: merged,
+        realSummaryRows: update.summaryRows,
+        realAggregateRows: update.aggregateRows,
+        hasHtmlReport: update.hasReport,
+        resultsCleared: false,
+        metrics: {
+          ...state.metrics,
+          samples: Math.max(state.metrics.samples, update.totalSamples),
+          errors: Math.max(state.metrics.errors, update.totalErrors, errors),
+        },
+      }
+    }),
+  setRunResults: (results) =>
+    set({
+      realSamples: results.samples,
+      realSummaryRows: results.summaryRows,
+      realAggregateRows: results.aggregateRows,
+      hasHtmlReport: results.hasReport,
+      activeRunId: results.runId ?? null,
+      resultsCleared: false,
+    }),
+  updateProgressMetrics: (metrics) =>
+    set((state) => ({
+      metrics: {
+        ...state.metrics,
+        ...metrics,
+        samples: metrics.samples === undefined ? state.metrics.samples : Math.max(state.metrics.samples, metrics.samples),
+        errors: metrics.errors === undefined ? state.metrics.errors : Math.max(state.metrics.errors, metrics.errors),
+      },
     })),
 }))
+
+
+useJMeterStore.subscribe((state) => {
+  persistState({
+    testPlan: state.testPlan,
+    selectedNodeId: state.selectedNodeId,
+    expandedNodeIds: state.expandedNodeIds,
+    dirty: state.dirty,
+    fileName: state.fileName,
+  })
+})
+
+const currentState = useJMeterStore.getState()
+const normalizedTestPlan = normalizeDirectoryVariablesInTree(currentState.testPlan)
+if (normalizedTestPlan !== currentState.testPlan) {
+  useJMeterStore.setState({
+    testPlan: normalizedTestPlan,
+    dirty: true,
+  })
+}

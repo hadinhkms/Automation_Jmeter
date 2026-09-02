@@ -1,39 +1,75 @@
 import type { JMeterComponentType } from '../models/jmeter'
 
 export const componentGroups = {
-  Threads: ['ThreadGroup'],
-  Sampler: ['HTTPRequest', 'JSR223Sampler'],
-  'Logic Controller': [
-    'IfController',
-    'LoopController',
-    'TransactionController',
+  'Threads (Users)': [
+    'ThreadGroup',
+    'ConcurrencyThreadGroup',
+    'SteppingThreadGroup',
+    'UltimateThreadGroup',
   ],
   'Config Element': [
-    'UserDefinedVariables',
     'HTTPRequestDefaults',
     'HTTPHeaderManager',
     'HTTPCookieManager',
     'CSVDataSet',
+    'UserDefinedVariables',
   ],
-  Timer: ['ConstantTimer'],
-  'Pre Processor': ['JSR223PreProcessor'],
-  'Post Processor': [
+  'Listener': [
+    'ViewResultsTree',
+    'SummaryReport',
+    'AggregateReport',
+    'BackendListener',
+  ],
+  'Timer': ['ConstantTimer'],
+  'Pre Processors': ['JSR223PreProcessor', 'UserDefinedVariables'],
+  'Post Processors': [
     'JSONExtractor',
     'RegexExtractor',
     'JSR223PostProcessor',
   ],
-  Assertion: ['ResponseAssertion', 'JSR223Assertion'],
-  Listener: ['ViewResultsTree', 'SummaryReport', 'AggregateReport'],
+  'Assertions': ['ResponseAssertion', 'JSR223Assertion'],
+  'Logic Controller': [
+    'TransactionController',
+    'IfController',
+    'LoopController',
+    'ModuleController',
+    'TestFragmentController',
+  ],
+  'Sampler': [
+    'HTTPRequest',
+    'GraphQLSampler',
+    'WebSocketOpenSampler',
+    'WebSocketSingleWriteSampler',
+    'WebSocketSingleReadSampler',
+    'WebSocketCloseSampler',
+    'JSR223Sampler',
+    'DebugSampler',
+  ],
 } satisfies Record<string, JMeterComponentType[]>
+
+const threadGroupTypes = new Set<JMeterComponentType>([
+  'ThreadGroup',
+  'ConcurrencyThreadGroup',
+  'SteppingThreadGroup',
+  'UltimateThreadGroup',
+])
 
 const samplerTypes = new Set<JMeterComponentType>([
   'HTTPRequest',
+  'GraphQLSampler',
+  'WebSocketOpenSampler',
+  'WebSocketSingleWriteSampler',
+  'WebSocketSingleReadSampler',
+  'WebSocketCloseSampler',
   'JSR223Sampler',
+  'DebugSampler',
 ])
 const controllerTypes = new Set<JMeterComponentType>([
   'IfController',
   'LoopController',
   'TransactionController',
+  'ModuleController',
+  'TestFragmentController',
 ])
 const configTypes = new Set<JMeterComponentType>([
   'UserDefinedVariables',
@@ -47,6 +83,7 @@ const processorTypes = new Set<JMeterComponentType>([
   'RegexExtractor',
   'JSR223PreProcessor',
   'JSR223PostProcessor',
+  'BeanShellPostProcessor',
 ])
 const assertionTypes = new Set<JMeterComponentType>([
   'ResponseAssertion',
@@ -56,6 +93,7 @@ const listenerTypes = new Set<JMeterComponentType>([
   'ViewResultsTree',
   'SummaryReport',
   'AggregateReport',
+  'BackendListener',
 ])
 
 export function canAddChild(
@@ -63,10 +101,18 @@ export function canAddChild(
   childType: JMeterComponentType,
 ): boolean {
   if (parentType === 'TestPlan') {
-    return childType === 'ThreadGroup' || childType === 'UserDefinedVariables'
+    return (
+      threadGroupTypes.has(childType) ||
+      configTypes.has(childType) ||
+      listenerTypes.has(childType) ||
+      childType === 'ConstantTimer' ||
+      processorTypes.has(childType) ||
+      assertionTypes.has(childType) ||
+      childType === 'TestFragmentController'
+    )
   }
 
-  if (parentType === 'ThreadGroup') {
+  if (threadGroupTypes.has(parentType) || controllerTypes.has(parentType)) {
     return (
       samplerTypes.has(childType) ||
       controllerTypes.has(childType) ||
@@ -78,24 +124,18 @@ export function canAddChild(
     )
   }
 
-  if (controllerTypes.has(parentType)) {
-    return (
-      samplerTypes.has(childType) ||
-      controllerTypes.has(childType) ||
-      configTypes.has(childType) ||
-      childType === 'ConstantTimer' ||
-      processorTypes.has(childType) ||
-      assertionTypes.has(childType)
-    )
-  }
-
   if (samplerTypes.has(parentType)) {
     return (
       childType === 'ConstantTimer' ||
       processorTypes.has(childType) ||
-      assertionTypes.has(childType)
+      assertionTypes.has(childType) ||
+      listenerTypes.has(childType) ||
+      childType === 'HTTPHeaderManager' ||
+      childType === 'HTTPCookieManager'
     )
   }
 
   return false
 }
+
+

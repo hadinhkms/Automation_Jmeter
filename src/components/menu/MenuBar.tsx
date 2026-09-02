@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
+import { FileCode } from 'lucide-react'
 
 export interface AppCommands {
   newPlan: () => void
   openJmx: () => void
   save: () => void
+  saveAs: () => void
   exportJmx: () => void
   cut: () => void
   copy: () => void
@@ -14,6 +16,18 @@ export interface AppCommands {
   stop: () => void
   shutdown: () => void
   clear: () => void
+  toggleConsole: () => void
+  openSettings: () => void
+  openHtmlReport: () => void
+  importCurl: () => void
+  openBrowserRecorder: () => void
+  openPluginsManager: () => void
+  openAssetManager: () => void
+  openTemplateGallery: () => void
+  openWorkloadGraph: () => void
+  openSlaSettings: () => void
+  openGitManager: () => void
+  openUserGuide: () => void
 }
 
 interface MenuItem {
@@ -28,9 +42,13 @@ const menuItems: Record<string, MenuItem[]> = {
   File: [
     { label: 'New', shortcut: 'Ctrl+N', action: 'newPlan' },
     { label: 'Open JMX…', shortcut: 'Ctrl+O', action: 'openJmx' },
+    { label: 'Template Gallery…', action: 'openTemplateGallery' },
     { separator: true },
     { label: 'Save', shortcut: 'Ctrl+S', action: 'save' },
+    { label: 'Save As…', shortcut: 'Ctrl+Shift+S', action: 'saveAs' },
     { label: 'Export JMX…', action: 'exportJmx' },
+    { separator: true },
+    { label: 'Git Manager & Diff…', action: 'openGitManager' },
   ],
   Edit: [
     { label: 'Undo', shortcut: 'Ctrl+Z', disabled: true },
@@ -48,14 +66,58 @@ const menuItems: Record<string, MenuItem[]> = {
     { label: 'Stop', action: 'stop' },
     { label: 'Shutdown', action: 'shutdown' },
     { separator: true },
+    { label: 'View Workload Curve…', action: 'openWorkloadGraph' },
+    { label: 'SLA Quality Gates…', action: 'openSlaSettings' },
+    { separator: true },
     { label: 'Clear Results', action: 'clear' },
+    { separator: true },
+    { label: 'Toggle Live Console', action: 'toggleConsole' },
+    { label: 'Open HTML Report', action: 'openHtmlReport' },
   ],
-  Options: [{ label: 'Look and Feel', disabled: true }],
-  Tools: [{ label: 'Function Helper Dialog', disabled: true }],
-  Help: [{ label: 'About JMeter Web UI', disabled: true }],
+  Options: [
+    { label: 'Plugins Manager…', action: 'openPluginsManager' },
+    { label: 'SLA Quality Gates…', action: 'openSlaSettings' },
+    { label: 'Git Version Control…', action: 'openGitManager' },
+    { separator: true },
+    { label: 'JMeter Runner Settings…', action: 'openSettings' },
+    { separator: true },
+    { label: 'Look and Feel', disabled: true },
+  ],
+  Tools: [
+    { label: 'Enterprise Template Gallery…', action: 'openTemplateGallery' },
+    { label: 'Workload Curve Graph…', action: 'openWorkloadGraph' },
+    { label: 'Browser & Network Recorder…', shortcut: 'Ctrl+Shift+R', action: 'openBrowserRecorder' },
+    { label: 'Import from cURL…', action: 'importCurl' },
+    { label: 'Project File Manager...', action: 'openAssetManager' },
+    { label: 'Plugins Manager…', action: 'openPluginsManager' },
+    { label: 'Git Manager & Diff…', action: 'openGitManager' },
+    { separator: true },
+    { label: 'Function Helper Dialog', shortcut: 'Ctrl+Shift+F1', disabled: true },
+    { label: 'Generate HTML report', action: 'openHtmlReport' },
+    { label: 'Export transactions for report', disabled: true },
+    { label: 'Compile JSR223 Test Elements', disabled: true },
+    { label: 'Create a heap dump', disabled: true },
+    { label: 'Create a thread dump', disabled: true },
+  ],
+  Help: [
+    { label: 'User Guide & Documentation (HTML)', action: 'openUserGuide' },
+    { separator: true },
+    { label: 'About JMeter Web UI', disabled: true },
+  ],
 }
 
-export function MenuBar({ commands, disabled }: { commands: AppCommands; disabled: Partial<Record<keyof AppCommands, boolean>> }) {
+
+export function MenuBar({
+  commands,
+  disabled,
+  fileName,
+  dirty,
+}: {
+  commands: AppCommands
+  disabled: Partial<Record<keyof AppCommands, boolean>>
+  fileName?: string | null
+  dirty?: boolean
+}) {
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const barRef = useRef<HTMLElement>(null)
 
@@ -99,6 +161,20 @@ export function MenuBar({ commands, disabled }: { commands: AppCommands; disable
         </div>
       ))}
       <div className="menu-spacer" />
+      <button
+        type="button"
+        className={`app-active-file-pill ${dirty ? 'is-dirty' : ''}`}
+        onClick={commands.saveAs}
+        title="Click to Rename / Save Test Plan As..."
+      >
+        <FileCode size={13} />
+        <span>{fileName || 'Untitled Test Plan'}</span>
+        {dirty ? (
+          <span className="file-dirty-dot" title="Unsaved changes">●</span>
+        ) : (
+          <span className="file-saved-check" title="Saved">✓</span>
+        )}
+      </button>
       <div className="desktop-label">JMeter Web UI</div>
     </nav>
   )
