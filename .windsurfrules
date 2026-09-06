@@ -1,0 +1,11 @@
+Before making any changes in this repository (Web UI, Node.js server, JMeter scripts, Playwright recorder), read and strictly follow:
+1. Canonical Software Delivery Process & Quality Standard: .master_process/SOFTWARE_DELIVERY_PROCESS_MASTER.md
+2. Master Prompts: .master_process/prompts/
+3. Fast-Track for L1/L2: .master_process/prompts/00_Fast_Track_L1_L2.prompt.md
+
+All tasks must follow the 5-Phase pipeline:
+1. Principal BA / PO (Discovery & Implementation Plan) -> Gate 1
+2. Principal Designer (UI/UX Ergonomics & Web Standards)
+3. Principal BA (Validation Audit: Mandatory vs Optional, Button States, Error Handlers) -> Gate 2
+4. Principal Developer / Tech Lead (20+ YOE) (Clean Architecture, High Performance, Implementation)
+5. Principal QA / Test Architect (10+ YOE) (BVA, Fault Injection, Responsive, Theme, Sign-off) -> Gate 4

@@ -232,19 +232,24 @@ function unescapeXml(str: string): string {
     .replace(/\r(?!\n)/g, '\n')
 }
 
-export function parseVrtXml(vrtPath: string): Map<number, Partial<JtlSample>> {
-  const result = new Map<number, Partial<JtlSample>>()
+export function parseVrtXml(vrtPath: string): Map<string | number, Partial<JtlSample>> {
+  const result = new Map<string | number, Partial<JtlSample>>()
   if (!existsSync(vrtPath)) return result
 
   try {
     const content = readFileSync(vrtPath, 'utf-8')
-    const sampleRegex = /<(httpSample|sample)\s+([^>]+)>([\s\S]*?)<\/\1>/g
-    let match: RegExpExecArray | null
-    let index = 1
+    const tagOpenRegex = /<(httpSample|sample)\s+([^>]+)>/g
+    let m: RegExpExecArray | null
+    const openings: { attrs: string; contentStart: number; nextIndex: number }[] = []
+    while ((m = tagOpenRegex.exec(content)) !== null) {
+      openings.push({ attrs: m[2], contentStart: m.index + m[0].length, nextIndex: m.index })
+    }
 
-    while ((match = sampleRegex.exec(content)) !== null) {
-      const tagAttrs = match[2]
-      const inner = match[3]
+    for (let i = 0; i < openings.length; i++) {
+      const cur = openings[i]
+      const nextStart = i + 1 < openings.length ? openings[i + 1].nextIndex : content.length
+      const inner = content.substring(cur.contentStart, nextStart)
+      const tagAttrs = cur.attrs
 
       const lbMatch = tagAttrs.match(/\blb="([^"]*)"/)
       const rcMatch = tagAttrs.match(/\brc="([^"]*)"/)
@@ -282,7 +287,7 @@ export function parseVrtXml(vrtPath: string): Map<number, Partial<JtlSample>> {
         requestContent = `${method || 'GET'} ${url}\n${requestHeader}`
       }
 
-      result.set(index, {
+      const sampleObj: Partial<JtlSample> = {
         label: lbMatch ? unescapeXml(lbMatch[1]) : undefined,
         code: rcMatch ? Number(rcMatch[1]) : undefined,
         elapsed: tMatch ? Number(tMatch[1]) : undefined,
@@ -299,9 +304,18 @@ export function parseVrtXml(vrtPath: string): Map<number, Partial<JtlSample>> {
         response: responseData || undefined,
         requestHeaders: requestHeader || undefined,
         responseHeaders: responseHeader || undefined,
-      })
+      }
 
-      index++
+      const sampleIdx = i + 1
+      result.set(sampleIdx, sampleObj)
+      const tsVal = tsMatch ? tsMatch[1] : ''
+      const lbVal = lbMatch ? unescapeXml(lbMatch[1]) : ''
+      if (tsVal) {
+        result.set(`${tsVal}_${lbVal}`, sampleObj)
+        if (!result.has(tsVal)) {
+          result.set(tsVal, sampleObj)
+        }
+      }
     }
   } catch (err) {
     console.error('Error parsing vrt_results.xml:', err)
@@ -835,7 +849,7 @@ export class JMeterRunner extends EventEmitter {
 
     try {
       const vrtPath = join(dirname(jtlPath), 'vrt_results.xml')
-      const vrtData = existsSync(vrtPath) ? parseVrtXml(vrtPath) : new Map<number, Partial<JtlSample>>()
+      const vrtData = existsSync(vrtPath) ? parseVrtXml(vrtPath) : new Map<string | number, Partial<JtlSample>>()
 
       const content = readFileSync(jtlPath, 'utf-8')
       const lines = content.split(/\r?\n/).filter((line) => line.trim().length > 0)
@@ -887,7 +901,10 @@ export class JMeterRunner extends EventEmitter {
         const respMsg = (idxResponseMessage !== -1 ? row[idxResponseMessage] : '') || ''
         const failureMsg = (idxFailureMessage !== -1 ? row[idxFailureMessage] : '') || ''
 
-        const vrt = vrtData.get(i)
+        const rawTs = idxTimeStamp !== -1 ? String(row[idxTimeStamp]).trim() : ''
+        const vrt = (rawTs ? vrtData.get(`${rawTs}_${label}`) : null)
+          || (rawTs ? vrtData.get(rawTs) : null)
+          || vrtData.get(i)
         const finalUrl = vrt?.url || url
         const finalMethod = vrt?.method || 'HTTP'
         const finalRequest = vrt?.request || `Thread: ${threadName}\nURL: ${finalUrl}`

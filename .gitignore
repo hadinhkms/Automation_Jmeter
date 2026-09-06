@@ -12,3 +12,6 @@ apache-jmeter-*
 # Test execution outputs and temp files
 runs/
 downloads/
+
+# Central Master Process Standards
+.master_process

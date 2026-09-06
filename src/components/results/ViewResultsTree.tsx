@@ -25,7 +25,7 @@ import { CodeEditor } from '../common/CodeEditor'
 import { parseJtlContent } from '../../utils/jtlParser'
 import { useJMeterStore } from '../../store/jmeterStore'
 import { LiveMetricsDashboard } from './LiveMetricsDashboard'
-import type { SlaThresholds } from '../../models/jmeter'
+import type { SlaThresholds, TestPlanNode } from '../../models/jmeter'
 
 interface ViewResultsTreeProps {
   samples: JtlSample[]
@@ -49,23 +49,13 @@ function decodeUnicodeEscapes(str: string): string {
       const code = parseInt(hex, 16)
       return isNaN(code) ? '' : String.fromCodePoint(code)
     })
-    .replace(/&#0*([0-9]+);/g, (_, dec) => {
+    .replace(/&#([0-9]+);/gi, (_, dec) => {
       const code = parseInt(dec, 10)
       return isNaN(code) ? '' : String.fromCodePoint(code)
     })
-    .replace(/&quot;/g, '"')
-    .replace(/&apos;/g, "'")
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&amp;/g, '&')
-    .replace(/\r\r\n/g, '\r\n')
-    .replace(/\r(?!\n)/g, '\n')
-    .replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => {
-      try {
-        return String.fromCharCode(parseInt(hex, 16))
-      } catch {
-        return `\\u${hex}`
-      }
+    .replace(/\\u([0-9a-fA-F]{4})/gi, (_, hex) => {
+      const code = parseInt(hex, 16)
+      return isNaN(code) ? '' : String.fromCodePoint(code)
     })
 }
 
@@ -101,7 +91,59 @@ function isHttpRequestSample(sample: JtlSample): boolean {
   return !isNonHttpSampler(sample) && Boolean(getHttpUrl(sample))
 }
 
-function generateCurlCommand(sample: JtlSample): string {
+function findSamplerHeadersInTestPlan(
+  testPlan: TestPlanNode | null | undefined,
+  sampleLabel: string
+): { name: string; value: string }[] {
+  if (!testPlan) return []
+
+  const foundHeaders: { name: string; value: string }[] = []
+
+  function traverse(node: TestPlanNode, inheritedHeaders: { name: string; value: string }[]): boolean {
+    const scopeHeaders = [...inheritedHeaders]
+    for (const child of node.children || []) {
+      if (child.type === 'HTTPHeaderManager' && child.enabled) {
+        const hdrs = (child.properties.headers as { name: string; value: string }[]) || []
+        for (const h of hdrs) {
+          if (h.name && h.value) {
+            const idx = scopeHeaders.findIndex((sh) => sh.name.toLowerCase() === h.name.toLowerCase())
+            if (idx >= 0) scopeHeaders[idx] = h
+            else scopeHeaders.push(h)
+          }
+        }
+      }
+    }
+
+    const cleanNodeName = node.name.trim().toLowerCase()
+    const cleanSampleLabel = sampleLabel.trim().toLowerCase()
+    const isMatch =
+      cleanNodeName === cleanSampleLabel ||
+      (node.type === 'HTTPRequest' && (cleanSampleLabel.includes(cleanNodeName) || cleanNodeName.includes(cleanSampleLabel)))
+
+    if (isMatch) {
+      for (const h of scopeHeaders) {
+        if (!foundHeaders.some((fh) => fh.name.toLowerCase() === h.name.toLowerCase())) {
+          foundHeaders.push(h)
+        }
+      }
+      return true
+    }
+
+    for (const child of node.children || []) {
+      if (traverse(child, scopeHeaders)) return true
+    }
+    return false
+  }
+
+  traverse(testPlan, [])
+  return foundHeaders
+}
+
+function generateCurlCommand(
+  sample: JtlSample,
+  testPlan?: TestPlanNode | null,
+  knownVariables?: Record<string, string>
+): string {
   const url = getHttpUrl(sample)
   if (!url || isNonHttpSampler(sample)) return ''
 
@@ -176,6 +218,22 @@ function generateCurlCommand(sample: JtlSample): string {
 
     if (bodyLines.length > 0) {
       body = bodyLines.join('\n').trim()
+    }
+  }
+
+  // Fallback: If headers is missing authorization or essential headers, inspect TestPlan HeaderManager
+  if (testPlan && (!headers.some((h) => h.name.toLowerCase() === 'authorization') || headers.length <= 2)) {
+    const planHeaders = findSamplerHeadersInTestPlan(testPlan, sample.label)
+    for (const ph of planHeaders) {
+      if (!headers.some((h) => h.name.toLowerCase() === ph.name.toLowerCase())) {
+        let val = ph.value
+        if (knownVariables) {
+          val = val.replace(/\$\{([^}]+)\}/g, (_, varName) => {
+            return knownVariables[varName] || `\${${varName}}`
+          })
+        }
+        headers.push({ name: ph.name, value: val })
+      }
     }
   }
 
@@ -603,6 +661,24 @@ TestElement.name=${selectedSample.label}`
     return formattedBody
   }, [selectedSample])
 
+  const debugVariables = useMemo(() => {
+    const vars: Record<string, string> = {}
+    for (const s of samples) {
+      if (s.response && (s.label.toLowerCase().includes('debug sampler') || s.response.includes('JMeterVariables:'))) {
+        const lines = s.response.split(/\r?\n/)
+        for (const line of lines) {
+          const eqIdx = line.indexOf('=')
+          if (eqIdx > 0 && !line.startsWith('DebugSampler.')) {
+            const k = line.substring(0, eqIdx).trim()
+            const v = line.substring(eqIdx + 1).trim()
+            if (k && v) vars[k] = v
+          }
+        }
+      }
+    }
+    return vars
+  }, [samples])
+
   // Request Headers
   const requestHeaders = useMemo(() => {
     if (!selectedSample) return ''
@@ -611,6 +687,20 @@ TestElement.name=${selectedSample.label}`
     }
     if (selectedSample.requestHeaders && selectedSample.requestHeaders.trim()) {
       return decodeUnicodeEscapes(selectedSample.requestHeaders.trim())
+    }
+    if (store.testPlan) {
+      const planHeaders = findSamplerHeadersInTestPlan(store.testPlan, selectedSample.label)
+      if (planHeaders.length > 0) {
+        return planHeaders
+          .map((h) => {
+            let val = h.value
+            if (debugVariables) {
+              val = val.replace(/\$\{([^}]+)\}/g, (_, varName) => debugVariables[varName] || `\${${varName}}`)
+            }
+            return `${h.name}: ${val}`
+          })
+          .join('\n')
+      }
     }
     const rawReq = selectedSample.request || ''
     // Only parse headers from rawReq if it doesn't look like a multipart body or JSON body
@@ -626,7 +716,7 @@ TestElement.name=${selectedSample.label}`
     }
 
     return `Connection: keep-alive\nContent-Type: application/json; charset=UTF-8\nAccept: application/json, text/plain, */*\nUser-Agent: Apache-JMeter/5.6.3\nHost: ${urlInfo?.host || 'localhost'}`
-  }, [selectedSample, urlInfo])
+  }, [selectedSample, urlInfo, store.testPlan, debugVariables])
 
   // Detailed Response Headers
   const formattedResponseHeaders = useMemo(() => {
@@ -687,8 +777,8 @@ TestElement.name=${selectedSample.label}`
   }
 
   const curlCommand = useMemo(() => {
-    return selectedSample ? generateCurlCommand(selectedSample) : ''
-  }, [selectedSample])
+    return selectedSample ? generateCurlCommand(selectedSample, store.testPlan, debugVariables) : ''
+  }, [selectedSample, store.testPlan, debugVariables])
 
   const curlResponsePreview = useMemo(() => {
     return selectedSample ? generateHttpResponsePreview(selectedSample) : ''
