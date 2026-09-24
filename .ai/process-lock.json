@@ -1,0 +1,11 @@
+{
+  "version": "2.2.0",
+  "hub_commit": "4ce2114d5f5235b09981da87ff52b5383c93c564",
+  "hub_path": "D:/_Master_Process",
+  "installed_at": "2026-09-24T17:02:37.000000+00:00",
+  "managed_files": [
+    ".ai/learning/candidates.md",
+    ".ai/knowledge/manifest.json",
+    "AGENTS.md"
+  ]
+}

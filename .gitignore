@@ -15,3 +15,6 @@ downloads/
 
 # Central Master Process Standards
 .master_process
+
+# AI Temporary Workspace
+.ai/learning/scratch/
