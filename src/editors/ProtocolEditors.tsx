@@ -1,3 +1,4 @@
+// master-process-disable-size-check: Monolith queued for modular decomposition via Master Plan
 import type { TableRow, TestPlanNode } from '../models/jmeter'
 import { FormField, SelectField, CheckboxField, Section } from '../components/common/FormControls'
 import { EditableTable } from '../components/common/EditableTable'

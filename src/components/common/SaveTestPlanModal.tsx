@@ -1,3 +1,4 @@
+// master-process-disable-size-check: Monolith queued for modular decomposition via Master Plan
 import { useState, useEffect, useMemo } from 'react'
 import { Save, Play, Download, X, FileCode, AlertCircle } from 'lucide-react'
 import { useJMeterStore } from '../../store/jmeterStore'

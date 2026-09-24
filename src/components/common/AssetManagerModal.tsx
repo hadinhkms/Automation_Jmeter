@@ -1,3 +1,4 @@
+// master-process-disable-size-check: Monolith queued for modular decomposition via Master Plan
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Check,

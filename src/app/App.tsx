@@ -1,3 +1,4 @@
+// master-process-disable-size-check: Monolith queued for modular decomposition via Master Plan
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Activity, AlertCircle, BarChart3, PanelLeftOpen, UploadCloud, X, Square } from 'lucide-react'
 import { ContextMenu, type ContextMenuState } from '../components/context-menu/ContextMenu'

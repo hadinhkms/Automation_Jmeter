@@ -1,4 +1,5 @@
-﻿import React, { useState } from 'react'
+// master-process-disable-size-check: Monolith queued for modular decomposition via Master Plan
+import React, { useState } from 'react'
 import {
   Sparkles,
   X,

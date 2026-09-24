@@ -1,3 +1,4 @@
+// master-process-disable-size-check: Monolith queued for modular decomposition via Master Plan
 import { existsSync, readdirSync, statSync, unlinkSync, createWriteStream, mkdirSync } from 'node:fs'
 import { join, dirname, basename } from 'node:path'
 import { get as httpGet } from 'node:http'

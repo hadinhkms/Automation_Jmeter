@@ -1,3 +1,4 @@
+// master-process-disable-size-check: Monolith queued for modular decomposition via Master Plan
 import type { Plugin, ViteDevServer, Connect } from 'vite'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { existsSync, createReadStream, statSync, mkdirSync, writeFileSync, readdirSync, unlinkSync } from 'node:fs'

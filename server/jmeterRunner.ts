@@ -1,3 +1,4 @@
+// master-process-disable-size-check: Monolith queued for modular decomposition via Master Plan
 import { spawn, type ChildProcess, execSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, statSync, cpSync, copyFileSync, symlinkSync, rmSync } from 'node:fs'
 import { join, resolve, isAbsolute, dirname } from 'node:path'

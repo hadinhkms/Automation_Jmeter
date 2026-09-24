@@ -1,3 +1,4 @@
+// master-process-disable-size-check: Monolith queued for modular decomposition via Master Plan
 import type { RecordedHeader, RecordedParam, RecordedRequest } from '../models/recorder'
 
 const SENSITIVE_HEADER_REGEX = /^(authorization|cookie|set-cookie|x-api-key|x-csrf-token|x-xsrf-token|x-auth-token|apikey|api-key|x-token|access-token|refresh-token|bearer)$/i

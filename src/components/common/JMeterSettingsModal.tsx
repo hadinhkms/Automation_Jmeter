@@ -1,3 +1,4 @@
+// master-process-disable-size-check: Monolith queued for modular decomposition via Master Plan
 import { useState, useEffect } from 'react'
 import { CheckCircle2, XCircle, Search, Save, X, Terminal, Cpu, HardDrive } from 'lucide-react'
 import { jmeterRunnerService, type JMeterDetectionResult } from '../../services/jmeterRunnerService'

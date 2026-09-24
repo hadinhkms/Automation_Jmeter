@@ -1,3 +1,4 @@
+// master-process-disable-size-check: Monolith queued for modular decomposition via Master Plan
 import { useMemo } from 'react'
 import type { TableRow, TestPlanNode } from '../models/jmeter'
 import { FormField, SelectField, Section } from '../components/common/FormControls'

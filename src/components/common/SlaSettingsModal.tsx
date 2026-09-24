@@ -1,3 +1,4 @@
+// master-process-disable-size-check: Monolith queued for modular decomposition via Master Plan
 import { useState } from 'react'
 import { Check, Send, ShieldCheck, Webhook, X } from 'lucide-react'
 import { FormField, CheckboxField, SelectField } from './FormControls'

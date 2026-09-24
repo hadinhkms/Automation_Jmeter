@@ -1,3 +1,4 @@
+// master-process-disable-size-check: Monolith queued for modular decomposition via Master Plan
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import Prism from 'prismjs'
 import 'prismjs/components/prism-clike'

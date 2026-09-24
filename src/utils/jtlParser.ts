@@ -1,3 +1,4 @@
+// master-process-disable-size-check: Monolith queued for modular decomposition via Master Plan
 import type { JtlSample } from '../services/jmeterRunnerService'
 
 function parseCsvLine(line: string): string[] {

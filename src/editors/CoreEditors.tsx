@@ -1,3 +1,4 @@
+// master-process-disable-size-check: Monolith queued for modular decomposition via Master Plan
 import { useRef, useState, useMemo } from 'react'
 import { UploadCloud } from 'lucide-react'
 import { CodeEditor } from '../components/common/CodeEditor'

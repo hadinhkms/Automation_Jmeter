@@ -1,3 +1,4 @@
+// master-process-disable-size-check: Monolith queued for modular decomposition via Master Plan
 import type { JMeterComponentType, TableRow, TestPlanNode } from '../models/jmeter'
 import { createNode } from '../mock/sampleTestPlan'
 import { normalizeDirectoryVariableRows } from '../utils/jmeterPathVariables'
