@@ -12,6 +12,8 @@ export type JMeterComponentType =
   | 'WebSocketSingleWriteSampler'
   | 'WebSocketSingleReadSampler'
   | 'WebSocketCloseSampler'
+  | 'GRPCSampler'
+  | 'TCPSampler'
   | 'HTTPHeaderManager'
   | 'HTTPCookieManager'
   | 'CSVDataSet'

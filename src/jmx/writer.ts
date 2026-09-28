@@ -339,7 +339,40 @@ function createKnownComponent(documentNode: XmlDocument, node: TestPlanNode, typ
       stringProp(documentNode, element, 'closeReason', value(node, 'closeReason', 'Normal Closure'))
       break
     }
-    case 'BackendListener': {
+        case 'GRPCSampler': {
+      stringProp(documentNode, element, 'GRPCSampler.host', value(node, 'server', ''))
+      stringProp(documentNode, element, 'GRPCSampler.port', value(node, 'port', '50051'))
+      stringProp(documentNode, element, 'GRPCSampler.fullMethod', value(node, 'fullMethod', ''))
+      stringProp(documentNode, element, 'GRPCSampler.requestJson', value(node, 'requestJson', ''))
+      stringProp(documentNode, element, 'GRPCSampler.deadline', value(node, 'deadline', '5000'))
+      boolProperty(documentNode, element, 'GRPCSampler.tls', value(node, 'tls', 'false') === 'true')
+      stringProp(documentNode, element, 'GRPCSampler.protoFolder', value(node, 'protoFolder', ''))
+      stringProp(documentNode, element, 'GRPCSampler.libFolder', value(node, 'libFolder', ''))
+      const grpcMetadataRows = rows(node, 'metadata')
+      if (grpcMetadataRows.length > 0) {
+        appendCollection(documentNode, element, 'GRPCSampler.metadata', 'Argument', grpcMetadataRows, [
+          { key: 'name', property: 'Argument.name' },
+          { key: 'value', property: 'Argument.value' },
+          { key: 'metadata', property: 'Argument.metadata' },
+        ])
+      }
+      break
+    }
+    case 'TCPSampler': {
+      stringProp(documentNode, element, 'TCPSampler.server', value(node, 'server', ''))
+      stringProp(documentNode, element, 'TCPSampler.port', value(node, 'port', ''))
+      stringProp(documentNode, element, 'TCPSampler.timeout', value(node, 'timeout', '10000'))
+      stringProp(documentNode, element, 'TCPSampler.ctimeout', value(node, 'connectTimeout', '5000'))
+      stringProp(documentNode, element, 'TCPSampler.request', value(node, 'requestData', ''))
+      boolProperty(documentNode, element, 'TCPSampler.reUseConnection', value(node, 'reuseConnection', true))
+      boolProperty(documentNode, element, 'TCPSampler.closeConnection', value(node, 'closeConnection', false))
+      boolProperty(documentNode, element, 'TCPSampler.nodelay', value(node, 'noDelay', false))
+      stringProp(documentNode, element, 'TCPSampler.EolByte', value(node, 'eolByte', ''))
+      stringProp(documentNode, element, 'TCPSampler.soLinger', value(node, 'soLinger', ''))
+      stringProp(documentNode, element, 'TCPSampler.classname', value(node, 'classname', 'TCPClientImpl'))
+      break
+    }
+case 'BackendListener': {
       stringProp(documentNode, element, 'classname', value(node, 'classname', 'org.apache.jmeter.visualizers.backend.influxdb.HttpMetricsSender'))
       const args = documentNode.createElement('elementProp')
       args.setAttribute('name', 'arguments')

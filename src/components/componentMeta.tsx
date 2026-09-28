@@ -4,6 +4,7 @@ import {
   Boxes,
   Braces,
   Bug,
+  Cable,
   Clock3,
   Code2,
   Cookie,
@@ -30,6 +31,7 @@ import {
   Users,
   Variable,
   Workflow,
+  Zap,
   type LucideIcon,
 } from 'lucide-react'
 import type { JMeterComponentType } from '../models/jmeter'
@@ -51,6 +53,8 @@ export const componentMeta: Record<
   WebSocketSingleWriteSampler: { label: 'WebSocket Single Write', icon: Send, tone: 'sampler' },
   WebSocketSingleReadSampler: { label: 'WebSocket Single Read', icon: Radio, tone: 'sampler' },
   WebSocketCloseSampler: { label: 'WebSocket Close Connection', icon: Radio, tone: 'sampler' },
+  GRPCSampler: { label: 'gRPC Sampler', icon: Zap, tone: 'sampler' },
+  TCPSampler: { label: 'TCP Sampler', icon: Cable, tone: 'sampler' },
   HTTPHeaderManager: { label: 'HTTP Header Manager', icon: PanelTop, tone: 'config' },
   HTTPCookieManager: { label: 'HTTP Cookie Manager', icon: Cookie, tone: 'config' },
   CSVDataSet: { label: 'CSV Data Set Config', icon: Table2, tone: 'config' },

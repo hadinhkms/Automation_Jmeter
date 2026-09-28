@@ -42,6 +42,8 @@ export const componentGroups = {
     'WebSocketSingleWriteSampler',
     'WebSocketSingleReadSampler',
     'WebSocketCloseSampler',
+    'GRPCSampler',
+    'TCPSampler',
     'JSR223Sampler',
     'DebugSampler',
   ],
@@ -61,6 +63,8 @@ const samplerTypes = new Set<JMeterComponentType>([
   'WebSocketSingleWriteSampler',
   'WebSocketSingleReadSampler',
   'WebSocketCloseSampler',
+  'GRPCSampler',
+  'TCPSampler',
   'JSR223Sampler',
   'DebugSampler',
 ])

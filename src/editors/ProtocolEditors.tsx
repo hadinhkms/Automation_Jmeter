@@ -326,3 +326,190 @@ export function BackendListenerEditor({ node, updateProperties }: EditorProps) {
     </div>
   )
 }
+
+export function GRPCSamplerEditor({ node, updateProperties }: EditorProps) {
+  const metadata = (node.properties.metadata as TableRow[]) || []
+
+  return (
+    <div className="editor-group-form">
+      <Section title="gRPC Server & Service Configuration">
+        <div className="form-grid-3">
+          <FormField
+            label="Server Name / IP"
+            placeholder="grpc.example.com"
+            value={String(node.properties.server ?? '')}
+            onChange={(val) => updateProperties({ server: val })}
+          />
+          <FormField
+            label="Port"
+            type="number"
+            placeholder="50051"
+            value={String(node.properties.port ?? '50051')}
+            onChange={(val) => updateProperties({ port: val })}
+          />
+          <FormField
+            label="Deadline (ms)"
+            type="number"
+            placeholder="5000"
+            value={String(node.properties.deadline ?? '5000')}
+            onChange={(val) => updateProperties({ deadline: val })}
+          />
+        </div>
+        <div className="form-grid-2" style={{ marginTop: 12 }}>
+          <FormField
+            label="Full Method Name"
+            placeholder="package.ServiceName/MethodName"
+            value={String(node.properties.fullMethod ?? '')}
+            onChange={(val) => updateProperties({ fullMethod: val })}
+          />
+          <SelectField
+            label="Channel Security"
+            value={String(node.properties.tls ?? 'false')}
+            options={[
+              { value: 'false', label: 'Plaintext (Insecure)' },
+              { value: 'true', label: 'TLS (Secured)' },
+            ]}
+            onChange={(val) => updateProperties({ tls: val })}
+          />
+        </div>
+      </Section>
+      <Section title="Proto Definition (Protobuf Folder Path)">
+        <FormField
+          label="Proto Root Folder"
+          placeholder="/path/to/proto/files"
+          value={String(node.properties.protoFolder ?? '')}
+          onChange={(val) => updateProperties({ protoFolder: val })}
+        />
+        <div style={{ marginTop: 8 }}>
+          <FormField
+            label="Library Folder (Optional)"
+            placeholder="/path/to/lib"
+            value={String(node.properties.libFolder ?? '')}
+            onChange={(val) => updateProperties({ libFolder: val })}
+          />
+        </div>
+      </Section>
+      <div style={{ marginTop: 12 }}>
+        <label style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 600, color: 'var(--text-color, #fff)' }}>
+          Request Payload (JSON)
+        </label>
+        <CodeEditor
+          label="gRPC Payload"
+          value={String(node.properties.requestJson ?? '{\n  "field1": "value1"\n}')}
+          language="json"
+          onChange={(val) => updateProperties({ requestJson: val })}
+          minHeight={200}
+        />
+      </div>
+      <div style={{ marginTop: 16 }}>
+        <Section title="Metadata Headers">
+          <EditableTable
+            columns={[
+              { key: 'name', label: 'Metadata Key', minWidth: 200 },
+              { key: 'value', label: 'Metadata Value', minWidth: 300 },
+            ]}
+            rows={metadata}
+            newRow={{ name: '', value: '' }}
+            onChange={(rows) => updateProperties({ metadata: rows })}
+            compact
+          />
+        </Section>
+      </div>
+    </div>
+  )
+}
+
+export function TCPSamplerEditor({ node, updateProperties }: EditorProps) {
+  return (
+    <div className="editor-group-form">
+      <Section title="TCP Server Connection">
+        <div className="form-grid-3">
+          <FormField
+            label="Server Name / IP"
+            placeholder="tcp.example.com"
+            value={String(node.properties.server ?? '')}
+            onChange={(val) => updateProperties({ server: val })}
+          />
+          <FormField
+            label="Port"
+            type="number"
+            placeholder="9100"
+            value={String(node.properties.port ?? '')}
+            onChange={(val) => updateProperties({ port: val })}
+          />
+          <FormField
+            label="Timeout (ms)"
+            type="number"
+            placeholder="10000"
+            value={String(node.properties.timeout ?? '10000')}
+            onChange={(val) => updateProperties({ timeout: val })}
+          />
+        </div>
+        <div className="form-grid-2" style={{ marginTop: 12 }}>
+          <FormField
+            label="Connect Timeout (ms)"
+            type="number"
+            placeholder="5000"
+            value={String(node.properties.connectTimeout ?? '5000')}
+            onChange={(val) => updateProperties({ connectTimeout: val })}
+          />
+          <SelectField
+            label="TCP Client Class"
+            value={String(node.properties.classname ?? 'TCPClientImpl')}
+            options={[
+              { value: 'TCPClientImpl', label: 'TCPClientImpl (Default)' },
+              { value: 'BinaryTCPClientImpl', label: 'BinaryTCPClientImpl (Hex)' },
+              { value: 'LengthPrefixedBinaryTCPClientImpl', label: 'LengthPrefixedBinaryTCPClientImpl' },
+            ]}
+            onChange={(val) => updateProperties({ classname: val })}
+          />
+        </div>
+      </Section>
+      <Section title="Connection Options">
+        <div className="form-grid-3">
+          <CheckboxField
+            label="Re-use Connection"
+            checked={node.properties.reuseConnection !== false}
+            onChange={(checked) => updateProperties({ reuseConnection: checked })}
+          />
+          <CheckboxField
+            label="Close Connection after send"
+            checked={Boolean(node.properties.closeConnection)}
+            onChange={(checked) => updateProperties({ closeConnection: checked })}
+          />
+          <CheckboxField
+            label="Set NoDelay"
+            checked={Boolean(node.properties.noDelay)}
+            onChange={(checked) => updateProperties({ noDelay: checked })}
+          />
+        </div>
+        <div className="form-grid-2" style={{ marginTop: 12 }}>
+          <FormField
+            label="End of Line (EOL) Byte Value"
+            placeholder="Leave blank for default"
+            value={String(node.properties.eolByte ?? '')}
+            onChange={(val) => updateProperties({ eolByte: val })}
+          />
+          <FormField
+            label="SO_LINGER (seconds, -1 to disable)"
+            type="number"
+            value={String(node.properties.soLinger ?? '')}
+            onChange={(val) => updateProperties({ soLinger: val })}
+          />
+        </div>
+      </Section>
+      <div style={{ marginTop: 12 }}>
+        <label style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 600, color: 'var(--text-color, #fff)' }}>
+          Text / Payload to Send
+        </label>
+        <CodeEditor
+          label="TCP Payload"
+          value={String(node.properties.requestData ?? '')}
+          language="text"
+          onChange={(val) => updateProperties({ requestData: val })}
+          minHeight={180}
+        />
+      </div>
+    </div>
+  )
+}

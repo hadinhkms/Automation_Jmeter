@@ -48,6 +48,16 @@ export const typeToElement: Record<Exclude<JMeterComponentType, 'UnsupportedComp
     guiclass: 'eu.luminis.jmeter.wssampler.CloseWebSocketSamplerGui',
     testclass: 'eu.luminis.jmeter.wssampler.CloseWebSocketSampler',
   },
+  GRPCSampler: {
+    tag: 'vn.zalopay.benchmark.GRPCSampler',
+    guiclass: 'vn.zalopay.benchmark.GRPCSamplerGui',
+    testclass: 'vn.zalopay.benchmark.GRPCSampler',
+  },
+  TCPSampler: {
+    tag: 'TCPSampler',
+    guiclass: 'TCPSamplerGui',
+    testclass: 'TCPSampler',
+  },
   HTTPHeaderManager: { tag: 'HeaderManager', guiclass: 'HeaderPanel', testclass: 'HeaderManager' },
   HTTPCookieManager: { tag: 'CookieManager', guiclass: 'CookiePanel', testclass: 'CookieManager' },
   CSVDataSet: { tag: 'CSVDataSet', guiclass: 'TestBeanGUI', testclass: 'CSVDataSet' },
@@ -95,6 +105,8 @@ export function mapElementToType(element: Element): JMeterComponentType {
   if (tag.includes('SingleWriteWebSocketSampler') || gui.includes('SingleWriteWebSocketSampler')) return 'WebSocketSingleWriteSampler'
   if (tag.includes('SingleReadWebSocketSampler') || gui.includes('SingleReadWebSocketSampler')) return 'WebSocketSingleReadSampler'
   if (tag.includes('CloseWebSocketSampler') || gui.includes('CloseWebSocketSampler')) return 'WebSocketCloseSampler'
+  if (tag.includes('GRPCSampler') || gui.includes('GRPCSampler') || test.includes('GRPCSampler')) return 'GRPCSampler'
+  if (tag === 'TCPSampler' || gui.includes('TCPSampler') || test === 'TCPSampler') return 'TCPSampler'
   if (tag === 'BackendListener' || gui.includes('BackendListener') || test.includes('BackendListener')) return 'BackendListener'
 
   const entry = (Object.entries(typeToElement) as Array<[Exclude<JMeterComponentType, 'UnsupportedComponent'>, ElementMapping]>).find(

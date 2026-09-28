@@ -10,7 +10,7 @@ import { AggregateReportEditor, SummaryReportEditor, ViewResultsTreeEditor } fro
 import { ConstantTimerEditor, IfControllerEditor, LoopControllerEditor, TransactionControllerEditor } from './LogicEditors'
 import { JSONExtractorEditor, JSR223Editor, RegexExtractorEditor, ResponseAssertionEditor } from './ProcessorEditors'
 import { ConcurrencyThreadGroupEditor, SteppingThreadGroupEditor, UltimateThreadGroupEditor } from './ThreadEditors'
-import { BackendListenerEditor, GraphQLSamplerEditor, WebSocketCloseSamplerEditor, WebSocketOpenSamplerEditor, WebSocketSingleReadSamplerEditor, WebSocketSingleWriteSamplerEditor } from './ProtocolEditors'
+import { BackendListenerEditor, GRPCSamplerEditor, GraphQLSamplerEditor, TCPSamplerEditor, WebSocketCloseSamplerEditor, WebSocketOpenSamplerEditor, WebSocketSingleReadSamplerEditor, WebSocketSingleWriteSamplerEditor } from './ProtocolEditors'
 
 function UnsupportedComponentEditor({
   node,
@@ -85,6 +85,8 @@ export function ComponentEditorRouter({
       case 'WebSocketSingleWriteSampler': return <WebSocketSingleWriteSamplerEditor key={node.id} {...props} />
       case 'WebSocketSingleReadSampler': return <WebSocketSingleReadSamplerEditor key={node.id} {...props} />
       case 'WebSocketCloseSampler': return <WebSocketCloseSamplerEditor key={node.id} {...props} />
+      case 'GRPCSampler': return <GRPCSamplerEditor key={node.id} {...props} />
+      case 'TCPSampler': return <TCPSamplerEditor key={node.id} {...props} />
       case 'HTTPRequestDefaults': return <HTTPRequestDefaultsEditor {...props} />
       case 'DebugSampler': return <DebugSamplerEditor key={node.id} {...props} />
       case 'HTTPHeaderManager': return <HTTPHeaderManagerEditor {...props} />

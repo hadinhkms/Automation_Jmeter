@@ -49,4 +49,19 @@ export const gitService = {
     if (!res.ok) throw new Error(`Git diff failed: ${res.statusText}`)
     return res.json()
   },
+
+  async getBranches(): Promise<{ current: string; branches: string[] }> {
+    const res = await fetch('/api/jmeter/git/branches')
+    if (!res.ok) throw new Error(`Git branches failed: ${res.statusText}`)
+    return res.json()
+  },
+
+  async checkout(branch: string, createNew = false): Promise<{ success: boolean; branch?: string; error?: string }> {
+    const res = await fetch('/api/jmeter/git/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ branch, createNew }),
+    })
+    return res.json()
+  },
 }

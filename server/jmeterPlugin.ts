@@ -513,6 +513,65 @@ export function jmeterPlugin(): Plugin {
           return
         }
 
+        // --- Git Branch Management APIs ---
+        if (url === '/api/jmeter/git/branches' && req.method === 'GET') {
+          try {
+            let currentBranch = 'main'
+            try {
+              currentBranch = execSync('git branch --show-current', { encoding: 'utf-8', stdio: 'pipe' }).trim() || 'main'
+            } catch {
+              currentBranch = 'main'
+            }
+
+            let branches: string[] = []
+            try {
+              const raw = execSync('git branch -a --no-color', { encoding: 'utf-8', stdio: 'pipe' })
+              branches = raw
+                .split('\n')
+                .map((line) => line.replace(/^[\s*]+/, '').trim())
+                .filter((b) => b && !b.includes('HEAD') && !b.includes('->'))
+                .map((b) => b.replace(/^remotes\/origin\//, ''))
+                .filter((b, i, arr) => arr.indexOf(b) === i)
+            } catch {
+              branches = [currentBranch]
+            }
+
+            res.setHeader('Content-Type', 'application/json')
+            res.end(JSON.stringify({ current: currentBranch, branches }))
+          } catch (err) {
+            res.setHeader('Content-Type', 'application/json')
+            res.end(JSON.stringify({ current: 'main', branches: ['main'], error: String(err) }))
+          }
+          return
+        }
+
+        if (url === '/api/jmeter/git/checkout' && req.method === 'POST') {
+          try {
+            const body = await parseJsonBody(req)
+            const branch = typeof body.branch === 'string' ? body.branch : ''
+            const createNew = Boolean(body.createNew)
+
+            if (!branch || /[^\w\-.\/]/.test(branch)) {
+              res.statusCode = 400
+              res.setHeader('Content-Type', 'application/json')
+              res.end(JSON.stringify({ error: 'Invalid branch name.' }))
+              return
+            }
+
+            const cmd = createNew
+              ? `git checkout -b "${branch.replace(/"/g, '')}"`
+              : `git checkout "${branch.replace(/"/g, '')}"`
+            const output = execSync(cmd, { encoding: 'utf-8', timeout: 10000, stdio: 'pipe' })
+            res.setHeader('Content-Type', 'application/json')
+            res.end(JSON.stringify({ success: true, branch, output }))
+          } catch (err) {
+            res.statusCode = 500
+            res.setHeader('Content-Type', 'application/json')
+            res.end(JSON.stringify({ success: false, error: err instanceof Error ? err.message : String(err) }))
+          }
+          return
+        }
+
         if (url.startsWith('/api/jmeter/git/diff') && req.method === 'GET') {
           try {
             const u = new URL(url, `http://${req.headers.host || 'localhost'}`)
