@@ -1,7 +1,9 @@
 import type { TestPlanNode } from '../../models/jmeter'
 import { createNode } from '../../mock/sampleTestPlan'
 import type { PostmanItem } from './postmanTypes'
-import { normalizePostmanUrl, postmanToJMeterVar } from './postmanVariableConverter'
+import { normalizePostmanUrl } from './postmanVariableConverter'
+import { transpileVariablesToJMeter } from './dynamicVariablesEngine'
+import { transpilePostmanScript } from './postmanScriptTranspiler'
 
 export interface ConvertRequestOptions {
   autoConvertVars: boolean
@@ -24,7 +26,7 @@ export function convertPostmanRequestToNode(
   let bodyData = ''
   if (req.body?.mode === 'raw' && req.body.raw) {
     bodyData = options.autoConvertVars
-      ? postmanToJMeterVar(req.body.raw)
+      ? transpileVariablesToJMeter(req.body.raw)
       : req.body.raw
   }
 
@@ -35,7 +37,7 @@ export function convertPostmanRequestToNode(
   if (req.header && Array.isArray(req.header)) {
     for (const h of req.header) {
       if (!h.disabled && h.key) {
-        const val = options.autoConvertVars ? postmanToJMeterVar(h.value) : h.value
+        const val = options.autoConvertVars ? transpileVariablesToJMeter(h.value) : h.value
         headers.push({ name: h.key, value: val })
       }
     }
@@ -46,7 +48,7 @@ export function convertPostmanRequestToNode(
     const tokenObj = req.auth.bearer.find((b) => b.key === 'token')
     if (tokenObj && tokenObj.value) {
       const token = options.autoConvertVars
-        ? postmanToJMeterVar(tokenObj.value)
+        ? transpileVariablesToJMeter(tokenObj.value)
         : tokenObj.value
       headers.push({ name: 'Authorization', value: `Bearer ${token}` })
     }
@@ -65,6 +67,17 @@ export function convertPostmanRequestToNode(
         headers,
       }),
     )
+  }
+
+  // Transpile Chai / Postman test assertions
+  if (Array.isArray(item.event)) {
+    for (const ev of item.event) {
+      if (ev.listen === 'test' && ev.script?.exec) {
+        const rawScript = Array.isArray(ev.script.exec) ? ev.script.exec.join('\n') : String(ev.script.exec)
+        const assertions = transpilePostmanScript(rawScript, name)
+        children.push(...assertions)
+      }
+    }
   }
 
   return createNode(

@@ -1,9 +1,11 @@
+import { transpileVariablesToJMeter } from './dynamicVariablesEngine'
+
 /**
  * Converts Postman variable syntax {{variable_name}} to JMeter syntax ${variable_name}.
  */
 export function postmanToJMeterVar(input: string): string {
   if (!input) return ''
-  return input.replace(/\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g, '${$1}')
+  return transpileVariablesToJMeter(input)
 }
 
 /**
@@ -24,20 +26,30 @@ export function normalizePostmanUrl(urlInput: unknown): {
     raw = obj.raw || ''
   }
 
-  const converted = postmanToJMeterVar(raw)
+  const converted = transpileVariablesToJMeter(raw)
   let protocol = 'https'
   let domain = ''
   let port = ''
   let path = ''
 
   try {
-    // If it has protocol like http:// or https://
-    const match = converted.match(/^(https?):\/\/([^/:?#]+)(?::(\d+))?(\/[^?#]*)?/i)
+    // 1. Matches protocol like http:// or https:// (or variable protocol like ${protocol}://)
+    const match = converted.match(/^(https?|\$\{[^}]+\}):\/\/([^/:?#]+)(?::(\d+|\$\{[^}]+\}))?(\/[^?#]*)?/i)
     if (match) {
       protocol = match[1].toLowerCase()
       domain = match[2]
       port = match[3] || ''
       path = match[4] || '/'
+    } else if (converted.startsWith('${')) {
+      // 2. Starts with a variable like ${baseUrl}/path or ${domain}/path
+      const slashIndex = converted.indexOf('/')
+      if (slashIndex !== -1) {
+        domain = converted.slice(0, slashIndex)
+        path = converted.slice(slashIndex)
+      } else {
+        domain = converted
+        path = '/'
+      }
     } else {
       path = converted.startsWith('/') ? converted : `/${converted}`
     }

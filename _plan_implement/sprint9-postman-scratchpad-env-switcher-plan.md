@@ -62,6 +62,19 @@
 - **Sending:** Nút Disabled, icon Spinner quay, text "Sending...".
 - **Done/Error:** Nút Enabled trở lại, Response Panel cập nhật kết quả.
 
+### 3.3 Bất Biến Bắt Buộc: JMX Native Schema Compatibility (Không Làm Hỏng JMX)
+1. **Cô Lập Trạng Thái UI (Zero JMX Pollution):**
+   - Các trạng thái giao diện như Response Inspector, tab history, kết quả debug 1-click CHỈ lưu trong Zustand/client state, **TUYỆT ĐỐI KHÔNG** chèn bất kỳ thẻ XML lạ hay custom attribute nào vào cây JMX.
+2. **Ánh Xạ Chuẩn Sang Apache JMeter 5.6.3 XML Elements:**
+   - Environment variables -> `<Arguments guiclass="ArgumentsPanel" testclass="Arguments">` (UDV).
+   - Biến dạng `{{var}}` được chuyển thành `${var}`; dynamic variables chuyển thành built-in JMeter functions: `${__UUID()}`, `${__time()}` mà JMeter CLI hiểu nguyên bản.
+   - Assertions & Extractors -> `<ResponseAssertion>`, `<JSONPathAssertion>`, `<JSONPostProcessor>`.
+3. **Kỷ Luật Kiểm Thử Round-Trip & JMeter CLI Execution:**
+   - Mọi kịch bản sau khi áp dụng tính năng phải thỏa mãn:
+     `TestPlanNode -> JmxWriter.write() -> XML string -> JmxParser.parse() -> 100% khớp schema`.
+   - File `.jmx` xuất ra phải chạy thành công trực tiếp bằng lệnh:
+     `apache-jmeter-5.6.3\bin\jmeter.bat -n -t <exported.jmx> -l <test.jtl>` với exit code 0.
+
 ---
 
 ## 4. Gate 3 – Dev Implementation Architecture (Phase B)
@@ -98,6 +111,8 @@
 - [ ] **TC-05:** Request quá 30s -> Trả về lỗi timeout rõ ràng.
 - [ ] **TC-06:** Import file `.postman_environment.json` -> Tự động nạp danh sách biến và cập nhật UDV.
 - [ ] **TC-07:** Import script `pm.response.to.have.status(200)` -> Sinh ra `ResponseAssertion` mã 200.
+- [ ] **TC-08 (JMX Compatibility):** Kịch bản có Environment + Assertions sau khi Save/Export ra file `.jmx` phải mở lại được bằng `JmxParser.parse()` không bị lỗi hoặc mất thuộc tính.
+- [ ] **TC-09 (JMeter CLI Verification):** Chạy thực tế bằng `jmeter.bat -n -t [exported.jmx]` -> Apache JMeter 5.6.3 CLI load XML thành công và thực thi không có warning/error về unknown tags.
 - [ ] **Regression:** `npm run typecheck` đạt 0 lỗi; tính năng Import Collection (Sprint 8) vẫn hoạt động bình thường.
 
 ---

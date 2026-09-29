@@ -9,6 +9,7 @@ import { jmeterPluginsManager } from './pluginsManager'
 import { browserRecorder } from './browserRecorder'
 import { sendWebhookNotification } from './webhookNotifier'
 import { computeJmxDiff } from './jmxDiffEngine'
+import { handleDebugProxy } from './routes/debugProxyRouter'
 
 const mimeTypes: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -86,6 +87,11 @@ export function jmeterPlugin(): Plugin {
         if (req.method === 'OPTIONS') {
           res.statusCode = 204
           res.end()
+          return
+        }
+
+        // 0. Postman 1-Click Debug Proxy
+        if (await handleDebugProxy(req, res)) {
           return
         }
 

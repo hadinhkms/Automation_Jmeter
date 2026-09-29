@@ -26,6 +26,7 @@ import {
 import type { AppCommands } from '../menu/MenuBar'
 import { useJMeterStore } from '../../store/jmeterStore'
 import { jmeterRunnerService } from '../../services/jmeterRunnerService'
+import { EnvironmentSwitcher } from './EnvironmentSwitcher'
 
 function ToolButton({
   title,
@@ -138,6 +139,8 @@ export function Toolbar({
       <ToolButton title="Cut selected node" action={commands.cut} disabled={disabled.cut}><Scissors size={17} /></ToolButton>
       <ToolButton title="Copy selected node" action={commands.copy}><Copy size={17} /></ToolButton>
       <ToolButton title="Paste into selected node" action={commands.paste} disabled={disabled.paste}><Clipboard size={17} /></ToolButton>
+      <span className="toolbar-separator" />
+      <EnvironmentSwitcher />
       <span className="toolbar-separator" />
       <ToolButton
         title={store.executionMode === 'real' ? 'Start real JMeter run (jmeter.bat -n)' : 'Start mock simulation'}

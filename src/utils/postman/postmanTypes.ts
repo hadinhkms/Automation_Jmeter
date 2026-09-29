@@ -36,12 +36,21 @@ export interface PostmanRequest {
   description?: string
 }
 
+export interface PostmanEvent {
+  listen: string
+  script?: {
+    type?: string
+    exec?: string[] | string
+  }
+}
+
 export interface PostmanItem {
   id?: string
   name: string
   description?: string
   item?: PostmanItem[]
   request?: PostmanRequest
+  event?: PostmanEvent[]
 }
 
 export interface PostmanCollection {
