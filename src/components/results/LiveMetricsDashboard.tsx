@@ -1,5 +1,7 @@
 // master-process-disable-size-check: Monolith queued for modular decomposition via Master Plan
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
+import { ResultsChart } from './charts/ResultsChart'
+import { type ChartMetricPoint, MAX_CHART_POINTS } from './charts/chartTypes'
 import {
   Activity,
   AlertTriangle,
@@ -36,6 +38,9 @@ export function LiveMetricsDashboard({
   slaThresholds,
   isRunning = false,
 }: LiveMetricsDashboardProps) {
+  const [viewMode, setViewMode] = useState<'kpi' | 'chart'>('kpi')
+  const [chartPoints, setChartPoints] = useState<ChartMetricPoint[]>([])
+
   // Compute percentiles and latency stats
   const stats = useMemo(() => {
     if (!samples || samples.length === 0) {
@@ -175,6 +180,23 @@ export function LiveMetricsDashboard({
 
   const maxChartLatency = Math.max(...trendPoints.map((p) => Math.max(p.avg, p.p95)), 10)
 
+  useEffect(() => {
+    if (!runMetrics && (!samples || samples.length === 0)) return
+    const pt: ChartMetricPoint = {
+      timestamp: Date.now(),
+      tps: runMetrics?.throughput || stats.throughput,
+      avgLatency: stats.avg,
+      p90Latency: stats.p90,
+      p95Latency: stats.p95,
+      errorRate: stats.errorRate,
+      activeThreads: runMetrics?.activeThreads || 0,
+    }
+    setChartPoints((prev) => {
+      const next = [...prev, pt]
+      return next.length > MAX_CHART_POINTS ? next.slice(next.length - MAX_CHART_POINTS) : next
+    })
+  }, [runMetrics?.samples, runMetrics?.throughput, runMetrics?.activeThreads, stats])
+
   return (
     <div className="live-metrics-dashboard" style={{ padding: '16px 20px', height: '100%', overflowY: 'auto' }}>
       {/* SLA Status Banner */}
@@ -220,6 +242,51 @@ export function LiveMetricsDashboard({
         </div>
       )}
 
+      {/* View Mode Toggle */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+        <div style={{ display: 'flex', gap: 6, background: 'rgba(0,0,0,0.2)', padding: 3, borderRadius: 6 }}>
+          <button
+            onClick={() => setViewMode('kpi')}
+            style={{
+              padding: '4px 12px',
+              fontSize: 12,
+              fontWeight: 600,
+              borderRadius: 4,
+              border: 'none',
+              background: viewMode === 'kpi' ? '#3b82f6' : 'transparent',
+              color: viewMode === 'kpi' ? '#fff' : 'var(--text-muted, #94a3b8)',
+              cursor: 'pointer',
+            }}
+          >
+            📊 KPI & Summary
+          </button>
+          <button
+            onClick={() => setViewMode('chart')}
+            style={{
+              padding: '4px 12px',
+              fontSize: 12,
+              fontWeight: 600,
+              borderRadius: 4,
+              border: 'none',
+              background: viewMode === 'chart' ? '#3b82f6' : 'transparent',
+              color: viewMode === 'chart' ? '#fff' : 'var(--text-muted, #94a3b8)',
+              cursor: 'pointer',
+            }}
+          >
+            📈 Grafana Canvas Charts
+          </button>
+        </div>
+        <div style={{ fontSize: 11.5, color: 'var(--text-muted, #94a3b8)' }}>
+          {chartPoints.length} points buffered
+        </div>
+      </div>
+
+      {viewMode === 'chart' ? (
+        <div style={{ marginBottom: 16 }}>
+          <ResultsChart points={chartPoints} />
+        </div>
+      ) : (
+        <>
       {/* Top 4 KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 16 }}>
         <div className="metrics-card" style={{ background: 'var(--panel-bg-subtle, rgba(255,255,255,0.04))', padding: 14, borderRadius: 8, border: '1px solid var(--border-color, #333)' }}>
@@ -433,6 +500,8 @@ export function LiveMetricsDashboard({
             </tbody>
           </table>
         </div>
+      )}
+        </>
       )}
     </div>
   )

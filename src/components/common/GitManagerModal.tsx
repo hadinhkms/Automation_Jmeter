@@ -13,6 +13,7 @@ import {
   X,
 } from 'lucide-react'
 import { gitService, type GitStatusResult } from '../../services/gitService'
+import { JmxDiffPanel } from '../git/JmxDiffPanel'
 
 interface GitManagerModalProps {
   isOpen: boolean
@@ -33,6 +34,7 @@ export function GitManagerModal({ isOpen, onClose }: GitManagerModalProps) {
   const [showBranchDropdown, setShowBranchDropdown] = useState(false)
   const [newBranchName, setNewBranchName] = useState('')
   const [branchLoading, setBranchLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState<'working-tree' | 'jmx-diff'>('working-tree')
 
   const loadStatus = async () => {
     setLoading(true)
@@ -278,8 +280,54 @@ export function GitManagerModal({ isOpen, onClose }: GitManagerModalProps) {
           </div>
         </div>
 
-        {/* Side-by-side Body */}
+        {/* Git Sub Tabs */}
         <div
+          style={{
+            display: 'flex',
+            gap: 12,
+            padding: '6px 24px',
+            borderBottom: '1px solid var(--border-color, #334155)',
+            background: 'var(--bg-secondary, rgba(15, 23, 42, 0.4))',
+          }}
+        >
+          <button
+            onClick={() => setActiveTab('working-tree')}
+            style={{
+              padding: '6px 12px',
+              fontSize: 12.5,
+              fontWeight: 600,
+              cursor: 'pointer',
+              background: 'transparent',
+              border: 'none',
+              borderBottom: activeTab === 'working-tree' ? '2px solid #3b82f6' : '2px solid transparent',
+              color: activeTab === 'working-tree' ? '#60a5fa' : 'var(--text-muted, #94a3b8)',
+            }}
+          >
+            Working Tree Changes ({status?.files.length ?? 0})
+          </button>
+          <button
+            onClick={() => setActiveTab('jmx-diff')}
+            style={{
+              padding: '6px 12px',
+              fontSize: 12.5,
+              fontWeight: 600,
+              cursor: 'pointer',
+              background: 'transparent',
+              border: 'none',
+              borderBottom: activeTab === 'jmx-diff' ? '2px solid #3b82f6' : '2px solid transparent',
+              color: activeTab === 'jmx-diff' ? '#60a5fa' : 'var(--text-muted, #94a3b8)',
+            }}
+          >
+            JMX Semantic Diff
+          </button>
+        </div>
+
+        {activeTab === 'jmx-diff' ? (
+          <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+            <JmxDiffPanel branches={branches} currentBranch={status?.branch || 'main'} />
+          </div>
+        ) : (
+          <div
           className="modal-body modal-body-split"
           style={{
             display: 'grid',
@@ -597,6 +645,7 @@ export function GitManagerModal({ isOpen, onClose }: GitManagerModalProps) {
             </div>
           </div>
         </div>
+        )}
 
         {/* Footer */}
         <div

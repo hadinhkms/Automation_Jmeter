@@ -1,4 +1,4 @@
-﻿# Sprint 7 – Implementation Plan
+# Sprint 7 – Implementation Plan
 ## GAP-03: Git Branch Switching UI | GAP-05: gRPC Sampler | GAP-06: TCP Sampler
 
 > **Ngày lập:** 2026-09-28
@@ -249,8 +249,8 @@ POST /api/jmeter/git/checkout
 - [ ] Git commit/push/pull/diff không bị ảnh hưởng
 - [x] TypeScript: `npx tsc --noEmit` → **0 errors** ✅
 - [x] Vite build: `npx vite build` → **success 8.52s** ✅
-- [ ] Context menu Add Sampler hiển thị gRPC + TCP entries
-- [ ] UI responsive tại 390px
+- [x] Context menu Add Sampler hiển thị gRPC + TCP entries ✅ (verified: `componentRules.ts` dòng 45-46, `componentMeta.tsx` dòng 56-57)
+- [ ] UI responsive tại 390px ⚠️ *(chưa có @media query riêng cho 390px – defer Sprint 8)*
 
 ---
 

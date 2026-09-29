@@ -4,7 +4,10 @@
       "fixtures",
       "docs",
       "runs",
-      "plans"
+      "plans",
+      "apache-jmeter-5.6.3",
+      "dist",
+      "downloads"
     ]
   }
 }

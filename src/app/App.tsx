@@ -24,6 +24,7 @@ import { TemplateGalleryModal } from '../components/common/TemplateGalleryModal'
 import { WorkloadGraphModal } from '../components/common/WorkloadGraphModal'
 import { SlaSettingsModal } from '../components/common/SlaSettingsModal'
 import { GitManagerModal } from '../components/common/GitManagerModal'
+import { ImportPostmanModal } from '../components/common/postman/ImportPostmanModal'
 import { evaluateSamplesSla } from '../utils/slaEvaluator'
 import type { SlaThresholds, WebhookConfig } from '../models/jmeter'
 import { parseJtlContent } from '../utils/jtlParser'
@@ -53,6 +54,7 @@ export type ActiveModal =
   | 'assets'
   | 'recorder'
   | 'curl'
+  | 'postman'
   | 'plugins'
   | 'settings'
   | 'save'
@@ -435,6 +437,7 @@ export function App() {
     openSettings: () => toggleModal('settings'),
     openHtmlReport,
     importCurl: () => toggleModal('curl'),
+    importPostman: () => toggleModal('postman'),
     openBrowserRecorder: () => toggleModal('recorder'),
     openPluginsManager: () => toggleModal('plugins'),
     openAssetManager: () => toggleModal('assets'),
@@ -839,6 +842,17 @@ export function App() {
       <GitManagerModal
         isOpen={activeModal === 'git'}
         onClose={closeModal}
+      />
+      <ImportPostmanModal
+        isOpen={activeModal === 'postman'}
+        testPlan={store.testPlan}
+        onClose={closeModal}
+        onImport={(nodes, targetParentId) => {
+          for (const node of nodes) {
+            store.insertNode(targetParentId, node)
+          }
+          dismissNoticeLater(`Successfully imported ${nodes.length} element(s) from Postman Collection.`)
+        }}
       />
     </div>
   )

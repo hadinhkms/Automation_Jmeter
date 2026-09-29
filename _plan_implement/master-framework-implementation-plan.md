@@ -1,5 +1,11 @@
 # Master Implementation Plan: Nền Tảng JMeter Web Studio & Enterprise Performance Testing Platform
 
+> **Ngày lập:** 2026-09-28
+> **Last Updated:** 2026-09-29
+> **Version:** 1.0
+> **Phạm vi:** JMeter Web Studio – `D:\_Jmeter`
+> **Loại:** Roadmap tổng thể 6 giai đoạn
+
 Tài liệu này cung cấp bản kế hoạch tổng thể hoàn chỉnh, chuyên sâu và chuẩn công nghiệp (Production-Grade Master Plan) cho dự án **JMeter Web UI / Studio & Live Load Testing Platform** (`Project_Jmeter`). Kế hoạch được thiết kế có cấu trúc rõ ràng theo từng giai đoạn, phân tách rõ module, giao diện, backend service, và cơ chế kiểm thử để người dùng dễ dàng sắp xếp và thực hiện.
 
 ---

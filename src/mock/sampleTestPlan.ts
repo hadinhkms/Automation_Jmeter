@@ -35,6 +35,8 @@ const names: Record<JMeterComponentType, string> = {
   TestFragmentController: 'Test Fragment Controller',
   BeanShellPostProcessor: 'BeanShell PostProcessor',
   BackendListener: 'Backend Listener (InfluxDB)',
+  GRPCSampler: 'gRPC Sampler',
+  TCPSampler: 'TCP Sampler',
   ViewResultsTree: 'View Results Tree',
   SummaryReport: 'Summary Report',
   AggregateReport: 'Aggregate Report',
@@ -159,6 +161,29 @@ export function defaultProperties(
         ...common,
         statusCode: 1000,
         closeReason: 'Normal Closure',
+      }
+    case 'GRPCSampler':
+      return {
+        ...common,
+        serverName: 'localhost',
+        port: '50051',
+        serviceName: '',
+        methodName: '',
+        protoFolder: '',
+        requestJson: '{}',
+        deadlineMs: 5000,
+        useTls: false,
+      }
+    case 'TCPSampler':
+      return {
+        ...common,
+        server: 'localhost',
+        port: '8080',
+        classname: 'TCPClientImpl',
+        requestData: '',
+        timeout: 5000,
+        closeConnection: false,
+        reUseConnection: true,
       }
     case 'BackendListener':
       return {

@@ -15,6 +15,7 @@ import {
   Trash2,
   ExternalLink,
   FileCode2,
+  FileJson,
   FolderArchive,
   Radio,
   Sparkles,
@@ -111,6 +112,13 @@ export function Toolbar({
         active={activeModal === 'curl'}
       >
         <FileCode2 size={17} />
+      </ToolButton>
+      <ToolButton
+        title="Import Postman Collection… (Tools -> Import Postman Collection)"
+        action={commands.importPostman}
+        active={activeModal === 'postman'}
+      >
+        <FileJson size={17} style={{ color: activeModal === 'postman' ? '#ffffff' : '#f59e0b' }} />
       </ToolButton>
       <ToolButton
         title="Project File Manager (upload CSV, attachments, files)"

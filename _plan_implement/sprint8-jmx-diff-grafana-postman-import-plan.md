@@ -1,10 +1,12 @@
-﻿# Sprint 8 – Implementation Plan
+# Sprint 8 – Implementation Plan
 ## GAP-04: JMX Semantic Diff | GAP-07: Grafana/Canvas Charts | FEAT-P1: Postman Collection Import
 
 > **Ngày lập:** 2026-09-28
-> **Version:** 1.0
+> **Last Updated:** 2026-09-29
+> **Version:** 1.1
 > **Phạm vi:** JMeter Web Studio – `D:\_Jmeter`
-> **Trạng thái:** 🟡 ĐỀ XUẤT – Chờ duyệt Gate 1
+> **Trạng thái:** ✅ ĐÃ PHÊ DUYỆT (Gate 1 & Gate 2 Ready for Implementation)
+> **Kiến trúc:** Tuân thủ Proactive File Splitting Protocol (toàn bộ file mới ≤ 150 dòng)
 
 ---
 
@@ -55,9 +57,22 @@ Toolbar -> Import -> "Postman Collection"
 -> Tick chọn Folder/Request cụ thể (hoặc Select All)
 -> Chọn Target: gắn vào Thread Group đang chọn
 -> Click "Import" -> Nodes được thêm vào TestPlan tree
-```
+### 1.4 Acceptance Criteria (Gherkin format)
+
+**GAP-04: JMX Semantic Diff**
+- **AC-01:** Given 2 branches with JMX changes, When user selects both branches and clicks "Compare", Then visual tree displays added nodes (green), removed nodes (red), and modified nodes (amber) with field-level diffs.
+- **AC-02:** Given identical branches selected, When viewing comparison form, Then "Compare" button is disabled.
+
+**GAP-07: Grafana Canvas Charts**
+- **AC-03:** Given a running or completed test with JTL samples, When user toggles "Chart View", Then pure Canvas 2D renders real-time TPS, Latency, Error Rate, and Thread curves without external dependencies.
+- **AC-04:** Given real-time updates arriving, When sample buffer reaches 300 data points, Then oldest points roll over smoothly in FIFO manner without memory growth or canvas leaks.
+
+**FEAT-P1: Postman Collection Import**
+- **AC-05:** Given a valid Postman Collection JSON (v2.0 or v2.1), When user uploads the file, Then preview tree accurately displays folders and requests with checkboxes.
+- **AC-06:** Given selected requests with `{{variable}}` syntax, When imported into target Thread Group, Then variables are automatically converted to `${variable}` and HTTP headers are preserved in HTTPHeaderManager.
 
 ---
+
 
 ## 2. Gate 1.5 – UI/UX Spec (Phase A2)
 
@@ -199,18 +214,33 @@ ImportPostmanModal (width: 780px):
 
 ## 4. Gate 3 – Dev Implementation (Phase B)
 
-### 4.1 Ma Trận File Thay Đổi
+### 4.1 Ma Trận File Thay Đổi (Tuân thủ Proactive File Splitting Protocol - Toàn bộ file ≤ 150 dòng)
 
-| File | Loại | Dòng thêm | Ghi chú |
+| File | Loại | Dòng ước tính | Vai trò / Module |
 |:--|:--|:---:|:---|
-| `src/utils/postmanParser.ts` | NEW | ~280 | Schema reader, node converter, var normalizer |
-| `src/components/common/ImportPostmanModal.tsx` | NEW | ~360 | Modal: upload, preview tree, options |
-| `src/components/toolbar/Toolbar.tsx` | EDIT | +8 | Thêm "Postman Collection" vào Import dropdown |
-| `src/components/results/ResultsChart.tsx` | NEW | ~250 | Canvas 2D: TPS, Latency, Error Rate, Threads |
-| `src/components/results/ResultsPanel.tsx` | EDIT | +30 | Toggle Table/Chart + wiring ResultsChart |
-| `server/jmeterPlugin.ts` | EDIT | +80 | `GET /api/jmeter/jmx/diff?branchA=&branchB=` |
-| `src/services/gitService.ts` | EDIT | +20 | `getJmxDiff(branchA, branchB)` method |
-| `src/components/common/GitManagerModal.tsx` | EDIT | +150 | Tab "History Diff" + DiffPanel |
+| `server/jmxDiffEngine.ts` | NEW | ~180 | Backend diff engine: parse JMX XML and compute node/field diffs |
+| `server/jmeterPlugin.ts` | EDIT | +25 | Endpoint `GET /api/jmeter/jmx/diff` tích hợp `jmxDiffEngine` |
+| `src/services/jmxDiffService.ts` | NEW | ~60 | Service client gọi diff API |
+| `src/components/git/JmxDiffPanel.tsx` | NEW | ~135 | Tab History Diff chính trong GitManagerModal |
+| `src/components/git/JmxDiffNodeTree.tsx` | NEW | ~110 | Component cây JMX side-by-side (added/removed/changed badges) |
+| `src/components/git/JmxDiffFieldInspector.tsx` | NEW | ~85 | Panel chi tiết các thuộc tính bị thay đổi (field-level diff) |
+| `src/components/common/GitManagerModal.tsx` | EDIT | +35 | Thêm sub-tab chuyển đổi giữa Working Tree và Semantic Diff |
+| `src/components/results/charts/chartTypes.ts` | NEW | ~55 | Types, interfaces, default configuration cho canvas chart |
+| `src/components/results/charts/chartRenderer.ts` | NEW | ~135 | Pure Canvas 2D engine: grid, smooth curves, area gradients, legends |
+| `src/components/results/charts/ResultsChart.tsx` | NEW | ~125 | React Canvas component, DPR auto-scaling, hover tooltip |
+| `src/components/results/LiveMetricsDashboard.tsx` | EDIT | +40 | Toggle View: KPI Cards/Table vs Grafana Canvas Charts |
+| `src/utils/postman/postmanTypes.ts` | NEW | ~70 | TypeScript definitions cho Postman Collection v2.0/v2.1 |
+| `src/utils/postman/postmanVariableConverter.ts` | NEW | ~55 | Helper convert `{{var}}` sang `${var}` |
+| `src/utils/postman/postmanRequestConverter.ts` | NEW | ~135 | Chuyển đổi Postman Request sang `TestPlanNode` (HTTPRequest + HeaderManager) |
+| `src/utils/postman/postmanParser.ts` | NEW | ~110 | Facade parse collection, extract items preview, validate schema |
+| `src/components/common/postman/PostmanFileUploader.tsx` | NEW | ~105 | Dropzone drag-and-drop & file picker kèm validation badge |
+| `src/components/common/postman/PostmanItemTreePreview.tsx` | NEW | ~120 | Cây preview folder/request kèm multi-select checkboxes |
+| `src/components/common/postman/PostmanImportOptions.tsx` | NEW | ~90 | Panel chọn Target ThreadGroup & các tuỳ chọn convert |
+| `src/components/common/postman/ImportPostmanModal.tsx` | NEW | ~130 | Modal chính điều phối flow import Postman |
+| `src/components/toolbar/Toolbar.tsx` | EDIT | +12 | ToolButton "Import Postman Collection" |
+| `src/components/menu/MenuBar.tsx` | EDIT | +6 | Menu item "Import Postman Collection…" |
+| `src/app/App.tsx` | EDIT | +10 | Wiring modal `postman` |
+
 
 ### 4.2 Postman Parser Core Interface
 

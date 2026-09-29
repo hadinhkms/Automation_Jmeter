@@ -8,6 +8,7 @@ import { jmeterRunner } from './jmeterRunner'
 import { jmeterPluginsManager } from './pluginsManager'
 import { browserRecorder } from './browserRecorder'
 import { sendWebhookNotification } from './webhookNotifier'
+import { computeJmxDiff } from './jmxDiffEngine'
 
 const mimeTypes: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -588,6 +589,25 @@ export function jmeterPlugin(): Plugin {
           } catch (err) {
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ diff: '', error: String(err) }))
+          }
+          return
+        }
+
+        // --- JMX Semantic Diff API ---
+        if (url.startsWith('/api/jmeter/jmx/diff') && req.method === 'GET') {
+          try {
+            const u = new URL(url, `http://${req.headers.host || 'localhost'}`)
+            const branchA = u.searchParams.get('branchA') || 'main'
+            const branchB = u.searchParams.get('branchB') || 'HEAD'
+            const file = u.searchParams.get('file') || 'plans/test.jmx'
+
+            const diff = computeJmxDiff(branchA, branchB, file)
+            res.setHeader('Content-Type', 'application/json')
+            res.end(JSON.stringify(diff))
+          } catch (err) {
+            res.statusCode = 500
+            res.setHeader('Content-Type', 'application/json')
+            res.end(JSON.stringify({ error: err instanceof Error ? err.message : String(err) }))
           }
           return
         }

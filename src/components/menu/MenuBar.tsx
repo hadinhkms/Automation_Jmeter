@@ -21,6 +21,7 @@ export interface AppCommands {
   openSettings: () => void
   openHtmlReport: () => void
   importCurl: () => void
+  importPostman: () => void
   openBrowserRecorder: () => void
   openPluginsManager: () => void
   openAssetManager: () => void
@@ -89,6 +90,7 @@ const menuItems: Record<string, MenuItem[]> = {
     { label: 'Workload Curve Graph…', action: 'openWorkloadGraph' },
     { label: 'Browser & Network Recorder…', shortcut: 'Ctrl+Shift+R', action: 'openBrowserRecorder' },
     { label: 'Import from cURL…', action: 'importCurl' },
+    { label: 'Import Postman Collection…', action: 'importPostman' },
     { label: 'Project File Manager...', action: 'openAssetManager' },
     { label: 'Plugins Manager…', action: 'openPluginsManager' },
     { label: 'Git Manager & Diff…', action: 'openGitManager' },

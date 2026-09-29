@@ -1,5 +1,12 @@
 # Plan Implement: Browser & Network API Recorder
 
+> **Ngày lập:** 2026-09-28
+> **Version:** 1.0
+> **Phạm vi:** JMeter Web Studio – `D:\_Jmeter`
+> **Trạng thái:** ✅ ĐÃ TRIỂN KHAI (Phases 1-5) – Phase 6 (Golden Snapshot Tests) pending
+
+---
+
 ## Mục Tiêu
 
 Biến tính năng **Browser & Network API Recorder** thành một tính năng production-ready, ổn định và chuẩn xác cho JMeter Web UI.

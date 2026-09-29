@@ -17,3 +17,29 @@ Mọi yêu cầu phát triển phần mềm, thay đổi UI/UX, kịch bản tes
 3. **Principal BA (Validation Audit)** (.master_process/prompts/04_A3_BA_Validation_Audit.prompt.md): Rà soát logic nghiệp vụ, lập ma trận **Mandatory vs Optional**, ma trận trạng thái Buttons (idle, loading, disabled, confirmation dialog), quy tắc validation inline/toast. Chốt Gate 2: Ready for Dev (Handoff Package).
 4. **Principal Developer / Tech Lead (20+ YOE)** (.master_process/prompts/05_B_Dev_Implementation.prompt.md): Thẩm định kỹ thuật, xuất Implementation Preview trước khi code, Clean Architecture, an toàn concurrency, tối ưu hiệu năng chống lag/leak bộ nhớ.
 5. **Principal QA / Test Architect (10+ YOE)** (.master_process/prompts/07_D_QA_Verification_Gate4.prompt.md): Thẩm định và verify lại toàn bộ sản phẩm theo đúng **Implementation Plan**, BVA, Fault Injection, Responsive, Theme, chạy build. **CHẶN BÀN GIAO NẾU CÒN BUG.** Chốt Gate 4: Ready for Release.
+
+## CLI & Tooling
+```powershell
+python "D:/_Master_process/master.py" doctor .
+python "D:/_Master_process/master.py" audit .
+python "D:/_Master_process/master.py" optimize .
+```
+
+## Kỷ luật Giới hạn Kích thước File & Chủ Động Tách File (Proactive File Splitting Protocol)
+- **TUYỆT ĐỐI KHÔNG TẠO FILE NGUYÊN KHỐI (MONOLITH):** Tuân thủ trần số dòng theo `config/quality-policy.json`: UI Component ≤ 150 dòng, Hook ≤ 150 dòng, Utils/Helpers ≤ 150 dòng, Service/Client ≤ 200 dòng, Module khác/Backend/Scripts ≤ 250 dòng, Test Scripts ≤ 800 dòng.
+- **CẢNH BÁO SỚM & CHỦ ĐỘNG TÁCH FILE TẠI VÙNG VÀNG (80% LIMIT):**
+  - Khi một file đạt hoặc dự kiến sau khi sửa sẽ đạt **≥ 80% ngưỡng cho phép** (Component/Hook/Util ≥ 120 dòng, Service ≥ 160 dòng, Module ≥ 200 dòng, Test ≥ 650 dòng): AI **BẮT BUỘC DỪNG VIỆC THÊM LOGIC VÀO FILE ĐÓ** và **CHỦ ĐỘNG TÁCH FILE NGAY**.
+  - Không chờ đến khi vượt trần, bị lỗi git hook pre-commit hoặc audit chặn đứng mới vội vã sửa.
+- **CHIẾN LƯỢC TÁCH FILE CHUẨN KIẾN TRÚC:**
+  - *Frontend:* Tách Sub-components cho các phần UI độc lập; tách state/effects vào Custom Hooks; tách types và constants ra file riêng.
+  - *Backend & Modules:* Tách theo Clean Architecture (Router → Service → Repository → Schemas → Mappers); tách helper logic ra utils riêng.
+
+## Kỷ luật Thực chứng khi Test & Re-test (Evidence-Based Verification Protocol)
+- **CẤM TỰ QUY LUẬN / SUY DIỄN:** Tuyệt đối không được nhìn code rồi tự suy luận "logic trông đúng rồi nên chắc chắn test pass" hoặc "chỉ sửa một dòng nên không cần test lại".
+- **BẮT BUỘC ĐÍNH KÈM EVIDENCE BLOCK:** Sau khi implement hay fix bug, BẮT BUỘC phải thực thi lệnh test thực tế trên terminal và báo cáo đủ 5 yếu tố:
+  1. **Exact Command:** Lệnh chạy thực tế (ví dụ: `npm test`, `npx tsc --noEmit`, `npx vite build`).
+  2. **Exit Code:** Mã thoát thực tế từ tiến trình (`exit 0` nếu pass, khác 0 nếu fail).
+  3. **Quantitative Metrics:** Tổng số test pass/fail/skipped và thời gian chạy thực tế.
+  4. **Terminal Output Snippet:** Trích xuất log thực tế mà máy tính in ra chứng minh test đã thực sự chạy.
+  5. **Git Revision & Working Tree:** Commit SHA và trạng thái clean/dirty của working tree tại thời điểm test.
+
