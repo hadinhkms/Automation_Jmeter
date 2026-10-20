@@ -13,6 +13,7 @@ export function evaluateDynamicVariable(varName: string): string | null {
   const normalized = varName.trim().toLowerCase()
   switch (normalized) {
     case '$guid':
+    case '$randomuuid':
       return generateUUID()
     case '$timestamp':
       return Math.floor(Date.now() / 1000).toString()
@@ -50,7 +51,7 @@ export function transpileVariablesToJMeter(template: string): string {
   if (!template) return ''
 
   let result = template
-    .replace(/\{\{\s*\$guid\s*\}\}/gi, '${__UUID()}')
+    .replace(/\{\{\s*\$(?:guid|randomuuid)\s*\}\}/gi, '${__UUID()}')
     .replace(/\{\{\s*\$timestamp\s*\}\}/gi, '${__time()}')
     .replace(/\{\{\s*\$randomint\s*\}\}/gi, '${__Random(1,1000)}')
     .replace(/\{\{\s*\$isotimestamp\s*\}\}/gi, "${__time(yyyy-MM-dd'T'HH:mm:ss.SSS'Z')}")

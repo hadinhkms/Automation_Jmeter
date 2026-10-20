@@ -9,24 +9,26 @@ export function useEnvironmentSync() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const { getActiveEnvironment, importFromPostmanJson } = useEnvironmentStore()
-  const { testPlan, updateNodeProperties, insertNode } = useJMeterStore()
+  const { updateNodeProperties, insertNode } = useJMeterStore()
 
-  const handleSyncToUDV = () => {
-    const activeEnv = getActiveEnvironment()
-    if (!activeEnv) return
+  const handleSyncToUDV = (targetEnv = getActiveEnvironment(), showFeedback = true) => {
+    if (!targetEnv) return
 
-    const udvRows = convertEnvToUDVRows(activeEnv.variables)
-    const existingUDV = testPlan.children.find((c) => c.type === 'UserDefinedVariables')
+    const udvRows = convertEnvToUDVRows(targetEnv.variables)
+    const currentTestPlan = useJMeterStore.getState().testPlan
+    const existingUDV = currentTestPlan.children.find((c) => c.type === 'UserDefinedVariables')
 
     if (existingUDV) {
       updateNodeProperties(existingUDV.id, { variables: udvRows })
     } else {
       const newNode = createNode('UserDefinedVariables', 'User Defined Variables', { variables: udvRows })
-      insertNode(testPlan.id, newNode)
+      insertNode(currentTestPlan.id, newNode)
     }
 
-    setFeedback(`Synced ${udvRows.length} vars to Test Plan UDV!`)
-    setTimeout(() => setFeedback(''), 2500)
+    if (showFeedback) {
+      setFeedback(`Synced ${udvRows.length} vars to Test Plan UDV!`)
+      setTimeout(() => setFeedback(''), 2500)
+    }
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,7 +41,12 @@ export function useEnvironmentSync() {
       const content = evt.target?.result as string
       const res = importFromPostmanJson(content)
       if (res.success) {
-        setFeedback(`Imported "${res.name}" (${res.count} vars)`)
+        // Auto-sync imported variables to UDV immediately
+        const updatedEnv = useEnvironmentStore.getState().getActiveEnvironment()
+        if (updatedEnv) {
+          handleSyncToUDV(updatedEnv, false)
+        }
+        setFeedback(`Imported "${res.name}" & synced ${res.count} vars to UDV`)
       } else {
         setFeedback(`Error: ${res.error}`)
       }

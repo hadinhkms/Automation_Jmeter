@@ -104,16 +104,16 @@
 
 ## 5. Gate 4 – QA Verification Checklist (Phase D)
 
-- [ ] **TC-01:** Gửi GET `https://httpbin.org/get` -> Status 200, hiển thị latency, JSON format chuẩn.
-- [ ] **TC-02:** Gửi POST `https://httpbin.org/post` có body JSON -> Response echo lại đúng data.
-- [ ] **TC-03:** Request chứa biến `{{baseUrl}}` -> Phân giải đúng theo environment đang chọn.
-- [ ] **TC-04:** Endpoint lỗi 401/404/500 -> Hiển thị badge màu tương ứng, không làm crash app.
-- [ ] **TC-05:** Request quá 30s -> Trả về lỗi timeout rõ ràng.
-- [ ] **TC-06:** Import file `.postman_environment.json` -> Tự động nạp danh sách biến và cập nhật UDV.
-- [ ] **TC-07:** Import script `pm.response.to.have.status(200)` -> Sinh ra `ResponseAssertion` mã 200.
-- [ ] **TC-08 (JMX Compatibility):** Kịch bản có Environment + Assertions sau khi Save/Export ra file `.jmx` phải mở lại được bằng `JmxParser.parse()` không bị lỗi hoặc mất thuộc tính.
-- [ ] **TC-09 (JMeter CLI Verification):** Chạy thực tế bằng `jmeter.bat -n -t [exported.jmx]` -> Apache JMeter 5.6.3 CLI load XML thành công và thực thi không có warning/error về unknown tags.
-- [ ] **Regression:** `npm run typecheck` đạt 0 lỗi; tính năng Import Collection (Sprint 8) vẫn hoạt động bình thường.
+- [x] **TC-01:** Gửi GET `https://httpbin.org/get` -> Status 200, hiển thị latency, JSON format chuẩn.
+- [x] **TC-02:** Gửi POST `https://httpbin.org/post` có body JSON -> Response echo lại đúng data.
+- [x] **TC-03:** Request chứa biến `{{baseUrl}}` -> Phân giải đúng theo environment đang chọn.
+- [x] **TC-04:** Endpoint lỗi 401/404/500 -> Hiển thị badge màu tương ứng, không làm crash app.
+- [x] **TC-05:** Request quá 30s -> Trả về lỗi timeout rõ ràng.
+- [x] **TC-06:** Import file `.postman_environment.json` -> Tự động nạp danh sách biến và cập nhật UDV.
+- [x] **TC-07:** Import script `pm.response.to.have.status(200)` -> Sinh ra `ResponseAssertion` mã 200.
+- [x] **TC-08 (JMX Compatibility):** Kịch bản có Environment + Assertions sau khi Save/Export ra file `.jmx` phải mở lại được bằng `JmxParser.parse()` không bị lỗi hoặc mất thuộc tính.
+- [x] **TC-09 (JMeter CLI Verification):** Chạy thực tế bằng `jmeter.bat -n -t [exported.jmx]` -> Apache JMeter 5.6.3 CLI load XML thành công và thực thi không có warning/error về unknown tags.
+- [x] **Regression:** `npm run typecheck` đạt 0 lỗi; tính năng Import Collection (Sprint 8) vẫn hoạt động bình thường.
 
 ---
 

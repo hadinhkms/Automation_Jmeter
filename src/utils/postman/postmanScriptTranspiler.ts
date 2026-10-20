@@ -7,8 +7,8 @@ export function transpilePostmanScript(script: string, requestName = 'Request'):
   const generatedNodes: TestPlanNode[] = []
   const cleanScript = script.trim()
 
-  // 1. Status Code assertions: pm.response.to.have.status(200), responseCode.code === 200, pm.expect(pm.response.code).to.eq(200)
-  const statusRegex = /(?:pm\.response\.to\.(?:have|be)\.status|pm\.expect\(pm\.response\.code\)\.to\.(?:eq|equal)|responseCode\.code\s*===?)\s*\(?\s*(\d{3})\s*\)?/g
+  // 1. Status Code assertions: pm.response.to.have.status(200), pm.response.to.have.status("200"), responseCode.code === 200, pm.expect(pm.response.code).to.eq(200)
+  const statusRegex = /(?:pm\.response\.to\.(?:have|be)\.status|pm\.expect\(pm\.response\.code\)\.to\.(?:eq|equal)|responseCode\.code\s*===?)\s*\(?\s*["']?(\d{3})["']?\s*\)?/g
   let statusMatch: RegExpExecArray | null
   const seenStatusCodes = new Set<string>()
 
@@ -46,8 +46,8 @@ export function transpilePostmanScript(script: string, requestName = 'Request'):
     }
   }
 
-  // 3. JSON extractors: pm.environment.set("token", jsonData.token) or jsonData.data.id
-  const jsonExtractRegex = /pm\.(?:environment|collectionVariables|globals)\.set\s*\(\s*["']([^"']+)["']\s*,\s*jsonData\.([a-zA-Z0-9_.$[\]]+)\s*\)/g
+  // 3. JSON extractors: pm.environment.set("token", jsonData.token) or res.token or data.token or pm.response.json().token
+  const jsonExtractRegex = /pm\.(?:environment|collectionVariables|globals)\.set\s*\(\s*["']([^"']+)["']\s*,\s*(?:jsonData|res|data|pm\.response\.json\(\))\.([a-zA-Z0-9_.$[\]]+)\s*\)/g
   let extractMatch: RegExpExecArray | null
   const seenVars = new Set<string>()
 

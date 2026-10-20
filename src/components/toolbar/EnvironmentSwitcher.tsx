@@ -57,6 +57,10 @@ export function EnvironmentSwitcher() {
           feedback={feedback}
           onSelect={(id) => {
             setActiveEnvironment(id)
+            const target = environments.find((e) => e.id === id)
+            if (target) {
+              handleSyncToUDV(target, false)
+            }
             setOpen(false)
           }}
           onSync={handleSyncToUDV}

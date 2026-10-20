@@ -2,7 +2,9 @@ import { useState } from 'react'
 import type { TableRow, TestPlanNode } from '../../../models/jmeter'
 import { proxyDebugService, type SingleResponseResult } from '../../../services/proxyDebugService'
 import { useEnvironmentStore } from '../../../store/environmentStore'
+import { useJMeterStore } from '../../../store/jmeterStore'
 import { resolveVariables } from '../../../utils/postman/dynamicVariablesEngine'
+import { resolveCascadedHeaders } from '../../../utils/headerScoping'
 
 function textProp(node: TestPlanNode, key: string): string {
   const val = node.properties[key]
@@ -71,20 +73,13 @@ export function useSendRequest(node: TestPlanNode) {
       const normalizedPath = rawPath.startsWith('/') ? rawPath : `/${rawPath}`
       const fullUrl = `${rawProtocol}://${rawDomain}${portSegment}${normalizedPath}${queryString}`
 
-      // Extract headers from child HeaderManager if present
-      const headers: Array<{ name: string; value: string }> = []
-      const headerManager = node.children.find((c) => c.type === 'HTTPHeaderManager')
-      if (headerManager) {
-        const headerRows = rowsProp(headerManager, 'headers')
-        for (const h of headerRows) {
-          if (h.name) {
-            headers.push({
-              name: resolveVariables(String(h.name), envVars),
-              value: resolveVariables(String(h.value || ''), envVars),
-            })
-          }
-        }
-      }
+      // Extract cascaded headers from tree (TestPlan -> ThreadGroup -> HTTPRequest)
+      const rootTestPlan = useJMeterStore.getState().testPlan
+      const cascaded = resolveCascadedHeaders(node, rootTestPlan)
+      const headers: Array<{ name: string; value: string }> = cascaded.map((h) => ({
+        name: resolveVariables(h.name, envVars),
+        value: resolveVariables(h.value, envVars),
+      }))
 
       if (rawBody && !headers.some((h) => h.name.toLowerCase() === 'content-type')) {
         headers.push({ name: 'Content-Type', value: 'application/json' })

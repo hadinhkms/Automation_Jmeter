@@ -17,6 +17,7 @@ import {
 } from '../src/utils/postman/postmanEnvironmentParser.ts'
 import { transpilePostmanScript } from '../src/utils/postman/postmanScriptTranspiler.ts'
 import { convertPostmanRequestToNode } from '../src/utils/postman/postmanRequestConverter.ts'
+import { resolveCascadedHeaders, findParentPath } from '../src/utils/headerScoping.ts'
 
 // Lightweight DOM shim for Node environment
 if (typeof globalThis.document === 'undefined') {
@@ -85,9 +86,12 @@ async function runAsyncTest(name, fn) {
 // ----------------------------------------------------
 // 1. Dynamic Variables Engine Tests (FEAT-P3)
 // ----------------------------------------------------
-runTest('TC-DV-01: Dynamic Variables Resolution (guid, timestamp, randomInt)', () => {
+runTest('TC-DV-01: Dynamic Variables Resolution (guid, randomUUID, timestamp, randomInt)', () => {
   const guid = evaluateDynamicVariable('$guid')
   assert.ok(guid && /^[0-9a-f-]{36}$/i.test(guid), `Invalid GUID: ${guid}`)
+
+  const randomUUID = evaluateDynamicVariable('$randomUUID')
+  assert.ok(randomUUID && /^[0-9a-f-]{36}$/i.test(randomUUID), `Invalid randomUUID: ${randomUUID}`)
 
   const ts = evaluateDynamicVariable('$timestamp')
   assert.ok(ts && Number(ts) > 1700000000, `Invalid timestamp: ${ts}`)
@@ -111,12 +115,12 @@ runTest('TC-DV-02: Template Variable Resolution with Environment & Dynamic', () 
 })
 
 runTest('TC-DV-03: Transpile Variables to Apache JMeter Syntax', () => {
-  const postmanStr = '{{baseUrl}}/order/{{$guid}}?time={{$timestamp}}&rand={{$randomInt}}'
+  const postmanStr = '{{baseUrl}}/order/{{$guid}}/{{$randomUUID}}?time={{$timestamp}}&rand={{$randomInt}}'
   const jmeterStr = transpileVariablesToJMeter(postmanStr)
 
   assert.strictEqual(
     jmeterStr,
-    '${baseUrl}/order/${__UUID()}?time=${__time()}&rand=${__Random(1,1000)}',
+    '${baseUrl}/order/${__UUID()}/${__UUID()}?time=${__time()}&rand=${__Random(1,1000)}',
     `Transpilation mismatch: ${jmeterStr}`,
   )
 })
@@ -153,18 +157,20 @@ runTest('TC-ENV-01: Parse Postman Environment File', () => {
 runTest('TC-ST-01: Transpile Status Code & Text Assertions', () => {
   const testScript = `
     pm.test("Status code is 200", function () {
-      pm.response.to.have.status(200);
+      pm.response.to.have.status("200");
     });
     pm.test("Body contains success string", function () {
       pm.expect(pm.response.text()).to.include("success");
     });
     pm.environment.set("jwtToken", jsonData.token);
+    pm.environment.set("refreshToken", res.refresh);
+    pm.environment.set("accountId", data.id);
   `
 
   const nodes = transpilePostmanScript(testScript, 'Auth Request')
-  assert.strictEqual(nodes.length, 3, `Expected 3 generated nodes, got ${nodes.length}`)
+  assert.strictEqual(nodes.length, 5, `Expected 5 generated nodes, got ${nodes.length}`)
 
-  // 1. Status Code Assertion
+  // 1. Status Code Assertion with string argument "200"
   const statusNode = nodes[0]
   assert.strictEqual(statusNode.type, 'ResponseAssertion')
   assert.strictEqual(statusNode.properties.field, 'response-code')
@@ -178,11 +184,23 @@ runTest('TC-ST-01: Transpile Status Code & Text Assertions', () => {
   assert.strictEqual(textNode.properties.matchType, 'substring')
   assert.strictEqual(textNode.properties.patterns[0].pattern, 'success')
 
-  // 3. JSON Extractor
+  // 3. JSON Extractor from jsonData.token
   const jsonNode = nodes[2]
   assert.strictEqual(jsonNode.type, 'JSONExtractor')
   assert.strictEqual(jsonNode.properties.variableNames, 'jwtToken')
   assert.strictEqual(jsonNode.properties.jsonPaths, '$.token')
+
+  // 4. JSON Extractor from res.refresh
+  const resNode = nodes[3]
+  assert.strictEqual(resNode.type, 'JSONExtractor')
+  assert.strictEqual(resNode.properties.variableNames, 'refreshToken')
+  assert.strictEqual(resNode.properties.jsonPaths, '$.refresh')
+
+  // 5. JSON Extractor from data.id
+  const dataNode = nodes[4]
+  assert.strictEqual(dataNode.type, 'JSONExtractor')
+  assert.strictEqual(dataNode.properties.variableNames, 'accountId')
+  assert.strictEqual(dataNode.properties.jsonPaths, '$.id')
 })
 
 runTest('TC-ST-02: Convert Postman Request with Script to JMeter Nodes', () => {
@@ -327,7 +345,8 @@ runTest('TC-CLI-01: Execute JMX with Apache JMeter 5.6.3 CLI', () => {
     writeFileSync(jmxPath, xml, 'utf-8')
 
     const cmd = `"${jmeterBin}" -n -t "${jmxPath}" -l "${jtlPath}" -j "${logPath}"`
-    const output = execSync(cmd, { cwd: tempDir, encoding: 'utf-8', timeout: 35000 })
+    const env = { ...process.env, HEAP: '-Xms128m -Xmx512m' }
+    const output = execSync(cmd, { cwd: tempDir, encoding: 'utf-8', timeout: 35000, env })
     assert.ok(output.includes('end of run') || output.includes('summary ='), 'JMeter CLI output must confirm completion')
     console.log('    [INFO] Apache JMeter CLI successfully ran JMX without errors!')
   } finally {
@@ -387,6 +406,62 @@ await runAsyncTest('TC-PROXY-02: Proxy Executes Real Request via Node Fetch', as
   assert.strictEqual(parsed.status, 200)
   assert.ok(parsed.latencyMs >= 0)
   assert.ok(parsed.body.includes('https://httpbin.org/get'))
+})
+
+// ----------------------------------------------------
+// 7. Cascaded Header Scoping Tests (FEAT-P2 Phase 2)
+// ----------------------------------------------------
+runTest('TC-HDR-01: Find Parent Path in JMeter Hierarchy', () => {
+  const root = createNode('TestPlan', 'Root', {})
+  const tg = createNode('ThreadGroup', 'TG', {})
+  const req = createNode('HTTPRequest', 'Req', {})
+  tg.children.push(req)
+  root.children.push(tg)
+
+  const path = findParentPath(root, req.id)
+  assert.ok(path !== null, 'Path must not be null')
+  assert.strictEqual(path.length, 2, 'Path should contain Root and TG')
+  assert.strictEqual(path[0].id, root.id)
+  assert.strictEqual(path[1].id, tg.id)
+})
+
+runTest('TC-HDR-02: Cascaded Headers from TestPlan and ThreadGroup', () => {
+  const root = createNode('TestPlan', 'Root', {}, [
+    createNode('HTTPHeaderManager', 'Global Headers', {
+      headers: [
+        { name: 'User-Agent', value: 'JMeter-Global' },
+        { name: 'X-App-Env', value: 'Production' },
+      ],
+    }),
+  ])
+
+  const tg = createNode('ThreadGroup', 'TG', {}, [
+    createNode('HTTPHeaderManager', 'TG Headers', {
+      headers: [
+        { name: 'Authorization', value: 'Bearer token-123' },
+        { name: 'user-agent', value: 'JMeter-Overridden' },
+      ],
+    }),
+  ])
+
+  const req = createNode('HTTPRequest', 'Req', {}, [
+    createNode('HTTPHeaderManager', 'Local Headers', {
+      headers: [
+        { name: 'X-Request-Id', value: 'req-999' },
+      ],
+    }),
+  ])
+
+  tg.children.push(req)
+  root.children.push(tg)
+
+  const resolved = resolveCascadedHeaders(req, root)
+  const headerMap = Object.fromEntries(resolved.map((h) => [h.name.toLowerCase(), h.value]))
+
+  assert.strictEqual(headerMap['authorization'], 'Bearer token-123', 'Should inherit TG auth header')
+  assert.strictEqual(headerMap['x-app-env'], 'Production', 'Should inherit Root header')
+  assert.strictEqual(headerMap['user-agent'], 'JMeter-Overridden', 'Child TG should override Root header')
+  assert.strictEqual(headerMap['x-request-id'], 'req-999', 'Should include local request header')
 })
 
 // Summary
