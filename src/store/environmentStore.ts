@@ -31,22 +31,46 @@ const DEFAULT_ENVIRONMENTS: EnvironmentItem[] = [
   {
     id: 'dev',
     name: 'Dev Environment',
-    variables: [{ key: 'baseUrl', value: 'https://httpbin.org', enabled: true }],
+    variables: [
+      { key: 'envi', value: 'dev', enabled: true },
+      { key: 'baseUrl', value: 'api.vl24hv2.dev.sieuviet-team.com', enabled: true },
+      { key: 'apiDomain', value: 'api.vl24hv2.dev.sieuviet-team.com', enabled: true },
+      { key: 'seekerDomain', value: 'seeker.vl24hv2.dev.sieuviet-team.com', enabled: true },
+      { key: 'sitemapDomain', value: 'cdn-vl24h.vl24hv2.dev.sieuviet-team.com', enabled: true },
+    ],
   },
   {
     id: 'qc',
     name: 'QC Environment',
-    variables: [{ key: 'baseUrl', value: 'https://httpbin.org', enabled: true }],
+    variables: [
+      { key: 'envi', value: 'qc', enabled: true },
+      { key: 'baseUrl', value: 'api.vl24hv2.qc.sieuviet-team.com', enabled: true },
+      { key: 'apiDomain', value: 'api.vl24hv2.qc.sieuviet-team.com', enabled: true },
+      { key: 'seekerDomain', value: 'seeker.vl24hv2.qc.sieuviet-team.com', enabled: true },
+      { key: 'sitemapDomain', value: 'cdn-vl24h.vl24hv2.qc.sieuviet-team.com', enabled: true },
+    ],
   },
   {
     id: 'staging',
     name: 'Staging Environment',
-    variables: [{ key: 'baseUrl', value: 'https://httpbin.org', enabled: true }],
+    variables: [
+      { key: 'envi', value: 'staging', enabled: true },
+      { key: 'baseUrl', value: 'api.vl24hv2.staging.sieuviet-team.com', enabled: true },
+      { key: 'apiDomain', value: 'api.vl24hv2.staging.sieuviet-team.com', enabled: true },
+      { key: 'seekerDomain', value: 'seeker.vl24hv2.staging.sieuviet-team.com', enabled: true },
+      { key: 'sitemapDomain', value: 'cdn-vl24h.vl24hv2.staging.sieuviet-team.com', enabled: true },
+    ],
   },
   {
     id: 'prod',
     name: 'Production Environment',
-    variables: [{ key: 'baseUrl', value: 'https://httpbin.org', enabled: true }],
+    variables: [
+      { key: 'envi', value: 'prod', enabled: true },
+      { key: 'baseUrl', value: 'api.vieclam24h.vn', enabled: true },
+      { key: 'apiDomain', value: 'api.vieclam24h.vn', enabled: true },
+      { key: 'seekerDomain', value: 'vieclam24h.vn', enabled: true },
+      { key: 'sitemapDomain', value: 'cdn.vieclam24h.vn', enabled: true },
+    ],
   },
 ]
 
@@ -56,16 +80,19 @@ function loadStoredEnvironments(): { environments: EnvironmentItem[]; activeEnvI
     if (raw) {
       const parsed = JSON.parse(raw)
       if (Array.isArray(parsed.environments) && parsed.environments.length > 0) {
-        return {
-          environments: parsed.environments,
-          activeEnvId: parsed.activeEnvId || parsed.environments[0].id,
+        const hasLegacy = parsed.environments.some((e: EnvironmentItem) => e.variables?.some((v) => v.value?.includes('httpbin.org')))
+        if (!hasLegacy) {
+          return {
+            environments: parsed.environments,
+            activeEnvId: parsed.activeEnvId || parsed.environments[0].id,
+          }
         }
       }
     }
   } catch {
     // fallback
   }
-  return { environments: DEFAULT_ENVIRONMENTS, activeEnvId: 'dev' }
+  return { environments: DEFAULT_ENVIRONMENTS, activeEnvId: 'qc' }
 }
 
 function persistState(environments: EnvironmentItem[], activeEnvId: string) {

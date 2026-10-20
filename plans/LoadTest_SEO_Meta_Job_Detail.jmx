@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="LoadTest - SEO Meta Job Detail" enabled="true"><stringProp name="comments">Load testing SEO Meta Get-by-URL API with dynamic job URLs extracted from sitemap</stringProp><boolProp name="TestPlan.functional_mode">false</boolProp><boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp><boolProp name="TestPlan.serialize_threadgroups">false</boolProp><elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" enabled="true"><collectionProp name="Arguments.arguments"><elementProp name="apiDomain" elementType="HTTPArgument"><stringProp name="Argument.name">apiDomain</stringProp><stringProp name="Argument.value">api.vl24hv2.qc.sieuviet-team.com</stringProp><stringProp name="Argument.metadata"/><stringProp name="Argument.desc"/><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">false</boolProp></elementProp><elementProp name="apiPath" elementType="HTTPArgument"><stringProp name="Argument.name">apiPath</stringProp><stringProp name="Argument.value">/system/fe/seo-meta/get-by-url</stringProp><stringProp name="Argument.metadata"/><stringProp name="Argument.desc"/><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">false</boolProp></elementProp><elementProp name="seekerDomain" elementType="HTTPArgument"><stringProp name="Argument.name">seekerDomain</stringProp><stringProp name="Argument.value">seeker.vl24hv2.qc.sieuviet-team.com</stringProp><stringProp name="Argument.metadata"/><stringProp name="Argument.desc"/><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">false</boolProp></elementProp><elementProp name="sitemapDomain" elementType="HTTPArgument"><stringProp name="Argument.name">sitemapDomain</stringProp><stringProp name="Argument.value">cdn-vl24h.vl24hv2.qc.sieuviet-team.com</stringProp><stringProp name="Argument.metadata"/><stringProp name="Argument.desc"/><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">false</boolProp></elementProp><elementProp name="sitemapPath" elementType="HTTPArgument"><stringProp name="Argument.name">sitemapPath</stringProp><stringProp name="Argument.value">/file/sitemap/job/tintuyendung-0.xml</stringProp><stringProp name="Argument.metadata"/><stringProp name="Argument.desc"/><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">false</boolProp></elementProp><elementProp name="threads" elementType="HTTPArgument"><stringProp name="Argument.name">threads</stringProp><stringProp name="Argument.value">${__P(threads,10)}</stringProp><stringProp name="Argument.metadata"/><stringProp name="Argument.desc"/><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">false</boolProp></elementProp><elementProp name="rampup" elementType="HTTPArgument"><stringProp name="Argument.name">rampup</stringProp><stringProp name="Argument.value">${__P(rampup,2)}</stringProp><stringProp name="Argument.metadata"/><stringProp name="Argument.desc"/><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">false</boolProp></elementProp><elementProp name="loops" elementType="HTTPArgument"><stringProp name="Argument.name">loops</stringProp><stringProp name="Argument.value">${__P(loops,5)}</stringProp><stringProp name="Argument.metadata"/><stringProp name="Argument.desc"/><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">false</boolProp></elementProp><elementProp name="envi" elementType="HTTPArgument"><stringProp name="Argument.name">envi</stringProp><stringProp name="Argument.value">qc</stringProp><stringProp name="Argument.metadata"/><stringProp name="Argument.desc">Imported from Postman Environment</stringProp><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">false</boolProp></elementProp><elementProp name="baseUrl" elementType="HTTPArgument"><stringProp name="Argument.name">baseUrl</stringProp><stringProp name="Argument.value">api.vl24hv2.qc.sieuviet-team.com</stringProp><stringProp name="Argument.metadata"/><stringProp name="Argument.desc">Imported from Postman Environment</stringProp><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">false</boolProp></elementProp></collectionProp></elementProp></TestPlan>
+    <hashTree>
+      <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="setUp - Fetch Sitemap &amp; Extract Job Paths" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">1</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"/>
+        <stringProp name="ThreadGroup.delay"/>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+      </SetupThreadGroup>
+      <hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET - Fetch Job Sitemap XML" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" enabled="true">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">${sitemapDomain}</stringProp>
+          <stringProp name="HTTPSampler.port"/>
+          <stringProp name="HTTPSampler.protocol">https</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+          <stringProp name="HTTPSampler.path">${sitemapPath}</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <boolProp name="HTTPSampler.BROWSER_COMPATIBLE_MULTIPART">false</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 - Parse Sitemap and Store Paths" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"/>
+            <stringProp name="filename"/>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">def xmlContent = prev.getResponseDataAsString()
+def matcher = xmlContent =~ /&lt;loc&gt;https?:\/\/[^\/]+(\/[^&lt;]+)&lt;\/loc&gt;/
+def paths = []
+while (matcher.find()) {
+    paths.add(matcher.group(1).trim())
+}
+
+if (!paths.isEmpty()) {
+    props.put('SITEMAP_JOB_PATHS', paths)
+    props.put('SITEMAP_JOB_PATHS_COUNT', String.valueOf(paths.size()))
+    log.info('[SetUp] Extracted ' + paths.size() + ' job paths from sitemap.')
+    try {
+        def baseDir = org.apache.jmeter.services.FileServer.getFileServer().getBaseDir()
+        def csvFile = new File(baseDir + '/../data/sitemap_job_paths.csv')
+        csvFile.parentFile.mkdirs()
+        csvFile.withWriter('UTF-8') { writer -&gt;
+            writer.writeLine('job_path')
+            paths.each { p -&gt; writer.writeLine(p) }
+        }
+        log.info('[SetUp] Successfully synced ' + paths.size() + ' paths to ' + csvFile.getAbsolutePath())
+    } catch (Exception e) {
+        log.warn('[SetUp] Could not write CSV file: ' + e.getMessage())
+    }
+} else {
+    log.warn('[SetUp] Failed to extract paths from sitemap. Will use fallback path.')
+}
+</stringProp>
+          </JSR223PostProcessor>
+          <hashTree>
+          </hashTree>
+        </hashTree>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Thread Group - SEO Meta Load Test" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">${loops}</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">${threads}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">${rampup}</stringProp>
+        <boolProp name="ThreadGroup.delayedStart">false</boolProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"/>
+        <stringProp name="ThreadGroup.delay">0</stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+      </ThreadGroup>
+      <hashTree>
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+          <collectionProp name="HeaderManager.headers">
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">accept</stringProp>
+              <stringProp name="Header.value">application/json</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">accept-language</stringProp>
+              <stringProp name="Header.value">vi,fr-FR;q=0.9,fr;q=0.8,en-US;q=0.7,en;q=0.6,zh-CN;q=0.5,zh;q=0.4</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">authorization</stringProp>
+              <stringProp name="Header.value">Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjaGFubmVsX2NvZGUiOiJ2bDI0aCIsInVzZXIiOm51bGx9.b_GBXepcnCjRzAc9I5OdamF0Mx2K1rEg9sZVYpNx_rU</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">content-type</stringProp>
+              <stringProp name="Header.value">application/json</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">origin</stringProp>
+              <stringProp name="Header.value">https://${seekerDomain}</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">priority</stringProp>
+              <stringProp name="Header.value">u=1, i</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">referer</stringProp>
+              <stringProp name="Header.value">https://${seekerDomain}/</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">sec-ch-ua</stringProp>
+              <stringProp name="Header.value">"Google Chrome";v="155", "Chromium";v="155", "Not(A:Brand";v="24"</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">sec-ch-ua-mobile</stringProp>
+              <stringProp name="Header.value">?0</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">sec-ch-ua-platform</stringProp>
+              <stringProp name="Header.value">"Windows"</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">sec-fetch-dest</stringProp>
+              <stringProp name="Header.value">empty</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">sec-fetch-mode</stringProp>
+              <stringProp name="Header.value">cors</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">sec-fetch-site</stringProp>
+              <stringProp name="Header.value">same-site</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">user-agent</stringProp>
+              <stringProp name="Header.value">Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">x-branch</stringProp>
+              <stringProp name="Header.value">vl24h.north</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">x-correlation-id</stringProp>
+              <stringProp name="Header.value">${__UUID}</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">x-lang</stringProp>
+              <stringProp name="Header.value">vi</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">x-request-id</stringProp>
+              <stringProp name="Header.value">${__UUID}</stringProp>
+            </elementProp>
+          </collectionProp>
+        </HeaderManager>
+        <hashTree>
+        </hashTree>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 - Select Random Job Path" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"/>
+          <stringProp name="filename"/>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">def paths = props.get('SITEMAP_JOB_PATHS')
+if (paths != null &amp;&amp; !paths.isEmpty()) {
+    int idx = java.util.concurrent.ThreadLocalRandom.current().nextInt(paths.size())
+    vars.put('job_path', paths.get(idx))
+} else {
+    vars.put('job_path', '/xay-dung/ky-su-giam-sat-cong-trinh-thu-nhap-len-den-25-trieu-thang-thuong-du-an-c31p210000160id200818628.html')
+}
+</stringProp>
+        </JSR223PreProcessor>
+        <hashTree>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET - /system/fe/seo-meta/get-by-url" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" enabled="true">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="url_array[0]" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.name">url_array[0]</stringProp>
+                <stringProp name="Argument.value">${job_path}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+              </elementProp>
+              <elementProp name="url_array[1]" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.name">url_array[1]</stringProp>
+                <stringProp name="Argument.value">job_detail</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">${apiDomain}</stringProp>
+          <stringProp name="HTTPSampler.port"/>
+          <stringProp name="HTTPSampler.protocol">https</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+          <stringProp name="HTTPSampler.path">${apiPath}</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <boolProp name="HTTPSampler.BROWSER_COMPATIBLE_MULTIPART">false</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert HTTP 200 &amp; Code 200" enabled="true">
+            <collectionProp name="Asserion.test_strings">
+              <stringProp name="49586">200</stringProp>
+              <stringProp name="1053567406">"code":200</stringProp>
+            </collectionProp>
+            <stringProp name="Assertion.custom_message">API get-by-url failed or did not return code 200</stringProp>
+            <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+            <boolProp name="Assertion.assume_success">false</boolProp>
+            <intProp name="Assertion.test_type">2</intProp>
+          </ResponseAssertion>
+          <hashTree>
+          </hashTree>
+        </hashTree>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"/>
+        </ResultCollector>
+        <hashTree>
+        </hashTree>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"/>
+        </ResultCollector>
+        <hashTree>
+        </hashTree>
+      </hashTree>
+      <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true"><stringProp name="comments"/><collectionProp name="Arguments.arguments"><elementProp name="baseUrl" elementType="Argument"><stringProp name="Argument.name">baseUrl</stringProp><stringProp name="Argument.value">api.vl24hv2.qc.sieuviet-team.com</stringProp><stringProp name="Argument.desc">Imported from Postman Environment</stringProp></elementProp><elementProp name="envi" elementType="Argument"><stringProp name="Argument.name">envi</stringProp><stringProp name="Argument.value">qc</stringProp><stringProp name="Argument.desc">Imported from Postman Environment</stringProp></elementProp><elementProp name="apiDomain" elementType="Argument"><stringProp name="Argument.name">apiDomain</stringProp><stringProp name="Argument.value">api.vl24hv2.qc.sieuviet-team.com</stringProp><stringProp name="Argument.desc">Imported from Postman Environment</stringProp></elementProp><elementProp name="seekerDomain" elementType="Argument"><stringProp name="Argument.name">seekerDomain</stringProp><stringProp name="Argument.value">seeker.vl24hv2.qc.sieuviet-team.com</stringProp><stringProp name="Argument.desc">Imported from Postman Environment</stringProp></elementProp><elementProp name="sitemapDomain" elementType="Argument"><stringProp name="Argument.name">sitemapDomain</stringProp><stringProp name="Argument.value">cdn-vl24h.vl24hv2.qc.sieuviet-team.com</stringProp><stringProp name="Argument.desc">Imported from Postman Environment</stringProp></elementProp></collectionProp></Arguments>
+      <hashTree>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>

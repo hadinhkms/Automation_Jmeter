@@ -3,6 +3,7 @@ import { useEnvironmentStore } from '../../store/environmentStore'
 import { useJMeterStore } from '../../store/jmeterStore'
 import { convertEnvToUDVRows } from '../../utils/postman/postmanEnvironmentParser'
 import { createNode } from '../../mock/sampleTestPlan'
+import type { TableRow } from '../../models/jmeter'
 
 export function useEnvironmentSync() {
   const [feedback, setFeedback] = useState('')
@@ -16,10 +17,34 @@ export function useEnvironmentSync() {
 
     const udvRows = convertEnvToUDVRows(targetEnv.variables)
     const currentTestPlan = useJMeterStore.getState().testPlan
-    const existingUDV = currentTestPlan.children.find((c) => c.type === 'UserDefinedVariables')
 
+    // 1. Sync to TestPlan root variables
+    const planVars = (currentTestPlan.properties.variables as TableRow[]) || []
+    const updatedPlanVars = [...planVars]
+    for (const row of udvRows) {
+      const idx = updatedPlanVars.findIndex((v) => String(v.name) === String(row.name))
+      if (idx >= 0) {
+        updatedPlanVars[idx] = { ...updatedPlanVars[idx], value: row.value }
+      } else {
+        updatedPlanVars.push(row)
+      }
+    }
+    updateNodeProperties(currentTestPlan.id, { variables: updatedPlanVars })
+
+    // 2. Sync to child UserDefinedVariables node
+    const existingUDV = currentTestPlan.children.find((c) => c.type === 'UserDefinedVariables')
     if (existingUDV) {
-      updateNodeProperties(existingUDV.id, { variables: udvRows })
+      const childVars = (existingUDV.properties.variables as TableRow[]) || []
+      const updatedChildVars = [...childVars]
+      for (const row of udvRows) {
+        const idx = updatedChildVars.findIndex((v) => String(v.name) === String(row.name))
+        if (idx >= 0) {
+          updatedChildVars[idx] = { ...updatedChildVars[idx], value: row.value }
+        } else {
+          updatedChildVars.push(row)
+        }
+      }
+      updateNodeProperties(existingUDV.id, { variables: updatedChildVars })
     } else {
       const newNode = createNode('UserDefinedVariables', 'User Defined Variables', { variables: udvRows })
       insertNode(currentTestPlan.id, newNode)
