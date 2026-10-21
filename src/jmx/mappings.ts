@@ -99,6 +99,7 @@ export function mapElementToType(element: Element): JMeterComponentType {
     return 'HTTPRequest'
   }
   if (tag.includes('ConcurrencyThreadGroup') || gui.includes('ConcurrencyThreadGroup')) return 'ConcurrencyThreadGroup'
+  if (tag === 'SetupThreadGroup' || tag === 'PostThreadGroup' || gui.includes('SetupThreadGroup') || test.includes('SetupThreadGroup')) return 'ThreadGroup'
   if (tag.includes('SteppingThreadGroup') || gui.includes('SteppingThreadGroup')) return 'SteppingThreadGroup'
   if (tag.includes('UltimateThreadGroup') || gui.includes('UltimateThreadGroup')) return 'UltimateThreadGroup'
   if (tag.includes('OpenWebSocketSampler') || gui.includes('OpenWebSocketSampler')) return 'WebSocketOpenSampler'
