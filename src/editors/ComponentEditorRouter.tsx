@@ -9,6 +9,7 @@ import { DebugSamplerEditor, HTTPRequestDefaultsEditor, HTTPRequestEditor, TestP
 import { AggregateReportEditor, SummaryReportEditor, ViewResultsTreeEditor } from './ListenerEditors'
 import { ConstantTimerEditor, IfControllerEditor, LoopControllerEditor, TransactionControllerEditor } from './LogicEditors'
 import { JSONExtractorEditor, JSR223Editor, RegexExtractorEditor, ResponseAssertionEditor } from './ProcessorEditors'
+import { JSONPathAssertionEditor } from './JSONPathAssertionEditor'
 import { ConcurrencyThreadGroupEditor, SteppingThreadGroupEditor, UltimateThreadGroupEditor } from './ThreadEditors'
 import { BackendListenerEditor, GRPCSamplerEditor, GraphQLSamplerEditor, TCPSamplerEditor, WebSocketCloseSamplerEditor, WebSocketOpenSamplerEditor, WebSocketSingleReadSamplerEditor, WebSocketSingleWriteSamplerEditor } from './ProtocolEditors'
 
@@ -101,6 +102,7 @@ export function ComponentEditorRouter({
       case 'JSONExtractor': return <JSONExtractorEditor {...props} />
       case 'RegexExtractor': return <RegexExtractorEditor {...props} />
       case 'ResponseAssertion': return <ResponseAssertionEditor {...props} />
+      case 'JSONPathAssertion': return <JSONPathAssertionEditor {...props} />
       case 'JSR223Sampler':
       case 'JSR223PreProcessor':
       case 'JSR223PostProcessor':

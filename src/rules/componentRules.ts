@@ -27,7 +27,7 @@ export const componentGroups = {
     'RegexExtractor',
     'JSR223PostProcessor',
   ],
-  'Assertions': ['ResponseAssertion', 'JSR223Assertion'],
+  'Assertions': ['ResponseAssertion', 'JSONPathAssertion', 'JSR223Assertion'],
   'Logic Controller': [
     'TransactionController',
     'IfController',
@@ -91,6 +91,7 @@ const processorTypes = new Set<JMeterComponentType>([
 ])
 const assertionTypes = new Set<JMeterComponentType>([
   'ResponseAssertion',
+  'JSONPathAssertion',
   'JSR223Assertion',
 ])
 const listenerTypes = new Set<JMeterComponentType>([

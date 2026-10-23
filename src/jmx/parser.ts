@@ -351,6 +351,16 @@ function parseProperties(element: Element, type: JMeterComponentType): Record<st
         or: (numProp(element, 'Assertion.test_type', 8) & 32) === 32,
         ignoreStatus: boolProp(element, 'Assertion.assume_success'),
       }
+    case 'JSONPathAssertion':
+      return {
+        ...common,
+        jsonPath: prop(element, 'JSON_PATH'),
+        expectedValue: prop(element, 'EXPECTED_VALUE'),
+        jsonValidation: boolProp(element, 'JSONVALIDATION', true),
+        expectNull: boolProp(element, 'EXPECT_NULL', false),
+        invert: boolProp(element, 'INVERT', false),
+        isRegex: boolProp(element, 'ISREGEX', false),
+      }
     case 'DebugSampler':
       return {
         ...common,

@@ -274,6 +274,14 @@ runTest('TC-JMX-01: Serializes Test Plan with UDV, Transpiled Variables & Assert
       matchType: 'equals',
       patterns: [{ pattern: '200' }],
     }),
+    createNode('JSONPathAssertion', 'JSON Assertion - Code 200', {
+      jsonPath: '$.code',
+      expectedValue: '200',
+      jsonValidation: true,
+      expectNull: false,
+      invert: false,
+      isRegex: false,
+    }),
   ])
 
   threadGroup.children.push(httpRequest)
@@ -286,6 +294,9 @@ runTest('TC-JMX-01: Serializes Test Plan with UDV, Transpiled Variables & Assert
   assert.ok(jmxXml.includes('<stringProp name="Argument.name">baseUrl</stringProp>'), 'Missing baseUrl in JMX')
   assert.ok(jmxXml.includes('<stringProp name="HTTPSampler.path">/get?uuid=${__UUID()}</stringProp>'), 'Missing path with dynamic var')
   assert.ok(jmxXml.includes('guiclass="AssertionGui" testclass="ResponseAssertion"'), 'Missing ResponseAssertion')
+  assert.ok(jmxXml.includes('guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion"'), 'Missing JSONPathAssertion')
+  assert.ok(jmxXml.includes('<stringProp name="JSON_PATH">$.code</stringProp>'), 'Missing JSON_PATH in JMX')
+  assert.ok(jmxXml.includes('<stringProp name="EXPECTED_VALUE">200</stringProp>'), 'Missing EXPECTED_VALUE in JMX')
 })
 
 // ----------------------------------------------------

@@ -68,6 +68,7 @@ export const typeToElement: Record<Exclude<JMeterComponentType, 'UnsupportedComp
   JSONExtractor: { tag: 'JSONPostProcessor', guiclass: 'JSONPostProcessorGui', testclass: 'JSONPostProcessor' },
   RegexExtractor: { tag: 'RegexExtractor', guiclass: 'RegexExtractorGui', testclass: 'RegexExtractor' },
   ResponseAssertion: { tag: 'ResponseAssertion', guiclass: 'AssertionGui', testclass: 'ResponseAssertion' },
+  JSONPathAssertion: { tag: 'JSONPathAssertion', guiclass: 'JSONPathAssertionGui', testclass: 'JSONPathAssertion' },
   DebugSampler: { tag: 'DebugSampler', guiclass: 'TestBeanGUI', testclass: 'DebugSampler' },
   JSR223Sampler: { tag: 'JSR223Sampler', guiclass: 'TestBeanGUI', testclass: 'JSR223Sampler' },
   JSR223PreProcessor: { tag: 'JSR223PreProcessor', guiclass: 'TestBeanGUI', testclass: 'JSR223PreProcessor' },

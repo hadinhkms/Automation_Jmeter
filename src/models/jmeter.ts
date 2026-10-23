@@ -24,6 +24,7 @@ export type JMeterComponentType =
   | 'JSONExtractor'
   | 'RegexExtractor'
   | 'ResponseAssertion'
+  | 'JSONPathAssertion'
   | 'DebugSampler'
   | 'JSR223Sampler'
   | 'JSR223PreProcessor'

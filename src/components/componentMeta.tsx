@@ -65,6 +65,7 @@ export const componentMeta: Record<
   JSONExtractor: { label: 'JSON Extractor', icon: FileJson2, tone: 'processor' },
   RegexExtractor: { label: 'Regular Expression Extractor', icon: Braces, tone: 'processor' },
   ResponseAssertion: { label: 'Response Assertion', icon: ShieldCheck, tone: 'assertion' },
+  JSONPathAssertion: { label: 'JSON Assertion', icon: ShieldCheck, tone: 'assertion' },
   DebugSampler: { label: 'Debug Sampler', icon: Bug, tone: 'sampler' },
   JSR223Sampler: { label: 'JSR223 Sampler', icon: Code2, tone: 'sampler' },
   JSR223PreProcessor: { label: 'JSR223 PreProcessor', icon: Code2, tone: 'processor' },

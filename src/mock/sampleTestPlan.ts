@@ -26,6 +26,7 @@ const names: Record<JMeterComponentType, string> = {
   JSONExtractor: 'JSON Extractor',
   RegexExtractor: 'Regular Expression Extractor',
   ResponseAssertion: 'Response Assertion',
+  JSONPathAssertion: 'JSON Assertion',
   DebugSampler: 'Debug Sampler',
   JSR223Sampler: 'JSR223 Sampler',
   JSR223PreProcessor: 'JSR223 PreProcessor',
@@ -266,6 +267,16 @@ export function defaultProperties(
         not: false,
         or: false,
         ignoreStatus: false,
+      }
+    case 'JSONPathAssertion':
+      return {
+        ...common,
+        jsonPath: '$.code',
+        expectedValue: '200',
+        jsonValidation: true,
+        expectNull: false,
+        invert: false,
+        isRegex: false,
       }
     case 'DebugSampler':
       return {

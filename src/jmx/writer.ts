@@ -545,6 +545,15 @@ case 'BackendListener': {
       boolProperty(documentNode, element, 'Assertion.assume_success', value(node, 'ignoreStatus', false))
       break
     }
+    case 'JSONPathAssertion': {
+      stringProp(documentNode, element, 'JSON_PATH', value(node, 'jsonPath', '$.code'))
+      stringProp(documentNode, element, 'EXPECTED_VALUE', value(node, 'expectedValue', '200'))
+      boolProperty(documentNode, element, 'JSONVALIDATION', value(node, 'jsonValidation', true))
+      boolProperty(documentNode, element, 'EXPECT_NULL', value(node, 'expectNull', false))
+      boolProperty(documentNode, element, 'INVERT', value(node, 'invert', false))
+      boolProperty(documentNode, element, 'ISREGEX', value(node, 'isRegex', false))
+      break
+    }
     case 'DebugSampler':
       boolProperty(documentNode, element, 'displayJMeterProperties', value(node, 'displayJMeterProperties', false))
       boolProperty(documentNode, element, 'displayJMeterVariables', value(node, 'displayJMeterVariables', true))
