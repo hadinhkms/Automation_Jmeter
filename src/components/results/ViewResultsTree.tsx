@@ -27,6 +27,8 @@ import { parseJtlContent } from '../../utils/jtlParser'
 import { useJMeterStore } from '../../store/jmeterStore'
 import { LiveMetricsDashboard } from './LiveMetricsDashboard'
 import type { SlaThresholds, TestPlanNode } from '../../models/jmeter'
+import { useEnvironmentStore } from '../../store/environmentStore'
+import { collectKnownVariables, resolveVariables } from '../../utils/variableResolver'
 
 interface ViewResultsTreeProps {
   samples: JtlSample[]
@@ -145,8 +147,11 @@ function generateCurlCommand(
   testPlan?: TestPlanNode | null,
   knownVariables?: Record<string, string>
 ): string {
-  const url = getHttpUrl(sample)
+  let url = getHttpUrl(sample)
   if (!url || isNonHttpSampler(sample)) return ''
+  if (knownVariables) {
+    url = resolveVariables(url, knownVariables)
+  }
 
   let method = (sample.method || '').toUpperCase()
   if (!method || method === 'HTTP' || !HTTP_METHODS.includes(method as typeof HTTP_METHODS[number])) {
@@ -167,10 +172,14 @@ function generateCurlCommand(
     for (const line of lines) {
       const colonIdx = line.indexOf(':')
       if (colonIdx > 0) {
-        const name = line.substring(0, colonIdx).trim()
-        const val = line.substring(colonIdx + 1).trim()
+        let name = line.substring(0, colonIdx).trim()
+        let val = line.substring(colonIdx + 1).trim()
         const lowerName = name.toLowerCase()
         if (lowerName !== 'connection' && lowerName !== 'content-length' && lowerName !== 'host') {
+          if (knownVariables) {
+            name = resolveVariables(name, knownVariables)
+            val = resolveVariables(val, knownVariables)
+          }
           headers.push({ name, value: val })
         }
       }
@@ -208,10 +217,14 @@ function generateCurlCommand(
 
       const colonIdx = line.indexOf(':')
       if (colonIdx > 0 && !line.startsWith('http://') && !line.startsWith('https://') && !line.startsWith('URL:') && !line.startsWith('Method:') && !line.startsWith('Thread:')) {
-        const name = line.substring(0, colonIdx).trim()
-        const val = line.substring(colonIdx + 1).trim()
+        let name = line.substring(0, colonIdx).trim()
+        let val = line.substring(colonIdx + 1).trim()
         const lowerName = name.toLowerCase()
         if (lowerName !== 'connection' && lowerName !== 'content-length' && lowerName !== 'host') {
+          if (knownVariables) {
+            name = resolveVariables(name, knownVariables)
+            val = resolveVariables(val, knownVariables)
+          }
           headers.push({ name, value: val })
         }
       }
@@ -227,14 +240,22 @@ function generateCurlCommand(
     const planHeaders = findSamplerHeadersInTestPlan(testPlan, sample.label)
     for (const ph of planHeaders) {
       if (!headers.some((h) => h.name.toLowerCase() === ph.name.toLowerCase())) {
+        let name = ph.name
         let val = ph.value
         if (knownVariables) {
-          val = val.replace(/\$\{([^}]+)\}/g, (_, varName) => {
-            return knownVariables[varName] || `\${${varName}}`
-          })
+          name = resolveVariables(name, knownVariables)
+          val = resolveVariables(val, knownVariables)
         }
-        headers.push({ name: ph.name, value: val })
+        headers.push({ name, value: val })
       }
+    }
+  }
+
+  // Final sweep: ensure all headers have variables resolved
+  if (knownVariables) {
+    for (const h of headers) {
+      h.name = resolveVariables(h.name, knownVariables)
+      h.value = resolveVariables(h.value, knownVariables)
     }
   }
 
@@ -260,7 +281,7 @@ function generateCurlCommand(
 
   // Body data (Postman format: --data-raw '{ ... }')
   if (body) {
-    let formattedBody = body
+    let formattedBody = knownVariables ? resolveVariables(body, knownVariables) : body
     try {
       if (body.startsWith('{') || body.startsWith('[')) {
         const parsed = JSON.parse(body)
@@ -297,6 +318,7 @@ function generateHttpResponsePreview(sample: JtlSample): string {
 
 export function ViewResultsTree({ samples, isReal = false, activeRunId }: ViewResultsTreeProps) {
   const store = useJMeterStore()
+  const activeEnvVariables = useEnvironmentStore((s) => s.getActiveVariables())
   const [viewMode, setViewMode] = useState<'tree' | 'dashboard'>('tree')
   const [selectedId, setSelectedId] = useState<string>(samples[0]?.id || '')
   const [searchQuery, setSearchQuery] = useState('')
@@ -439,13 +461,37 @@ export function ViewResultsTree({ samples, isReal = false, activeRunId }: ViewRe
     return filteredSamples.slice(virtualSampleRange.start, virtualSampleRange.end)
   }, [filteredSamples, virtualSampleRange])
 
+  const debugVariables = useMemo(() => {
+    const vars: Record<string, string> = {}
+    for (const s of samples) {
+      if (s.response && (s.label.toLowerCase().includes('debug sampler') || s.response.includes('JMeterVariables:'))) {
+        const lines = s.response.split(/\r?\n/)
+        for (const line of lines) {
+          const eqIdx = line.indexOf('=')
+          if (eqIdx > 0 && !line.startsWith('DebugSampler.')) {
+            const k = line.substring(0, eqIdx).trim()
+            const v = line.substring(eqIdx + 1).trim()
+            if (k && v) vars[k] = v
+          }
+        }
+      }
+    }
+    return vars
+  }, [samples])
+
+  const allKnownVariables = useMemo(() => {
+    return collectKnownVariables(store.testPlan, activeEnvVariables, debugVariables)
+  }, [store.testPlan, activeEnvVariables, debugVariables])
+
   const selectedSample = useMemo(() => {
     return samples.find((s) => s.id === selectedId) || filteredSamples[0] || samples[0]
   }, [samples, filteredSamples, selectedId])
 
   const selectedHttpUrl = useMemo(() => {
-    return selectedSample ? getHttpUrl(selectedSample) : ''
-  }, [selectedSample])
+    if (!selectedSample) return ''
+    const raw = getHttpUrl(selectedSample)
+    return allKnownVariables ? resolveVariables(raw, allKnownVariables) : raw
+  }, [selectedSample, allKnownVariables])
 
   const isSelectedHttpRequest = useMemo(() => {
     return selectedSample ? isHttpRequestSample(selectedSample) : false
@@ -628,7 +674,7 @@ loginEmail=admin@example.com
 phone=0987654321
 salary=negotiable
 tax_number=0102030405
-token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+token=mock_debug_bearer_sample_jwt_xyz123
 userId=201238842
 START.HMS=003905
 START.MS=1788197945150
@@ -646,7 +692,13 @@ TestElement.name=${selectedSample.label}`
       return raw && raw.includes('JMeterVariables:') ? raw : debugVariables
     }
 
-    // For HTTP Requests, format JSON nicely if it's compact JSON or has unicode escapes
+    return decodeUnicodeEscapes(raw)
+  }, [selectedSample])
+
+  // Extract and format request body with variable resolution
+  const requestBody = useMemo(() => {
+    if (!selectedSample) return ''
+    const raw = selectedSample.request || ''
     let formattedBody = raw
     if (raw && (raw.trim().startsWith('{') || raw.trim().startsWith('['))) {
       try {
@@ -659,26 +711,12 @@ TestElement.name=${selectedSample.label}`
       formattedBody = decodeUnicodeEscapes(raw)
     }
 
-    return formattedBody
-  }, [selectedSample])
-
-  const debugVariables = useMemo(() => {
-    const vars: Record<string, string> = {}
-    for (const s of samples) {
-      if (s.response && (s.label.toLowerCase().includes('debug sampler') || s.response.includes('JMeterVariables:'))) {
-        const lines = s.response.split(/\r?\n/)
-        for (const line of lines) {
-          const eqIdx = line.indexOf('=')
-          if (eqIdx > 0 && !line.startsWith('DebugSampler.')) {
-            const k = line.substring(0, eqIdx).trim()
-            const v = line.substring(eqIdx + 1).trim()
-            if (k && v) vars[k] = v
-          }
-        }
-      }
+    if (allKnownVariables && formattedBody) {
+      formattedBody = resolveVariables(formattedBody, allKnownVariables)
     }
-    return vars
-  }, [samples])
+
+    return formattedBody
+  }, [selectedSample, allKnownVariables])
 
   // Request Headers
   const requestHeaders = useMemo(() => {
@@ -687,18 +725,17 @@ TestElement.name=${selectedSample.label}`
       return '(This sampler does not generate HTTP request headers)'
     }
     if (selectedSample.requestHeaders && selectedSample.requestHeaders.trim()) {
-      return decodeUnicodeEscapes(selectedSample.requestHeaders.trim())
+      const decoded = decodeUnicodeEscapes(selectedSample.requestHeaders.trim())
+      return allKnownVariables ? resolveVariables(decoded, allKnownVariables) : decoded
     }
     if (store.testPlan) {
       const planHeaders = findSamplerHeadersInTestPlan(store.testPlan, selectedSample.label)
       if (planHeaders.length > 0) {
         return planHeaders
           .map((h) => {
-            let val = h.value
-            if (debugVariables) {
-              val = val.replace(/\$\{([^}]+)\}/g, (_, varName) => debugVariables[varName] || `\${${varName}}`)
-            }
-            return `${h.name}: ${val}`
+            const name = allKnownVariables ? resolveVariables(h.name, allKnownVariables) : h.name
+            const val = allKnownVariables ? resolveVariables(h.value, allKnownVariables) : h.value
+            return `${name}: ${val}`
           })
           .join('\n')
       }
@@ -710,14 +747,14 @@ TestElement.name=${selectedSample.label}`
       const headerLines: string[] = []
       for (const line of lines) {
         if (/^[A-Za-z0-9-]+:\s*.+/.test(line)) {
-          headerLines.push(line)
+          headerLines.push(allKnownVariables ? resolveVariables(line, allKnownVariables) : line)
         }
       }
       if (headerLines.length > 0) return decodeUnicodeEscapes(headerLines.join('\n'))
     }
 
     return `Connection: keep-alive\nContent-Type: application/json; charset=UTF-8\nAccept: application/json, text/plain, */*\nUser-Agent: Apache-JMeter/5.6.3\nHost: ${urlInfo?.host || 'localhost'}`
-  }, [selectedSample, urlInfo, store.testPlan, debugVariables])
+  }, [selectedSample, urlInfo, store.testPlan, allKnownVariables])
 
   // Detailed Response Headers
   const formattedResponseHeaders = useMemo(() => {
@@ -778,8 +815,8 @@ TestElement.name=${selectedSample.label}`
   }
 
   const curlCommand = useMemo(() => {
-    return selectedSample ? generateCurlCommand(selectedSample, store.testPlan, debugVariables) : ''
-  }, [selectedSample, store.testPlan, debugVariables])
+    return selectedSample ? generateCurlCommand(selectedSample, store.testPlan, allKnownVariables) : ''
+  }, [selectedSample, store.testPlan, allKnownVariables])
 
   const curlResponsePreview = useMemo(() => {
     return selectedSample ? generateHttpResponsePreview(selectedSample) : ''
@@ -1093,7 +1130,9 @@ TestElement.name=${selectedSample.label}`
                             ? curlCommand
                             : activeRequestSubTab === 'headers'
                               ? requestHeaders
-                              : decodeUnicodeEscapes(selectedSample.request || selectedSample.url || '')
+                              : activeRequestSubTab === 'body'
+                                ? requestBody
+                                : decodeUnicodeEscapes(selectedSample.request || selectedSample.url || '')
                           : responseSubTab === 'headers'
                             ? formattedResponseHeaders
                             : responseBody
@@ -1251,7 +1290,7 @@ TestElement.name=${selectedSample.label}`
                                 ? 'json'
                                 : 'text'
                           }
-                          value={decodeUnicodeEscapes(selectedSample.request || (isSelectedHttpRequest ? selectedSample.url : '') || '(No request data)')}
+                          value={requestBody || (isSelectedHttpRequest ? selectedHttpUrl : '') || '(No request data)'}
                           minHeight={340}
                           readOnly
                           onChange={() => {}}
