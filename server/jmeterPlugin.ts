@@ -108,7 +108,11 @@ export function jmeterPlugin(): Plugin {
           try {
             const body = await parseJsonBody(req)
             const customPath = typeof body.path === 'string' ? body.path : ''
+            const customHeap = typeof body.heap === 'string' ? body.heap : ''
             jmeterRunner.setCustomPath(customPath)
+            if (customHeap) {
+              jmeterRunner.setCustomHeap(customHeap)
+            }
             const detection = jmeterRunner.detectJMeter()
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ success: true, detection }))
@@ -143,7 +147,8 @@ export function jmeterPlugin(): Plugin {
             }
 
             const remoteHosts = body.remoteHosts as string[] | string | undefined
-            const { runId, reportDir } = await jmeterRunner.startRun(jmx, name, { remoteHosts })
+            const heap = typeof body.heap === 'string' ? body.heap : undefined
+            const { runId, reportDir } = await jmeterRunner.startRun(jmx, name, { remoteHosts, heap })
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ success: true, runId, reportDir }))
           } catch (err) {

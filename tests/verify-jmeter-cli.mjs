@@ -141,7 +141,8 @@ if (jmeterBin) {
   console.log('Running Apache JMeter CLI:', jmeterBin)
   try {
     const cmd = `"${jmeterBin}" -n -t "${jmxPath}" -l "${jtlPath}" -j "${logPath}"`
-    const output = execSync(cmd, { cwd: tempDir, encoding: 'utf-8', timeout: 30000 })
+    const env = { ...process.env, HEAP: process.env.HEAP || '-Xms128m -Xmx512m' }
+    const output = execSync(cmd, { cwd: tempDir, encoding: 'utf-8', timeout: 30000, env })
     console.log('JMeter CLI Output:\n', output)
     console.log('✓ Apache JMeter executed the generated test plan successfully with 0 errors!')
   } catch (err) {

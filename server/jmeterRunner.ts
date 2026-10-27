@@ -329,6 +329,7 @@ export class JMeterRunner extends EventEmitter {
 
   private customPath: string = ''
   private customJavaHome: string = ''
+  private customHeap: string = ''
   private currentProcess: ChildProcess | null = null
   private currentRunId: string | null = null
   private isRunning: boolean = false
@@ -394,6 +395,14 @@ export class JMeterRunner extends EventEmitter {
 
   public getCustomJavaHome(): string {
     return this.customJavaHome
+  }
+
+  public setCustomHeap(heap: string) {
+    this.customHeap = heap.trim()
+  }
+
+  public getCustomHeap(): string {
+    return this.customHeap
   }
 
   public getCompatibleJavaHome(): string | null {
@@ -511,6 +520,7 @@ export class JMeterRunner extends EventEmitter {
         env.Path = combinedPath
       }
       env.SystemRoot = systemRoot
+      env.HEAP = this.customHeap || process.env.HEAP || '-Xms128m -Xmx512m -XX:MaxMetaspaceSize=256m'
 
       const output = execSync(`"${binPath}" -v`, {
         encoding: 'utf-8',
@@ -594,7 +604,7 @@ export class JMeterRunner extends EventEmitter {
   public async startRun(
     jmxContent: string,
     testName = 'test_plan',
-    options?: { remoteHosts?: string[] | string },
+    options?: { remoteHosts?: string[] | string; heap?: string; jvmArgs?: string },
   ): Promise<{ runId: string; reportDir: string }> {
     if (this.isRunning) {
       if (this.currentProcess) {
@@ -676,6 +686,10 @@ export class JMeterRunner extends EventEmitter {
       env.Path = combinedPath
     }
     env.SystemRoot = systemRoot
+    env.HEAP = options?.heap || this.customHeap || process.env.HEAP || '-Xms128m -Xmx512m -XX:MaxMetaspaceSize=256m'
+    if (options?.jvmArgs || process.env.JVM_ARGS) {
+      env.JVM_ARGS = options?.jvmArgs || process.env.JVM_ARGS || ''
+    }
 
     const child = spawn(detection.path, args, {
       cwd: runDir,
