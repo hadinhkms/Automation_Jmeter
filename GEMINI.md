@@ -26,9 +26,9 @@ python "D:/_Master_process/master.py" optimize .
 ```
 
 ## Kỷ luật Giới hạn Kích thước File & Chủ Động Tách File (Proactive File Splitting Protocol)
-- **TUYỆT ĐỐI KHÔNG TẠO FILE NGUYÊN KHỐI (MONOLITH):** Tuân thủ trần số dòng theo `config/quality-policy.json`: UI Component ≤ 150 dòng, Hook ≤ 150 dòng, Utils/Helpers ≤ 150 dòng, Service/Client ≤ 200 dòng, Module khác/Backend/Scripts ≤ 250 dòng, Test Scripts ≤ 800 dòng.
+- **TUYỆT ĐỐI KHÔNG TẠO FILE NGUYÊN KHỐI (MONOLITH):** Tuân thủ trần số dòng theo `config/quality-policy.json`: UI Component ≤ 150 dòng, Hook ≤ 150 dòng, Utils/Helpers ≤ 150 dòng, Service/Client ≤ 200 dòng, Module khác/Backend/Scripts ≤ 250 dòng, Test Scripts ≤ 800 dòng. *(NGOẠI LỆ ĐẶC THÙ: Toàn bộ các file kịch bản JMeter `.jmx` là định dạng XML Test Plan cấu hình lớn, được LOẠI TRỪ HOÀN TOÀN khỏi quy định trần số dòng này và không áp dụng quy tắc tách file).*
 - **CẢNH BÁO SỚM & CHỦ ĐỘNG TÁCH FILE TẠI VÙNG VÀNG (80% LIMIT):**
-  - Khi một file đạt hoặc dự kiến sau khi sửa sẽ đạt **≥ 80% ngưỡng cho phép** (Component/Hook/Util ≥ 120 dòng, Service ≥ 160 dòng, Module ≥ 200 dòng, Test ≥ 650 dòng): AI **BẮT BUỘC DỪNG VIỆC THÊM LOGIC VÀO FILE ĐÓ** và **CHỦ ĐỘNG TÁCH FILE NGAY**.
+  - Khi một file đạt hoặc dự kiến sau khi sửa sẽ đạt **≥ 80% ngưỡng cho phép** (Component/Hook/Util ≥ 120 dòng, Service ≥ 160 dòng, Module ≥ 200 dòng, Test ≥ 650 dòng): AI **BẮT BUỘC DỪNG VIỆC THÊM LOGIC VÀO FILE ĐÓ** và **CHỦ ĐỘNG TÁCH FILE NGAY** *(ngoại trừ file `.jmx`)*.
   - Không chờ đến khi vượt trần, bị lỗi git hook pre-commit hoặc audit chặn đứng mới vội vã sửa.
 - **CHIẾN LƯỢC TÁCH FILE CHUẨN KIẾN TRÚC:**
   - *Frontend:* Tách Sub-components cho các phần UI độc lập; tách state/effects vào Custom Hooks; tách types và constants ra file riêng.

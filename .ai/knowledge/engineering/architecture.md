@@ -12,5 +12,5 @@
 - `[ARCH-001]` **UI Independence:** UI components không được gọi trực tiếp HTTP/Fetch; phải thông qua Service/API client layer.
 - `[ARCH-002]` **Error Handling Standard:** Toàn bộ API response lỗi phải được chuẩn hoá qua Error Boundary hoặc Interceptor thống nhất.
 - `[ARCH-003]` **Feature Modularity (Vertical Slice):** Tổ chức mã nguồn theo tính năng độc lập tại `features/<name>/` gồm components, hooks, services, types để dễ dàng mở rộng.
-- `[ARCH-004]` **File Size Budget:** Theo policy Hub: component/hook/utils ≤150, service ≤200, module ≤250 dòng. Phân rã theo trách nhiệm phù hợp stack; số dòng không chứng minh hiệu năng.
+- `[ARCH-004]` **File Size Budget:** Theo policy Hub: component/hook/utils ≤150, service ≤200, module ≤250 dòng, test script code ≤800 dòng. Phân rã theo trách nhiệm phù hợp stack; số dòng không chứng minh hiệu năng. *(Ngoại lệ: Toàn bộ file kịch bản JMeter `.jmx` là cấu hình XML test plan, được loại trừ hoàn toàn khỏi giới hạn kích thước file).*
 
