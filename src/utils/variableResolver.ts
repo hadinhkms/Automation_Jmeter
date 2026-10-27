@@ -1,5 +1,3 @@
-import type { TestPlanNode } from '../models/jmeter'
-
 /**
  * Iteratively resolves nested variable references inside a dictionary of variables
  * (e.g. { envi: 'qc', host: 'mr.${envi}.com' } -> { envi: 'qc', host: 'mr.qc.com' })

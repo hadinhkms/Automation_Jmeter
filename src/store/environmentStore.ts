@@ -1,90 +1,45 @@
 import { create } from 'zustand'
 import { parsePostmanEnvironment } from '../utils/postman/postmanEnvironmentParser'
+import type { EnvironmentItem, EnvironmentStore, EnvironmentVariable } from './environmentTypes'
+import { DEFAULT_ENVIRONMENTS, STORAGE_KEY } from './environmentDefaults'
 
-export interface EnvironmentVariable {
-  key: string
-  value: string
-  enabled: boolean
+export type { EnvironmentItem, EnvironmentStore, EnvironmentVariable }
+
+export function computeActiveVariables(
+  environments: EnvironmentItem[],
+  activeEnvId: string
+): Record<string, string> {
+  const active = environments.find((e) => e.id === activeEnvId) || environments[0]
+  if (!active) return {}
+  const map: Record<string, string> = {}
+  for (const v of active.variables) {
+    if (v.enabled && v.key.trim()) {
+      map[v.key.trim()] = v.value
+    }
+  }
+  return map
 }
 
-export interface EnvironmentItem {
-  id: string
-  name: string
-  variables: EnvironmentVariable[]
-}
-
-interface EnvironmentStore {
+function loadStoredEnvironments(): {
   environments: EnvironmentItem[]
   activeEnvId: string
-  setActiveEnvironment: (id: string) => void
-  getActiveEnvironment: () => EnvironmentItem | undefined
-  getActiveVariables: () => Record<string, string>
-  addEnvironment: (name: string, variables: EnvironmentVariable[]) => string
-  updateEnvironment: (id: string, updates: Partial<EnvironmentItem>) => void
-  deleteEnvironment: (id: string) => void
-  importFromPostmanJson: (jsonString: string) => { success: boolean; name?: string; count?: number; error?: string }
-}
-
-const STORAGE_KEY = 'jmeter_environments_v1'
-
-const DEFAULT_ENVIRONMENTS: EnvironmentItem[] = [
-  {
-    id: 'dev',
-    name: 'Dev Environment',
-    variables: [
-      { key: 'envi', value: 'dev', enabled: true },
-      { key: 'baseUrl', value: 'api.vl24hv2.dev.sieuviet-team.com', enabled: true },
-      { key: 'apiDomain', value: 'api.vl24hv2.dev.sieuviet-team.com', enabled: true },
-      { key: 'seekerDomain', value: 'seeker.vl24hv2.dev.sieuviet-team.com', enabled: true },
-      { key: 'sitemapDomain', value: 'cdn-vl24h.vl24hv2.dev.sieuviet-team.com', enabled: true },
-    ],
-  },
-  {
-    id: 'qc',
-    name: 'QC Environment',
-    variables: [
-      { key: 'envi', value: 'qc', enabled: true },
-      { key: 'baseUrl', value: 'api.vl24hv2.qc.sieuviet-team.com', enabled: true },
-      { key: 'apiDomain', value: 'api.vl24hv2.qc.sieuviet-team.com', enabled: true },
-      { key: 'seekerDomain', value: 'seeker.vl24hv2.qc.sieuviet-team.com', enabled: true },
-      { key: 'sitemapDomain', value: 'cdn-vl24h.vl24hv2.qc.sieuviet-team.com', enabled: true },
-    ],
-  },
-  {
-    id: 'staging',
-    name: 'Staging Environment',
-    variables: [
-      { key: 'envi', value: 'staging', enabled: true },
-      { key: 'baseUrl', value: 'api.vl24hv2.staging.sieuviet-team.com', enabled: true },
-      { key: 'apiDomain', value: 'api.vl24hv2.staging.sieuviet-team.com', enabled: true },
-      { key: 'seekerDomain', value: 'seeker.vl24hv2.staging.sieuviet-team.com', enabled: true },
-      { key: 'sitemapDomain', value: 'cdn-vl24h.vl24hv2.staging.sieuviet-team.com', enabled: true },
-    ],
-  },
-  {
-    id: 'prod',
-    name: 'Production Environment',
-    variables: [
-      { key: 'envi', value: 'prod', enabled: true },
-      { key: 'baseUrl', value: 'api.vieclam24h.vn', enabled: true },
-      { key: 'apiDomain', value: 'api.vieclam24h.vn', enabled: true },
-      { key: 'seekerDomain', value: 'vieclam24h.vn', enabled: true },
-      { key: 'sitemapDomain', value: 'cdn.vieclam24h.vn', enabled: true },
-    ],
-  },
-]
-
-function loadStoredEnvironments(): { environments: EnvironmentItem[]; activeEnvId: string } {
+  activeVariables: Record<string, string>
+} {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) {
       const parsed = JSON.parse(raw)
       if (Array.isArray(parsed.environments) && parsed.environments.length > 0) {
-        const hasLegacy = parsed.environments.some((e: EnvironmentItem) => e.variables?.some((v) => v.value?.includes('httpbin.org')))
+        const hasLegacy = parsed.environments.some((e: EnvironmentItem) =>
+          e.variables?.some((v) => v.value?.includes('httpbin.org'))
+        )
         if (!hasLegacy) {
+          const envs = parsed.environments
+          const activeId = parsed.activeEnvId || envs[0].id
           return {
-            environments: parsed.environments,
-            activeEnvId: parsed.activeEnvId || parsed.environments[0].id,
+            environments: envs,
+            activeEnvId: activeId,
+            activeVariables: computeActiveVariables(envs, activeId),
           }
         }
       }
@@ -92,7 +47,11 @@ function loadStoredEnvironments(): { environments: EnvironmentItem[]; activeEnvI
   } catch {
     // fallback
   }
-  return { environments: DEFAULT_ENVIRONMENTS, activeEnvId: 'qc' }
+  return {
+    environments: DEFAULT_ENVIRONMENTS,
+    activeEnvId: 'qc',
+    activeVariables: computeActiveVariables(DEFAULT_ENVIRONMENTS, 'qc'),
+  }
 }
 
 function persistState(environments: EnvironmentItem[], activeEnvId: string) {
@@ -108,10 +67,13 @@ const initial = loadStoredEnvironments()
 export const useEnvironmentStore = create<EnvironmentStore>((set, get) => ({
   environments: initial.environments,
   activeEnvId: initial.activeEnvId,
+  activeVariables: initial.activeVariables,
 
   setActiveEnvironment: (id) => {
-    set({ activeEnvId: id })
-    persistState(get().environments, id)
+    const envs = get().environments
+    const vars = computeActiveVariables(envs, id)
+    set({ activeEnvId: id, activeVariables: vars })
+    persistState(envs, id)
   },
 
   getActiveEnvironment: () => {
@@ -120,15 +82,7 @@ export const useEnvironmentStore = create<EnvironmentStore>((set, get) => ({
   },
 
   getActiveVariables: () => {
-    const active = get().getActiveEnvironment()
-    if (!active) return {}
-    const map: Record<string, string> = {}
-    for (const v of active.variables) {
-      if (v.enabled && v.key.trim()) {
-        map[v.key.trim()] = v.value
-      }
-    }
-    return map
+    return get().activeVariables
   },
 
   addEnvironment: (name, variables) => {
@@ -138,15 +92,18 @@ export const useEnvironmentStore = create<EnvironmentStore>((set, get) => ({
       variables,
     }
     const updated = [...get().environments, newEnv]
-    set({ environments: updated, activeEnvId: newEnv.id })
+    const vars = computeActiveVariables(updated, newEnv.id)
+    set({ environments: updated, activeEnvId: newEnv.id, activeVariables: vars })
     persistState(updated, newEnv.id)
     return newEnv.id
   },
 
   updateEnvironment: (id, updates) => {
     const updated = get().environments.map((e) => (e.id === id ? { ...e, ...updates } : e))
-    set({ environments: updated })
-    persistState(updated, get().activeEnvId)
+    const currentActiveId = get().activeEnvId
+    const vars = computeActiveVariables(updated, currentActiveId)
+    set({ environments: updated, activeVariables: vars })
+    persistState(updated, currentActiveId)
   },
 
   deleteEnvironment: (id) => {
@@ -154,7 +111,8 @@ export const useEnvironmentStore = create<EnvironmentStore>((set, get) => ({
     if (current.length <= 1) return
     const updated = current.filter((e) => e.id !== id)
     const nextActive = get().activeEnvId === id ? updated[0].id : get().activeEnvId
-    set({ environments: updated, activeEnvId: nextActive })
+    const vars = computeActiveVariables(updated, nextActive)
+    set({ environments: updated, activeEnvId: nextActive, activeVariables: vars })
     persistState(updated, nextActive)
   },
 
@@ -175,7 +133,8 @@ export const useEnvironmentStore = create<EnvironmentStore>((set, get) => ({
     }
 
     const updated = [...get().environments, envItem]
-    set({ environments: updated, activeEnvId: envItem.id })
+    const vars = computeActiveVariables(updated, envItem.id)
+    set({ environments: updated, activeEnvId: envItem.id, activeVariables: vars })
     persistState(updated, envItem.id)
 
     return { success: true, name: envItem.name, count: envItem.variables.length }

@@ -318,7 +318,7 @@ function generateHttpResponsePreview(sample: JtlSample): string {
 
 export function ViewResultsTree({ samples, isReal = false, activeRunId }: ViewResultsTreeProps) {
   const store = useJMeterStore()
-  const activeEnvVariables = useEnvironmentStore((s) => s.getActiveVariables())
+  const activeEnvVariables = useEnvironmentStore((s) => s.activeVariables)
   const [viewMode, setViewMode] = useState<'tree' | 'dashboard'>('tree')
   const [selectedId, setSelectedId] = useState<string>(samples[0]?.id || '')
   const [searchQuery, setSearchQuery] = useState('')
@@ -411,7 +411,7 @@ export function ViewResultsTree({ samples, isReal = false, activeRunId }: ViewRe
     }
 
     lastSampleCountRef.current = newCount
-  }, [samples, samples.length, autoScroll, selectedId])
+  }, [samples, autoScroll])
 
   // Cleanup timers on unmount
   useEffect(() => {
