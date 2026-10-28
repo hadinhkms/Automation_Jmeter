@@ -14,7 +14,6 @@ import {
   FolderOpen,
   UploadCloud,
   Terminal,
-  ChevronDown,
   Clock,
   HardDrive,
   Code2,
@@ -26,9 +25,13 @@ import { CodeEditor } from '../common/CodeEditor'
 import { parseJtlContent } from '../../utils/jtlParser'
 import { useJMeterStore } from '../../store/jmeterStore'
 import { LiveMetricsDashboard } from './LiveMetricsDashboard'
-import type { SlaThresholds, TestPlanNode } from '../../models/jmeter'
+import type { SlaThresholds } from '../../models/jmeter'
 import { useEnvironmentStore } from '../../store/environmentStore'
 import { collectKnownVariables, resolveVariables } from '../../utils/variableResolver'
+import { findSamplerHeadersInTestPlan } from './testPlanSamplerLookup'
+import { copyTextToClipboard } from '../../utils/clipboard'
+import { decodeUnicodeEscapes, getHttpUrl, isHttpRequestSample } from './sampleHttpUtils'
+import { generateCurlCommand } from './curlCommandBuilder'
 
 interface ViewResultsTreeProps {
   samples: JtlSample[]
@@ -41,261 +44,8 @@ type RequestSubTab = 'body' | 'headers' | 'curl' | 'url' | 'raw'
 type ResponseSubTab = 'body' | 'cookies' | 'headers' | 'tests'
 type ResponseRenderer = 'json' | 'curl-response' | 'text' | 'html' | 'xml' | 'headers'
 
-const HTTP_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'] as const
 const SAMPLE_ROW_HEIGHT = 32
 const SAMPLE_OVERSCAN_ROWS = 12
-
-function decodeUnicodeEscapes(str: string): string {
-  if (!str) return ''
-  return str
-    .replace(/&#x0*([0-9a-fA-F]+);/gi, (_, hex) => {
-      const code = parseInt(hex, 16)
-      return isNaN(code) ? '' : String.fromCodePoint(code)
-    })
-    .replace(/&#([0-9]+);/gi, (_, dec) => {
-      const code = parseInt(dec, 10)
-      return isNaN(code) ? '' : String.fromCodePoint(code)
-    })
-    .replace(/\\u([0-9a-fA-F]{4})/gi, (_, hex) => {
-      const code = parseInt(hex, 16)
-      return isNaN(code) ? '' : String.fromCodePoint(code)
-    })
-}
-
-function getHttpUrl(sample: JtlSample): string {
-  const candidates = [
-    sample.url || '',
-    (sample.request || '').match(/https?:\/\/[^\s'")]+/i)?.[0] || '',
-  ]
-
-  for (const candidate of candidates) {
-    const trimmed = candidate.trim()
-    if (!trimmed || trimmed === '(none)') continue
-
-    try {
-      const parsed = new URL(trimmed)
-      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
-        return parsed.toString()
-      }
-    } catch {
-      // keep checking the next candidate
-    }
-  }
-
-  return ''
-}
-
-function isNonHttpSampler(sample: JtlSample): boolean {
-  const label = sample.label.toLowerCase()
-  return label.includes('debug sampler') || label.includes('jsr223')
-}
-
-function isHttpRequestSample(sample: JtlSample): boolean {
-  return !isNonHttpSampler(sample) && Boolean(getHttpUrl(sample))
-}
-
-function findSamplerHeadersInTestPlan(
-  testPlan: TestPlanNode | null | undefined,
-  sampleLabel: string
-): { name: string; value: string }[] {
-  if (!testPlan) return []
-
-  const foundHeaders: { name: string; value: string }[] = []
-
-  function traverse(node: TestPlanNode, inheritedHeaders: { name: string; value: string }[]): boolean {
-    const scopeHeaders = [...inheritedHeaders]
-    for (const child of node.children || []) {
-      if (child.type === 'HTTPHeaderManager' && child.enabled) {
-        const hdrs = (child.properties.headers as { name: string; value: string }[]) || []
-        for (const h of hdrs) {
-          if (h.name && h.value) {
-            const idx = scopeHeaders.findIndex((sh) => sh.name.toLowerCase() === h.name.toLowerCase())
-            if (idx >= 0) scopeHeaders[idx] = h
-            else scopeHeaders.push(h)
-          }
-        }
-      }
-    }
-
-    const cleanNodeName = node.name.trim().toLowerCase()
-    const cleanSampleLabel = sampleLabel.trim().toLowerCase()
-    const isMatch =
-      cleanNodeName === cleanSampleLabel ||
-      (node.type === 'HTTPRequest' && (cleanSampleLabel.includes(cleanNodeName) || cleanNodeName.includes(cleanSampleLabel)))
-
-    if (isMatch) {
-      for (const h of scopeHeaders) {
-        if (!foundHeaders.some((fh) => fh.name.toLowerCase() === h.name.toLowerCase())) {
-          foundHeaders.push(h)
-        }
-      }
-      return true
-    }
-
-    for (const child of node.children || []) {
-      if (traverse(child, scopeHeaders)) return true
-    }
-    return false
-  }
-
-  traverse(testPlan, [])
-  return foundHeaders
-}
-
-function generateCurlCommand(
-  sample: JtlSample,
-  testPlan?: TestPlanNode | null,
-  knownVariables?: Record<string, string>
-): string {
-  let url = getHttpUrl(sample)
-  if (!url || isNonHttpSampler(sample)) return ''
-  if (knownVariables) {
-    url = resolveVariables(url, knownVariables)
-  }
-
-  let method = (sample.method || '').toUpperCase()
-  if (!method || method === 'HTTP' || !HTTP_METHODS.includes(method as typeof HTTP_METHODS[number])) {
-    const text = `${sample.label} ${url} ${sample.request || ''}`.toUpperCase()
-    if (/\b(GET)\b/.test(text)) method = 'GET'
-    else if (/\b(POST|LOGIN|REGISTER|UPLOAD|CREATE|ADD|SUBMIT)\b/.test(text)) method = 'POST'
-    else if (/\b(PUT|UPDATE)\b/.test(text)) method = 'PUT'
-    else if (/\b(DELETE|REMOVE)\b/.test(text)) method = 'DELETE'
-    else if (/\b(PATCH)\b/.test(text)) method = 'PATCH'
-    else method = 'GET'
-  }
-
-  const headers: { name: string; value: string }[] = []
-  let body = ''
-
-  if (sample.requestHeaders && sample.requestHeaders.trim()) {
-    const lines = decodeUnicodeEscapes(sample.requestHeaders.trim()).split(/\r?\n/)
-    for (const line of lines) {
-      const colonIdx = line.indexOf(':')
-      if (colonIdx > 0) {
-        let name = line.substring(0, colonIdx).trim()
-        let val = line.substring(colonIdx + 1).trim()
-        const lowerName = name.toLowerCase()
-        if (lowerName !== 'connection' && lowerName !== 'content-length' && lowerName !== 'host') {
-          if (knownVariables) {
-            name = resolveVariables(name, knownVariables)
-            val = resolveVariables(val, knownVariables)
-          }
-          headers.push({ name, value: val })
-        }
-      }
-    }
-    body = decodeUnicodeEscapes(sample.request || '').trim()
-  } else {
-    const rawReq = decodeUnicodeEscapes(sample.request || '')
-    const lines = rawReq.split(/\r?\n/)
-    let inBody = false
-    const bodyLines: string[] = []
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i]
-      if (inBody) {
-        bodyLines.push(line)
-        continue
-      }
-
-      if (!line.trim()) {
-        if (i > 0) inBody = true
-        continue
-      }
-
-      if (line.trim().startsWith('{') || line.trim().startsWith('[')) {
-        inBody = true
-        bodyLines.push(line)
-        continue
-      }
-
-      if (line.startsWith('Body:')) {
-        inBody = true
-        bodyLines.push(line.replace(/^Body:\s*/i, ''))
-        continue
-      }
-
-      const colonIdx = line.indexOf(':')
-      if (colonIdx > 0 && !line.startsWith('http://') && !line.startsWith('https://') && !line.startsWith('URL:') && !line.startsWith('Method:') && !line.startsWith('Thread:')) {
-        let name = line.substring(0, colonIdx).trim()
-        let val = line.substring(colonIdx + 1).trim()
-        const lowerName = name.toLowerCase()
-        if (lowerName !== 'connection' && lowerName !== 'content-length' && lowerName !== 'host') {
-          if (knownVariables) {
-            name = resolveVariables(name, knownVariables)
-            val = resolveVariables(val, knownVariables)
-          }
-          headers.push({ name, value: val })
-        }
-      }
-    }
-
-    if (bodyLines.length > 0) {
-      body = bodyLines.join('\n').trim()
-    }
-  }
-
-  // Fallback: If headers is missing authorization or essential headers, inspect TestPlan HeaderManager
-  if (testPlan && (!headers.some((h) => h.name.toLowerCase() === 'authorization') || headers.length <= 2)) {
-    const planHeaders = findSamplerHeadersInTestPlan(testPlan, sample.label)
-    for (const ph of planHeaders) {
-      if (!headers.some((h) => h.name.toLowerCase() === ph.name.toLowerCase())) {
-        let name = ph.name
-        let val = ph.value
-        if (knownVariables) {
-          name = resolveVariables(name, knownVariables)
-          val = resolveVariables(val, knownVariables)
-        }
-        headers.push({ name, value: val })
-      }
-    }
-  }
-
-  // Final sweep: ensure all headers have variables resolved
-  if (knownVariables) {
-    for (const h of headers) {
-      h.name = resolveVariables(h.name, knownVariables)
-      h.value = resolveVariables(h.value, knownVariables)
-    }
-  }
-
-  // Postman cURL syntax:
-  const parts: string[] = []
-  if (method === 'GET') {
-    parts.push(`curl --location '${url}'`)
-  } else {
-    parts.push(`curl --location --request ${method} '${url}'`)
-  }
-
-  // Headers (Postman format: --header '<key>: <value>')
-  if (headers.length > 0) {
-    for (const h of headers) {
-      parts.push(`--header '${h.name}: ${h.value.replace(/'/g, "\\'")}'`)
-    }
-  } else {
-    parts.push(`--header 'accept: application/json'`)
-    if (body || method === 'POST' || method === 'PUT' || method === 'PATCH') {
-      parts.push(`--header 'content-type: application/json'`)
-    }
-  }
-
-  // Body data (Postman format: --data-raw '{ ... }')
-  if (body) {
-    let formattedBody = knownVariables ? resolveVariables(body, knownVariables) : body
-    try {
-      if (body.startsWith('{') || body.startsWith('[')) {
-        const parsed = JSON.parse(body)
-        formattedBody = JSON.stringify(parsed, null, 2)
-      }
-    } catch {
-      // keep original
-    }
-    parts.push(`--data-raw '${formattedBody.replace(/'/g, "\\'")}'`)
-  }
-
-  return parts.join(' \\\n')
-}
-
 
 function generateHttpResponsePreview(sample: JtlSample): string {
   const statusMsg = sample.success ? 'OK' : 'Internal Server Error / Failed'
@@ -578,12 +328,9 @@ export function ViewResultsTree({ samples, isReal = false, activeRunId }: ViewRe
 
   const handleCopy = async (text: string) => {
     if (!text) return
-    try {
-      await navigator.clipboard.writeText(text)
+    if (await copyTextToClipboard(text)) {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-    } catch {
-      // ignore
     }
   }
 
@@ -694,6 +441,17 @@ TestElement.name=${selectedSample.label}`
 
     return decodeUnicodeEscapes(raw)
   }, [selectedSample])
+
+  // Pretty view: indent valid JSON (parse the raw body so escaped quotes stay valid); otherwise fall back to the raw body
+  const prettyResponseBody = useMemo(() => {
+    const raw = (selectedSample?.response || '').trim()
+    if (!raw.startsWith('{') && !raw.startsWith('[')) return responseBody
+    try {
+      return JSON.stringify(JSON.parse(raw), null, 2)
+    } catch {
+      return responseBody
+    }
+  }, [selectedSample, responseBody])
 
   // Extract and format request body with variable resolution
   const requestBody = useMemo(() => {
@@ -817,6 +575,21 @@ TestElement.name=${selectedSample.label}`
   const curlCommand = useMemo(() => {
     return selectedSample ? generateCurlCommand(selectedSample, store.testPlan, allKnownVariables) : ''
   }, [selectedSample, store.testPlan, allKnownVariables])
+
+  // One copy button per view: code views use the editor's built-in button, the tab-bar "Copy" covers the rest
+  const isCurlView = mainTab === 'request' && activeRequestSubTab === 'curl' && isSelectedHttpRequest
+  const tabCopyText = (() => {
+    if (mainTab === 'sampler-result') return samplerResultText
+    if (mainTab === 'request') {
+      if (activeRequestSubTab === 'headers') return requestHeaders
+      if (activeRequestSubTab === 'url') return selectedHttpUrl
+      if (activeRequestSubTab === 'raw') return decodeUnicodeEscapes(selectedSample?.request || selectedSample?.url || '')
+      return null // cURL and Request Body render a CodeEditor with its own copy button
+    }
+    if (responseSubTab === 'headers') return formattedResponseHeaders
+    if (responseSubTab === 'body' && responseRenderer !== 'json' && responseRenderer !== 'curl-response') return responseBody
+    return null
+  })()
 
   const curlResponsePreview = useMemo(() => {
     return selectedSample ? generateHttpResponsePreview(selectedSample) : ''
@@ -1105,44 +878,30 @@ TestElement.name=${selectedSample.label}`
 
                 <div className="vrt-tabs-spacer" />
 
-                {isSelectedHttpRequest ? (
+                {/* Shortcut to the request as cURL from any other view; the cURL view has its own copy button */}
+                {isSelectedHttpRequest && !isCurlView ? (
                   <button
                     type="button"
                     className="vrt-copy-btn curl-btn"
                     onClick={() => handleCopy(curlCommand)}
-                    title="Copy cURL Command to Clipboard"
+                    title="Copy this request as cURL (Postman import)"
                   >
                     <Terminal size={13} />
                     <span>Copy cURL</span>
                   </button>
                 ) : null}
 
-                {/* Quick Copy */}
-                <button
-                  type="button"
-                  className="vrt-copy-btn"
-                  onClick={() => {
-                    const text =
-                      mainTab === 'sampler-result'
-                        ? samplerResultText
-                        : mainTab === 'request'
-                          ? activeRequestSubTab === 'curl'
-                            ? curlCommand
-                            : activeRequestSubTab === 'headers'
-                              ? requestHeaders
-                              : activeRequestSubTab === 'body'
-                                ? requestBody
-                                : decodeUnicodeEscapes(selectedSample.request || selectedSample.url || '')
-                          : responseSubTab === 'headers'
-                            ? formattedResponseHeaders
-                            : responseBody
-                    handleCopy(text)
-                  }}
-                  title="Copy current tab content"
-                >
-                  {copied ? <Check size={13} className="text-success" /> : <Copy size={13} />}
-                  <span>{copied ? 'Copied!' : 'Copy'}</span>
-                </button>
+                {tabCopyText ? (
+                  <button
+                    type="button"
+                    className="vrt-copy-btn"
+                    onClick={() => handleCopy(tabCopyText)}
+                    title="Copy current tab content"
+                  >
+                    {copied ? <Check size={13} className="text-success" /> : <Copy size={13} />}
+                    <span>{copied ? 'Copied!' : 'Copy'}</span>
+                  </button>
+                ) : null}
               </div>
 
               {/* Tab 1: Sampler Result */}
@@ -1203,34 +962,13 @@ TestElement.name=${selectedSample.label}`
                   <div className="request-subtab-content">
                     {activeRequestSubTab === 'curl' && isSelectedHttpRequest ? (
                       <div className="curl-view">
-                        {/* Postman Style Action Bar for Snippet */}
-                        <div className="postman-snippet-bar">
-                          <div className="postman-snippet-meta">
-                            <span className="postman-snippet-title">Code snippet</span>
-                            <div className="postman-lang-badge">
-                              <span>cURL</span>
-                              <ChevronDown size={12} />
-                            </div>
-                          </div>
-                          <div className="postman-snippet-actions">
-                            <button
-                              type="button"
-                              className="vrt-copy-btn curl-btn"
-                              onClick={() => handleCopy(curlCommand)}
-                              title="Copy cURL to Clipboard"
-                            >
-                              {copied ? <Check size={13} className="text-success" /> : <Copy size={13} />}
-                              <span>{copied ? 'Copied!' : 'Copy cURL'}</span>
-                            </button>
-                          </div>
-                        </div>
-
                         <CodeEditor
-                          label={`cURL Code Snippet (${selectedSample.method || 'HTTP'} - ${selectedSample.label})`}
+                          label={`cURL · ${selectedSample.label}`}
                           language="curl"
                           value={curlCommand}
-                          minHeight={340}
+                          minHeight={160}
                           readOnly
+                          copyLabel="Copy cURL"
                           onChange={() => {}}
                         />
                       </div>
@@ -1291,7 +1029,7 @@ TestElement.name=${selectedSample.label}`
                                 : 'text'
                           }
                           value={requestBody || (isSelectedHttpRequest ? selectedHttpUrl : '') || '(No request data)'}
-                          minHeight={340}
+                          minHeight={160}
                           readOnly
                           onChange={() => {}}
                         />
@@ -1440,16 +1178,6 @@ TestElement.name=${selectedSample.label}`
                               onChange={(e) => setResponseSearchQuery(e.target.value)}
                             />
                           </div>
-
-                          <button
-                            type="button"
-                            className="vrt-copy-btn"
-                            onClick={() => handleCopy(responseBody)}
-                            title="Copy Response Body"
-                          >
-                            {copied ? <Check size={13} className="text-success" /> : <Copy size={13} />}
-                            <span>{copied ? 'Copied!' : 'Copy'}</span>
-                          </button>
                         </div>
                       </div>
 
@@ -1460,7 +1188,7 @@ TestElement.name=${selectedSample.label}`
                               label={`HTTP Response & Headers (${selectedSample.code} - ${selectedSample.elapsed}ms)`}
                               language="json"
                               value={curlResponsePreview}
-                              minHeight={360}
+                              minHeight={160}
                               readOnly
                               onChange={() => {}}
                             />
@@ -1470,8 +1198,8 @@ TestElement.name=${selectedSample.label}`
                             <CodeEditor
                               label={`Response JSON (${selectedSample.code} - ${selectedSample.elapsed}ms)`}
                               language="json"
-                              value={responseBody}
-                              minHeight={360}
+                              value={prettyResponseBody}
+                              minHeight={160}
                               readOnly
                               onChange={() => {}}
                             />

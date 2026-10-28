@@ -29,6 +29,8 @@ export function ViewResultsTreeEditor({ cleared = false }: { cleared?: boolean }
         sentBytes: s.sentBytes || 0,
         latency: s.latency || 0,
         connectTime: s.connectTime || 0,
+        requestHeaders: s.requestHeaders,
+        responseHeaders: s.responseHeaders,
       })),
     [rawSamples]
   )

@@ -477,6 +477,8 @@ button:hover kbd {
   flex-direction: column;
   overflow: hidden !important;
   height: 100%;
+  /* The generic 30px scroll padding would be dead space under a full-height listener and clip its bottom rows */
+  padding-bottom: 0;
 }
 
 .editor-body.full-height-listener {
@@ -1748,43 +1750,6 @@ button:hover kbd {
 .url-params-table .param-val {
   font-family: Consolas, monospace;
   word-break: break-all;
-}
-
-/* Postman-Style Request Snippet Header */
-.postman-snippet-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 12px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-bottom: 0;
-  border-radius: 6px 6px 0 0;
-}
-
-.postman-snippet-title-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.postman-snippet-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: #1e293b;
-}
-
-.postman-lang-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  background: #fff;
-  border: 1px solid #cbd5e1;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #0f172a;
 }
 
 /* Postman-Style Response Header Bar */
@@ -3989,6 +3954,7 @@ button:hover kbd {
 
 .request-body-wrap,
 .request-curl-wrap,
+.curl-view,
 .response-json-wrap,
 .response-curl-wrap,
 .response-rendered-content {
@@ -4001,6 +3967,7 @@ button:hover kbd {
 
 .request-body-wrap .code-editor-wrapper,
 .request-curl-wrap .code-editor-wrapper,
+.curl-view .code-editor-wrapper,
 .response-json-wrap .code-editor-wrapper,
 .response-curl-wrap .code-editor-wrapper {
   flex: 1;
@@ -4014,6 +3981,7 @@ button:hover kbd {
 
 .request-body-wrap .code-editor-container,
 .request-curl-wrap .code-editor-container,
+.curl-view .code-editor-container,
 .response-json-wrap .code-editor-container,
 .response-curl-wrap .code-editor-container {
   flex: 1;

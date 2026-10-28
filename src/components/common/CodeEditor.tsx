@@ -8,6 +8,7 @@ import 'prismjs/components/prism-groovy'
 import 'prismjs/components/prism-json'
 import 'prismjs/components/prism-bash'
 import { Copy, Check, Code2, Sparkles, Wand2 } from 'lucide-react'
+import { copyTextToClipboard } from '../../utils/clipboard'
 
 // Custom JMeter built-in identifiers highlighting in Prism
 if (Prism.languages.groovy) {
@@ -43,6 +44,8 @@ export interface CodeEditorProps {
   placeholder?: string
   minHeight?: number
   readOnly?: boolean
+  /** Text of the built-in copy button, e.g. "Copy cURL" (defaults to "Copy") */
+  copyLabel?: string
   onChange: (value: string) => void
 }
 
@@ -110,6 +113,7 @@ export function CodeEditor({
   placeholder = 'Enter code here...',
   minHeight = 240,
   readOnly = false,
+  copyLabel = 'Copy',
   onChange,
 }: CodeEditorProps) {
   const [copied, setCopied] = useState(false)
@@ -256,12 +260,9 @@ export function CodeEditor({
 
   const handleCopy = async () => {
     if (!value) return
-    try {
-      await navigator.clipboard.writeText(value)
+    if (await copyTextToClipboard(value)) {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-    } catch {
-      // ignore
     }
   }
 
@@ -390,7 +391,7 @@ export function CodeEditor({
             title="Copy content to clipboard"
           >
             {copied ? <Check size={13} className="success-icon" /> : <Copy size={13} />}
-            <span>{copied ? 'Copied' : 'Copy'}</span>
+            <span>{copied ? 'Copied!' : copyLabel}</span>
           </button>
         </div>
       </div>

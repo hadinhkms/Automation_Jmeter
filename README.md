@@ -94,7 +94,7 @@ Script sẽ tự động cài đặt dependencies (nếu chưa có), khởi đ�
    npm run dev
    ```
 
-3. Mở trình duyệt và truy cập theo URL hiển thị trên terminal (thường là `http://localhost:5173` hoặc cổng được cấp phát tự động).
+3. Mở trình duyệt và truy cập: `http://localhost:58936` (hoặc cổng cấu hình).
 
 ---
 

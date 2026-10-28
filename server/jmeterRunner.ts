@@ -3,6 +3,7 @@ import { spawn, type ChildProcess, execSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, statSync, cpSync, copyFileSync, symlinkSync, rmSync } from 'node:fs'
 import { join, resolve, isAbsolute, dirname } from 'node:path'
 import { EventEmitter } from 'node:events'
+import { enforceVrtListenerCapture } from './vrtListenerConfig'
 
 export interface JMeterDetectionResult {
   found: boolean
@@ -635,7 +636,8 @@ export class JMeterRunner extends EventEmitter {
     const logFilePath = join(runDir, 'jmeter.log')
 
     const workspaceRoot = process.cwd()
-    const runnableJmxContent = normalizeWorkspaceAssetPaths(jmxContent, workspaceRoot)
+    const vrtFilePath = join(runDir, 'vrt_results.xml').replace(/\\/g, '/')
+    const runnableJmxContent = enforceVrtListenerCapture(normalizeWorkspaceAssetPaths(jmxContent, workspaceRoot), vrtFilePath)
     writeFileSync(jmxPath, runnableJmxContent, 'utf-8')
 
     this.currentRunId = runId
