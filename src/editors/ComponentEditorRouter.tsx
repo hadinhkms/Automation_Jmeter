@@ -96,6 +96,7 @@ export function ComponentEditorRouter({
       case 'TransactionController': return <TransactionControllerEditor {...props} />
       case 'IfController': return <IfControllerEditor {...props} />
       case 'LoopController': return <LoopControllerEditor {...props} />
+      case 'SimpleController':
       case 'ModuleController':
       case 'TestFragmentController': return <div className="editor-empty-state">No specific configuration required for this controller container.</div>
       case 'ConstantTimer': return <ConstantTimerEditor {...props} />

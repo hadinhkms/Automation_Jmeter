@@ -58,6 +58,7 @@ export const componentMeta: Record<
   HTTPHeaderManager: { label: 'HTTP Header Manager', icon: PanelTop, tone: 'config' },
   HTTPCookieManager: { label: 'HTTP Cookie Manager', icon: Cookie, tone: 'config' },
   CSVDataSet: { label: 'CSV Data Set Config', icon: Table2, tone: 'config' },
+  SimpleController: { label: 'Simple Controller', icon: FolderCog, tone: 'controller' },
   TransactionController: { label: 'Transaction Controller', icon: GitBranch, tone: 'controller' },
   IfController: { label: 'If Controller', icon: GitBranch, tone: 'controller' },
   LoopController: { label: 'Loop Controller', icon: Repeat2, tone: 'controller' },

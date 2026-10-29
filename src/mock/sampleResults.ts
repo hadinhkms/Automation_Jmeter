@@ -14,6 +14,8 @@ export interface MockSample {
   sentBytes?: number
   latency?: number
   connectTime?: number
+  requestHeaders?: string
+  responseHeaders?: string
 }
 
 
@@ -81,7 +83,7 @@ loginEmail=admin@example.com
 phone=0987654321
 salary=negotiable
 tax_number=0102030405
-token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+token=mock_jwt_token_sample_1234567890
 userId=201238842
 START.HMS=003905
 START.MS=1788197945150

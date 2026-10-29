@@ -29,6 +29,7 @@ export const componentGroups = {
   ],
   'Assertions': ['ResponseAssertion', 'JSONPathAssertion', 'JSR223Assertion'],
   'Logic Controller': [
+    'SimpleController',
     'TransactionController',
     'IfController',
     'LoopController',
@@ -71,6 +72,7 @@ const samplerTypes = new Set<JMeterComponentType>([
 const controllerTypes = new Set<JMeterComponentType>([
   'IfController',
   'LoopController',
+  'SimpleController',
   'TransactionController',
   'ModuleController',
   'TestFragmentController',

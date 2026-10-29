@@ -12,6 +12,7 @@ import {
   createNode,
   createSampleTestPlan,
 } from '../mock/sampleTestPlan'
+import { upgradeUnsupportedNodes } from '../jmx/upgradeUnsupported'
 import { normalizeDirectoryVariablesInTree } from '../utils/jmeterPathVariables'
 import {
   collectNodeIds,
@@ -69,7 +70,7 @@ function loadInitialState(): {
     if (raw) {
       const parsed = JSON.parse(raw) as PersistedState
       if (parsed && parsed.testPlan && parsed.testPlan.id) {
-        const testPlan = normalizeDirectoryVariablesInTree(parsed.testPlan)
+        const testPlan = normalizeDirectoryVariablesInTree(upgradeUnsupportedNodes(parsed.testPlan))
         const selectedNodeId = findNode(testPlan, parsed.selectedNodeId) ? parsed.selectedNodeId : testPlan.id
         const expandedNodeIds = restoreExpandedNodeIds(testPlan, parsed.expandedNodeIds)
         return {

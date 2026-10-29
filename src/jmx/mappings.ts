@@ -61,6 +61,7 @@ export const typeToElement: Record<Exclude<JMeterComponentType, 'UnsupportedComp
   HTTPHeaderManager: { tag: 'HeaderManager', guiclass: 'HeaderPanel', testclass: 'HeaderManager' },
   HTTPCookieManager: { tag: 'CookieManager', guiclass: 'CookiePanel', testclass: 'CookieManager' },
   CSVDataSet: { tag: 'CSVDataSet', guiclass: 'TestBeanGUI', testclass: 'CSVDataSet' },
+  SimpleController: { tag: 'GenericController', guiclass: 'LogicControllerGui', testclass: 'GenericController' },
   TransactionController: { tag: 'TransactionController', guiclass: 'TransactionControllerGui', testclass: 'TransactionController' },
   IfController: { tag: 'IfController', guiclass: 'IfControllerPanel', testclass: 'IfController' },
   LoopController: { tag: 'LoopController', guiclass: 'LoopControlPanel', testclass: 'LoopController' },

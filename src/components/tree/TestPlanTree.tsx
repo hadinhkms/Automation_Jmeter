@@ -78,7 +78,7 @@ function TreeRow({
     const relativeY = event.clientY - rect.top
     const height = rect.height
 
-    const isContainer = node.id === props.root.id || node.type === 'ThreadGroup' || node.type === 'TransactionController' || node.type === 'IfController' || node.type === 'LoopController'
+    const isContainer = node.id === props.root.id || node.type === 'ThreadGroup' || node.type === 'SimpleController' || node.type === 'TransactionController' || node.type === 'IfController' || node.type === 'LoopController'
 
     let pos: DropPosition = 'after'
     if (relativeY < height * 0.3) {

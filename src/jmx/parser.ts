@@ -83,7 +83,7 @@ function regexFieldToEditorValue(rawField: string): string {
   return 'body'
 }
 
-function parseProperties(element: Element, type: JMeterComponentType): Record<string, unknown> {
+export function parseProperties(element: Element, type: JMeterComponentType): Record<string, unknown> {
   const common = { comments: comments(element) }
   switch (type) {
     case 'TestPlan':

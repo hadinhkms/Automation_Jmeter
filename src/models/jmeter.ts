@@ -17,6 +17,7 @@ export type JMeterComponentType =
   | 'HTTPHeaderManager'
   | 'HTTPCookieManager'
   | 'CSVDataSet'
+  | 'SimpleController'
   | 'TransactionController'
   | 'IfController'
   | 'LoopController'

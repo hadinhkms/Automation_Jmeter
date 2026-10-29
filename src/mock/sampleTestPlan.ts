@@ -19,6 +19,7 @@ const names: Record<JMeterComponentType, string> = {
   HTTPHeaderManager: 'HTTP Header Manager',
   HTTPCookieManager: 'HTTP Cookie Manager',
   CSVDataSet: 'CSV Data Set Config',
+  SimpleController: 'Simple Controller',
   TransactionController: 'Transaction Controller',
   IfController: 'If Controller',
   LoopController: 'Loop Controller',
