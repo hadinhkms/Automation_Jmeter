@@ -49,10 +49,12 @@ export function resolveVariables(text: string, variables?: Record<string, string
           replaced = true
           return variables[pKey]
         }
-        if (pDefault) {
+        if (propMatch[2] !== undefined) {
           replaced = true
           return pDefault
         }
+        replaced = true
+        return '1'
       }
       return match
     })

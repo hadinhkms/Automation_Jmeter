@@ -1,5 +1,5 @@
 // master-process-disable-size-check: Monolith queued for modular decomposition via Master Plan
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { Activity, AlertCircle, BarChart3, PanelLeftOpen, UploadCloud, X, Square } from 'lucide-react'
 import { ContextMenu, type ContextMenuState } from '../components/context-menu/ContextMenu'
 import { StatusBar } from '../components/layout/StatusBar'
@@ -78,10 +78,10 @@ export function App() {
     store.setSettingsOpen(modal === 'settings')
   }
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setActiveModal(null)
     store.setSettingsOpen(false)
-  }
+  }, [store])
 
   const toggleModal = (modal: ActiveModal) => {
     if (activeModal === modal) {
@@ -99,7 +99,7 @@ export function App() {
     }
     window.addEventListener('keydown', handleGlobalEsc)
     return () => window.removeEventListener('keydown', handleGlobalEsc)
-  }, [activeModal])
+  }, [activeModal, closeModal])
 
   // Resizable sidebar width with persistence
   const [treeWidth, setTreeWidth] = useState<number>(() => {
@@ -230,7 +230,7 @@ export function App() {
 
   const removeSelected = () => {
     if (selectedNode.id === store.testPlan.id) return
-    if (selectedNode.children.length > 0 && !window.confirm(`Remove “${selectedNode.name}” and all of its children?`)) return
+    if (selectedNode.children.length > 0 && !window.confirm(`Remove â€œ${selectedNode.name}â€ and all of its children?`)) return
     store.deleteNode(selectedNode.id)
   }
 
@@ -302,9 +302,9 @@ export function App() {
               const slaRes = evaluateSamplesSla(slaThresholds, finalResults.samples, finalResults.summaryRows)
               if (!slaRes.passed) {
                 const failedText = slaRes.rules.filter(r => !r.passed).map(r => `${r.name} (${r.actual}${r.unit} > ${r.target}${r.unit})`).join(', ')
-                dismissNoticeLater(`⚠️ Quality Gate Failed: ${failedText}`, 'error')
+                dismissNoticeLater(`Warning: Quality Gate Failed: ${failedText}`, 'error')
               } else {
-                dismissNoticeLater('✅ All SLA Quality Gate thresholds passed successfully!', 'info')
+                dismissNoticeLater('Success: All SLA Quality Gate thresholds passed successfully!', 'info')
               }
             } else {
               dismissNoticeLater(
@@ -722,7 +722,7 @@ export function App() {
               className={`workspace-resizer ${isResizingTree ? 'is-dragging' : ''}`}
               onMouseDown={handleTreeResizeStart}
               onDoubleClick={() => setTreeWidth(360)}
-              title="Kéo sang trái/phải để chỉnh độ rộng thanh Test Plan (Nháy đúp để reset về 360px)"
+              title="KÃ©o sang trÃ¡i/pháº£i Ä‘á»ƒ chá»‰nh Ä‘á»™ rá»™ng thanh Test Plan (NhÃ¡y Ä‘Ãºp Ä‘á»ƒ reset vá» 360px)"
             />
           </>
         ) : (
@@ -758,7 +758,7 @@ export function App() {
           onDuplicate={() => store.duplicateNode(menuNode.id)}
           onDelete={() => {
             if (menuNode.id === store.testPlan.id) return
-            if (menuNode.children.length === 0 || window.confirm(`Remove “${menuNode.name}” and all of its children?`)) store.deleteNode(menuNode.id)
+            if (menuNode.children.length === 0 || window.confirm(`Remove â€œ${menuNode.name}â€ and all of its children?`)) store.deleteNode(menuNode.id)
           }}
           onToggleEnabled={() => store.toggleEnabled(menuNode.id)}
           onRename={() => setRenameId(menuNode.id)}

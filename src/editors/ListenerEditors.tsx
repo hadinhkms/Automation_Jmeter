@@ -8,7 +8,10 @@ export { ReportTable, SummaryReportEditor, AggregateReportEditor } from './Repor
 export function ViewResultsTreeEditor({ cleared = false }: { cleared?: boolean }) {
   const store = useJMeterStore()
   const hasRealRun = store.realSamples.length > 0 || Boolean(store.activeRunId)
-  const rawSamples = store.realSamples.length > 0 ? store.realSamples : hasRealRun ? [] : mockSamples
+  const rawSamples = useMemo(() => {
+    if (store.realSamples.length > 0) return store.realSamples
+    return hasRealRun ? [] : mockSamples
+  }, [store.realSamples, hasRealRun])
   const isReal = hasRealRun
 
   const samples = useMemo(

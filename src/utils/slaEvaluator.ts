@@ -106,7 +106,7 @@ export function evaluateSla(
   }
 
   if (thresholds.maxErrorRatePercent !== undefined && thresholds.maxErrorRatePercent >= 0) {
-    const actualErrRate = Number(metrics.errorRate.toFixed(2))
+    const actualErrRate = Number((metrics.errorRate ?? 0).toFixed(2))
     const passed = actualErrRate <= thresholds.maxErrorRatePercent
     rules.push({
       name: 'Error Rate',
@@ -119,7 +119,7 @@ export function evaluateSla(
   }
 
   if (thresholds.minThroughputRps !== undefined && thresholds.minThroughputRps > 0) {
-    const actualRps = Number(metrics.throughput.toFixed(1))
+    const actualRps = Number((metrics.throughput ?? 0).toFixed(1))
     const passed = actualRps >= thresholds.minThroughputRps
     rules.push({
       name: 'Min Throughput',

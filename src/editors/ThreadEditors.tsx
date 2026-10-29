@@ -353,10 +353,12 @@ export function SteppingThreadGroupEditor({ node, updateProperties }: EditorProp
   )
 }
 
+const defaultUltimateScheduleRows: TableRow[] = [
+  { startThreads: '100', initialDelay: '0', startupTime: '30', holdLoadTime: '300', shutdownTime: '10' },
+]
+
 export function UltimateThreadGroupEditor({ node, updateProperties }: EditorProps) {
-  const rawRows = (node.properties.scheduleRows as TableRow[]) || [
-    { startThreads: '100', initialDelay: '0', startupTime: '30', holdLoadTime: '300', shutdownTime: '10' },
-  ]
+  const rawRows = (node.properties.scheduleRows as TableRow[]) || defaultUltimateScheduleRows
 
   const points = useMemo(() => {
     let maxT = 0

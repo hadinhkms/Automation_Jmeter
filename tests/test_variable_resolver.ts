@@ -1,7 +1,8 @@
 import { collectKnownVariables, resolveVariables } from '../src/utils/variableResolver'
+import type { TestPlanNode } from '../src/models/jmeter'
 
 // Mock Test Plan mirroring JS-8826
-const mockPlan: any = {
+const mockPlan: TestPlanNode = {
   id: 'tp',
   type: 'TestPlan',
   name: 'Suite',

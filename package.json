@@ -9,8 +9,9 @@
     "postbuild": "node scripts/prepare-sites-build.mjs",
     "lint": "eslint .",
     "typecheck": "tsc -b --pretty false",
+    "test:qa": "tsx tests/test_deep_qa.ts",
     "test:sprint9": "tsx tests/verify-sprint9.mjs",
-    "test": "npm run test:sprint9"
+    "test": "npm run test:qa && npm run test:sprint9"
   },
   "dependencies": {
     "lucide-react": "0.468.0",

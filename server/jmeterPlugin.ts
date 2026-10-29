@@ -4,7 +4,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import { existsSync, createReadStream, statSync, mkdirSync, writeFileSync, readdirSync, unlinkSync } from 'node:fs'
 import { join, extname, basename, normalize } from 'node:path'
 import { execSync } from 'node:child_process'
-import { jmeterRunner } from './jmeterRunner'
+import { jmeterRunner, type JtlSample } from './jmeterRunner'
 import { jmeterPluginsManager } from './pluginsManager'
 import { browserRecorder } from './browserRecorder'
 import { sendWebhookNotification } from './webhookNotifier'
@@ -22,6 +22,10 @@ const mimeTypes: Record<string, string> = {
   '.ico': 'image/x-icon',
   '.woff': 'font/woff',
   '.woff2': 'font/woff2',
+}
+
+function parseWebhookType(type: unknown): 'discord' | 'slack' | 'teams' | 'generic' {
+  return type === 'slack' || type === 'teams' || type === 'generic' ? type : 'discord'
 }
 
 function parseJsonBody(req: IncomingMessage): Promise<Record<string, unknown>> {
@@ -323,8 +327,14 @@ export function jmeterPlugin(): Plugin {
             const { runId, reportDir } = await jmeterRunner.startRun(jmx, name, { remoteHosts })
 
             // Await execution finish
-            const summary = await new Promise<any>((resolve) => {
-              const onDone = (resSummary: any) => {
+            interface RunExecutionSummary {
+              runId: string
+              status?: 'running' | 'completed' | 'failed' | 'stopped'
+              totalSamples?: number
+              samples?: JtlSample[]
+            }
+            const summary = await new Promise<RunExecutionSummary>((resolve) => {
+              const onDone = (resSummary: RunExecutionSummary) => {
                 if (resSummary.runId === runId) {
                   jmeterRunner.off('complete', onDone)
                   jmeterRunner.off('stopped', onDone)
@@ -338,9 +348,9 @@ export function jmeterPlugin(): Plugin {
             })
 
             const totalSamples = summary.totalSamples || (summary.samples ? summary.samples.length : 0)
-            const errors = summary.samples ? summary.samples.filter((s: any) => !s.success).length : 0
+            const errors = summary.samples ? summary.samples.filter((s: JtlSample) => !s.success).length : 0
             const errorRate = totalSamples > 0 ? (errors / totalSamples) * 100 : 0
-            const elapseds = summary.samples ? summary.samples.map((s: any) => s.elapsed).sort((a: number, b: number) => a - b) : []
+            const elapseds = summary.samples ? summary.samples.map((s: JtlSample) => s.elapsed).sort((a: number, b: number) => a - b) : []
             const sum = elapseds.reduce((a: number, b: number) => a + b, 0)
             const avg = elapseds.length > 0 ? Math.round(sum / elapseds.length) : 0
             const p90 = elapseds.length > 0 ? elapseds[Math.floor(elapseds.length * 0.9)] || elapseds[elapseds.length - 1] : 0
@@ -366,7 +376,7 @@ export function jmeterPlugin(): Plugin {
             // Send webhook if configured
             if (webhook && webhook.enabled && webhook.url) {
               if ((slaPassed && webhook.notifyOnPass) || (!slaPassed && webhook.notifyOnFail)) {
-                await sendWebhookNotification(String(webhook.url), (webhook.type as any) || 'discord', {
+                await sendWebhookNotification(String(webhook.url), parseWebhookType(webhook.type), {
                   testName: name,
                   runId,
                   status: slaPassed ? 'passed' : 'failed',
@@ -413,7 +423,7 @@ export function jmeterPlugin(): Plugin {
           try {
             const body = await parseJsonBody(req)
             const webhookUrl = typeof body.url === 'string' ? body.url : ''
-            const webhookType = (body.type as any) || 'discord'
+            const webhookType = parseWebhookType(body.type)
             if (!webhookUrl) {
               res.statusCode = 400
               res.setHeader('Content-Type', 'application/json')
@@ -563,7 +573,7 @@ export function jmeterPlugin(): Plugin {
             const branch = typeof body.branch === 'string' ? body.branch : ''
             const createNew = Boolean(body.createNew)
 
-            if (!branch || /[^\w\-.\/]/.test(branch)) {
+            if (!branch || /[^\w\-./]/.test(branch)) {
               res.statusCode = 400
               res.setHeader('Content-Type', 'application/json')
               res.end(JSON.stringify({ error: 'Invalid branch name.' }))

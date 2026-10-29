@@ -1,8 +1,8 @@
-// master-process-disable-size-check: Monolith queued for modular decomposition via Master Plan
 import { useMemo } from 'react'
 import { X, Activity, Clock, Users, Zap } from 'lucide-react'
 import type { TestPlanNode } from '../../models/jmeter'
 import { WorkloadCurvePreview } from '../../editors/ThreadEditors'
+import { extractThreadGroupCurves, computeCompositeCurve } from '../../utils/workloadUtils'
 
 interface WorkloadGraphModalProps {
   isOpen: boolean
@@ -10,166 +10,11 @@ interface WorkloadGraphModalProps {
   testPlan: TestPlanNode
 }
 
-function extractThreadGroupCurves(node: TestPlanNode): Array<{ name: string; type: string; points: { time: number; vus: number }[] }> {
-  const curves: Array<{ name: string; type: string; points: { time: number; vus: number }[] }> = []
-
-  function traverse(n: TestPlanNode) {
-    if (!n.enabled) return
-
-    if (n.type === 'ThreadGroup') {
-      const threads = Number(n.properties.threads ?? 1)
-      const rampUp = Number(n.properties.rampUp ?? 1)
-      const duration = Number(n.properties.duration ?? 0)
-      const loops = Number(n.properties.loops ?? 1)
-      const totalTime = duration > 0 ? duration : rampUp + loops * 5
-
-      const pts: { time: number; vus: number }[] = [
-        { time: 0, vus: 0 },
-        { time: Math.max(1, rampUp), vus: threads },
-        { time: Math.max(rampUp + 1, totalTime), vus: threads },
-        { time: totalTime + 1, vus: 0 },
-      ]
-      curves.push({ name: n.name, type: 'Standard ThreadGroup', points: pts })
-    } else if (n.type === 'ConcurrencyThreadGroup') {
-      const target = Number(n.properties.targetConcurrency ?? 50)
-      const ramp = Number(n.properties.rampUpTime ?? 60)
-      const steps = Math.max(1, Number(n.properties.rampUpSteps ?? 5))
-      const hold = Number(n.properties.holdRateTime ?? 300)
-      const pts: { time: number; vus: number }[] = [{ time: 0, vus: 0 }]
-      const stepDur = ramp / steps
-      const stepVus = target / steps
-
-      let curT = 0
-      for (let s = 1; s <= steps; s++) {
-        curT += stepDur
-        pts.push({ time: Math.round(curT), vus: Math.round(s * stepVus) })
-      }
-      if (hold > 0) {
-        curT += hold
-        pts.push({ time: Math.round(curT), vus: target })
-      }
-      pts.push({ time: Math.round(curT + 1), vus: 0 })
-      curves.push({ name: n.name, type: 'ConcurrencyThreadGroup', points: pts })
-    } else if (n.type === 'SteppingThreadGroup') {
-      const numThreads = Number(n.properties.numThreads ?? 100)
-      const firstWait = Number(n.properties.firstWaitSeconds ?? 0)
-      const initialThreads = Number(n.properties.initialThreads ?? 10)
-      const thenAddThreads = Math.max(1, Number(n.properties.thenAddThreads ?? 10))
-      const everySeconds = Math.max(1, Number(n.properties.everySeconds ?? 30))
-      const rampUpSeconds = Number(n.properties.rampUpSeconds ?? 5)
-      const holdSeconds = Number(n.properties.holdSeconds ?? 300)
-      const thenStopThreads = Math.max(1, Number(n.properties.thenStopThreads ?? 10))
-      const stopEverySeconds = Math.max(1, Number(n.properties.stopEverySeconds ?? 5))
-
-      const pts: { time: number; vus: number }[] = [{ time: 0, vus: 0 }]
-      let curTime = 0
-      let curVus = 0
-
-      if (firstWait > 0) {
-        curTime += firstWait
-        pts.push({ time: curTime, vus: 0 })
-      }
-      if (initialThreads > 0) {
-        curVus = Math.min(initialThreads, numThreads)
-        pts.push({ time: curTime, vus: curVus })
-      }
-      while (curVus < numThreads) {
-        curTime += rampUpSeconds
-        curVus = Math.min(curVus + thenAddThreads, numThreads)
-        pts.push({ time: curTime, vus: curVus })
-        if (curVus < numThreads) {
-          curTime += everySeconds
-          pts.push({ time: curTime, vus: curVus })
-        }
-      }
-      if (holdSeconds > 0) {
-        curTime += holdSeconds
-        pts.push({ time: curTime, vus: numThreads })
-      }
-      while (curVus > 0) {
-        curTime += stopEverySeconds
-        curVus = Math.max(0, curVus - thenStopThreads)
-        pts.push({ time: curTime, vus: curVus })
-      }
-      curves.push({ name: n.name, type: 'SteppingThreadGroup', points: pts })
-    } else if (n.type === 'UltimateThreadGroup') {
-      const rows = (n.properties.scheduleRows as Array<Record<string, string>>) || []
-      let maxT = 0
-      rows.forEach((r) => {
-        const delay = Number(r.initialDelay || 0)
-        const ramp = Number(r.startupTime || 0)
-        const hold = Number(r.holdLoadTime || 0)
-        const shut = Number(r.shutdownTime || 0)
-        maxT = Math.max(maxT, delay + ramp + hold + shut)
-      })
-      maxT = Math.max(maxT, 10)
-      const step = maxT / 50
-      const pts: { time: number; vus: number }[] = []
-      for (let t = 0; t <= maxT; t += step) {
-        let totalVus = 0
-        rows.forEach((r) => {
-          const vus = Number(r.startThreads || 0)
-          const delay = Number(r.initialDelay || 0)
-          const ramp = Number(r.startupTime || 0)
-          const hold = Number(r.holdLoadTime || 0)
-          const shut = Number(r.shutdownTime || 0)
-          if (t >= delay && t < delay + ramp) {
-            totalVus += Math.round(vus * ((t - delay) / (ramp || 1)))
-          } else if (t >= delay + ramp && t < delay + ramp + hold) {
-            totalVus += vus
-          } else if (t >= delay + ramp + hold && t < delay + ramp + hold + shut) {
-            totalVus += Math.round(vus * ((delay + ramp + hold + shut - t) / (shut || 1)))
-          }
-        })
-        pts.push({ time: Math.round(t), vus: totalVus })
-      }
-      curves.push({ name: n.name, type: 'UltimateThreadGroup', points: pts })
-    }
-
-    n.children.forEach(traverse)
-  }
-
-  traverse(node)
-  return curves
-}
-
 export function WorkloadGraphModal({ isOpen, onClose, testPlan }: WorkloadGraphModalProps) {
+  const curves = useMemo(() => (isOpen ? extractThreadGroupCurves(testPlan) : []), [isOpen, testPlan])
+  const compositeCurve = useMemo(() => (isOpen ? computeCompositeCurve(curves) : []), [isOpen, curves])
+
   if (!isOpen) return null
-
-  const curves = useMemo(() => extractThreadGroupCurves(testPlan), [testPlan])
-
-  // Aggregate composite curve
-  const compositeCurve = useMemo(() => {
-    if (curves.length === 0) return [{ time: 0, vus: 0 }]
-    let maxTime = 0
-    curves.forEach((c) => {
-      const lastT = Math.max(...c.points.map((p) => p.time), 0)
-      maxTime = Math.max(maxTime, lastT)
-    })
-    maxTime = Math.max(maxTime, 10)
-
-    const step = Math.max(1, Math.round(maxTime / 60))
-    const points: { time: number; vus: number }[] = []
-
-    for (let t = 0; t <= maxTime; t += step) {
-      let totalVus = 0
-      curves.forEach((c) => {
-        // interpolate VUs at time t for this curve
-        for (let i = 0; i < c.points.length - 1; i++) {
-          const p1 = c.points[i]
-          const p2 = c.points[i + 1]
-          if (t >= p1.time && t <= p2.time) {
-            const span = p2.time - p1.time
-            const ratio = span > 0 ? (t - p1.time) / span : 0
-            totalVus += Math.round(p1.vus + (p2.vus - p1.vus) * ratio)
-            break
-          }
-        }
-      })
-      points.push({ time: t, vus: totalVus })
-    }
-    return points
-  }, [curves])
 
   const maxTotalVus = Math.max(...compositeCurve.map((p) => p.vus), 0)
   const totalDuration = Math.max(...compositeCurve.map((p) => p.time), 0)

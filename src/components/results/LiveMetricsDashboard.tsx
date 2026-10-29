@@ -32,8 +32,6 @@ interface LiveMetricsDashboardProps {
 
 export function LiveMetricsDashboard({
   samples,
-  summaryRows: _summaryRows = [],
-  aggregateRows: _aggregateRows = [],
   runMetrics,
   slaThresholds,
   isRunning = false,
@@ -195,7 +193,7 @@ export function LiveMetricsDashboard({
       const next = [...prev, pt]
       return next.length > MAX_CHART_POINTS ? next.slice(next.length - MAX_CHART_POINTS) : next
     })
-  }, [runMetrics?.samples, runMetrics?.throughput, runMetrics?.activeThreads, stats])
+  }, [runMetrics, samples, stats])
 
   return (
     <div className="live-metrics-dashboard" style={{ padding: '16px 20px', height: '100%', overflowY: 'auto' }}>
@@ -258,7 +256,7 @@ export function LiveMetricsDashboard({
               cursor: 'pointer',
             }}
           >
-            📊 KPI & Summary
+            ðŸ“Š KPI & Summary
           </button>
           <button
             onClick={() => setViewMode('chart')}
@@ -273,7 +271,7 @@ export function LiveMetricsDashboard({
               cursor: 'pointer',
             }}
           >
-            📈 Grafana Canvas Charts
+            ðŸ“ˆ Grafana Canvas Charts
           </button>
         </div>
         <div style={{ fontSize: 11.5, color: 'var(--text-muted, #94a3b8)' }}>
@@ -298,7 +296,7 @@ export function LiveMetricsDashboard({
             {stats.total.toLocaleString()}
           </div>
           <div style={{ fontSize: 11, color: 'var(--text-muted, #888)', marginTop: 4 }}>
-            {isRunning ? '🟢 Stream live executing...' : 'Completed samples'}
+            {isRunning ? 'ðŸŸ¢ Stream live executing...' : 'Completed samples'}
           </div>
         </div>
 
@@ -378,8 +376,8 @@ export function LiveMetricsDashboard({
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
             <h4 style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>Response Time Timeline (Avg vs P95)</h4>
             <div style={{ display: 'flex', gap: 12, fontSize: 11 }}>
-              <span style={{ color: '#3b82f6', display: 'flex', alignItems: 'center', gap: 4 }}>● Avg Latency</span>
-              <span style={{ color: '#f472b6', display: 'flex', alignItems: 'center', gap: 4 }}>● P95 Latency</span>
+              <span style={{ color: '#3b82f6', display: 'flex', alignItems: 'center', gap: 4 }}>â— Avg Latency</span>
+              <span style={{ color: '#f472b6', display: 'flex', alignItems: 'center', gap: 4 }}>â— P95 Latency</span>
             </div>
           </div>
 

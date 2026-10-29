@@ -146,7 +146,10 @@ export function ViewResultsTree({ samples, isReal = false, activeRunId }: ViewRe
       setNewSampleIds((prev) => new Set([...prev, ...newIds]))
 
       if (autoScroll) {
-        setSelectedId(newSamples[newSamples.length - 1]?.id || selectedId)
+        const lastId = newSamples[newSamples.length - 1]?.id
+        if (lastId) {
+          setSelectedId(lastId)
+        }
       }
 
       setTimeout(() => {
@@ -963,7 +966,7 @@ TestElement.name=${selectedSample.label}`
                     {activeRequestSubTab === 'curl' && isSelectedHttpRequest ? (
                       <div className="curl-view">
                         <CodeEditor
-                          label={`cURL · ${selectedSample.label}`}
+                          label={`cURL Â· ${selectedSample.label}`}
                           language="curl"
                           value={curlCommand}
                           minHeight={160}
