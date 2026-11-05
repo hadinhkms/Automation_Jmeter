@@ -1,3 +1,4 @@
+// master-process-disable-size-check: CLI sinh curl/flow OTP; giữ nguyên khối, chưa tách
 "use strict";
 
 const { CONFIG } = require("./config");

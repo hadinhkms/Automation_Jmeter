@@ -18,3 +18,12 @@ downloads/
 
 # AI Temporary Workspace
 .ai/learning/scratch/
+
+# otp-tools: secrets & artifacts (giữ local, không commit)
+otp-tools/config.js
+otp-tools/postman-collection.json
+otp-tools/__pycache__/
+otp-tools/**/__pycache__/
+*.pyc
+otp-tools/logs-debug.txt
+otp-tools/logs-debug-result.html
