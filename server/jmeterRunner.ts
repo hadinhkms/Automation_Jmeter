@@ -821,18 +821,21 @@ export class JMeterRunner extends EventEmitter {
   }
 
   public getRunResults(runId?: string): RunSummary | null {
+    // Không có runId (hoặc hỏi đúng run hiện tại): ưu tiên summary trong bộ nhớ,
+    // nếu chưa có thì resolve ra run dir mới nhất rồi ĐỌC TRỰC TIẾP bên dưới (không đệ quy -> tránh stack overflow).
     if (!runId || runId === this.currentRunId) {
       if (this.lastSummary) return this.lastSummary
-      if (existsSync(this.runsBaseDir)) {
+      if (!runId && existsSync(this.runsBaseDir)) {
         const runs = readdirSync(this.runsBaseDir)
           .filter((f) => f.startsWith('run_'))
           .sort()
           .reverse()
         if (runs.length > 0) {
-          return this.getRunResults(runs[0])
+          runId = runs[0]
         }
       }
-      return null
+      if (!runId) return null
+      // rơi xuống nhánh đọc trực tiếp theo runId đã resolve
     }
     const targetDir = join(this.runsBaseDir, runId)
     const jtlPath = join(targetDir, 'results.jtl')

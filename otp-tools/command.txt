@@ -1,0 +1,19 @@
+node otp-tools/gen.js flows                    # liệt kê các flow Web và Mobile
+# PowerShell: đặt số test được phép trước khi sinh toàn bộ curl Web
+$env:WEB_PHONE='<SDT_TEST_WEB_DUOC_PHEP>'
+node otp-tools/gen.js api all                  # Web: cần WEB_PHONE hoặc --phone, không tự sinh số
+node otp-tools/gen.js api all --phone=<SDT_TEST_WEB_DUOC_PHEP>
+node otp-tools/gen.js api request-otp          # sinh riêng 1 flow
+node otp-tools/gen.js api lead-verify --lead-session=abc123 --code=4821 --request-id=R-999
+
+# Mobile: chỉ sinh curl, KHÔNG gọi API hay gửi SMS. Phone/host/device/JWT/public key lấy từ config.js.
+node otp-tools/gen.js api all --platform=mobile # request v2 + verify v1, copy clipboard
+node otp-tools/gen.js api mobile-request-otp   # timestamp/signature mới mỗi lần chạy
+node otp-tools/gen.js api mobile-verify-otp --request-id=<REQUEST_ID_TU_RESPONSE> --code=<OTP_NHAN_DUOC>
+
+# Đăng ký device test mới (không nằm trong all; file này chứa private key, không commit/chia sẻ curl sinh ra):
+node otp-tools/gen.js api mobile-device-token --device-id=<UUID_MOI> --private-key-file=<DUONG_DAN_PRIVATE_PEM>
+
+# Verify dùng {{request_id}}/{{otp_code}} nếu chưa có response/SMS; các trường còn lại là giá trị thật.
+# Khi test local, override host bằng --mobile-host=http://seeker-mobile.sieuviet.com:8080.
+# /api/v1/request-otp Mobile không gửi SMS; chỉ dùng /api/v2/request-otp.
