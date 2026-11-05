@@ -4156,6 +4156,21 @@ button:hover kbd {
   .results-tree-view { grid-template-columns: minmax(180px, 34%) minmax(0, 1fr); }
 }
 
+/* Phone (≤600px): no page-level horizontal scroll; tree stacks above the editor. */
+@media (max-width: 600px) {
+  body { min-width: 0; }
+  .toolbar { overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; }
+  .toolbar > * { flex-shrink: 0; }
+  .workspace,
+  .workspace.tree-collapsed {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: minmax(140px, 38%) minmax(0, 1fr);
+  }
+  .workspace.tree-collapsed { grid-template-rows: 34px minmax(0, 1fr); }
+  .workspace-resizer { display: none; }
+  .tree-panel { border-right: 0; border-bottom: 1px solid var(--border-dark); }
+}
+
 /* Active File Name Badge & Save Modal Styles */
 .app-active-file-pill {
   display: inline-flex;

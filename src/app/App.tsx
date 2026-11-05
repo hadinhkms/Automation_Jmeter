@@ -722,7 +722,7 @@ export function App() {
               className={`workspace-resizer ${isResizingTree ? 'is-dragging' : ''}`}
               onMouseDown={handleTreeResizeStart}
               onDoubleClick={() => setTreeWidth(360)}
-              title="KÃ©o sang trÃ¡i/pháº£i Ä‘á»ƒ chá»‰nh Ä‘á»™ rá»™ng thanh Test Plan (NhÃ¡y Ä‘Ãºp Ä‘á»ƒ reset vá» 360px)"
+              title="Kéo sang trái/phải để chỉnh độ rộng thanh Test Plan (Nháy đúp để reset về 360px)"
             />
           </>
         ) : (

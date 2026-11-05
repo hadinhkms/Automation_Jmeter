@@ -1,6 +1,7 @@
 import { execSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { isSafeRelativePath } from './gitCommands'
 
 export interface JmxDiffField {
   key: string
@@ -80,6 +81,7 @@ function parseJmxToItems(xmlContent: string): ParsedJmxItem[] {
 function getFileContentFromGit(ref: string, relativePath: string): string {
   try {
     if (ref === 'WORKING_TREE') {
+      if (!isSafeRelativePath(relativePath)) return ''
       const fullPath = join(process.cwd(), relativePath)
       if (existsSync(fullPath)) {
         return readFileSync(fullPath, 'utf-8')

@@ -41,10 +41,20 @@ export async function handleDebugProxy(req: IncomingMessage, res: ServerResponse
 
   try {
     const rawBody = await readRequestBody(req)
-    const payload: SingleDebugRequestPayload = rawBody ? JSON.parse(rawBody) : {}
-    const { url, method = 'GET', body, timeoutMs = DEFAULT_TIMEOUT_MS } = payload
+    let payload: SingleDebugRequestPayload
+    try {
+      payload = rawBody ? JSON.parse(rawBody) : {}
+    } catch {
+      res.statusCode = 400
+      res.end(JSON.stringify({ error: 'Malformed JSON request body.' }))
+      return true
+    }
+    const { url, body } = payload ?? {}
+    const method = typeof payload?.method === 'string' && payload.method ? payload.method : 'GET'
+    const parsedTimeout = Number(payload?.timeoutMs)
+    const timeoutMs = Number.isFinite(parsedTimeout) && parsedTimeout > 0 ? parsedTimeout : DEFAULT_TIMEOUT_MS
 
-    if (!url || !/^https?:\/\//i.test(url)) {
+    if (typeof url !== 'string' || !/^https?:\/\//i.test(url)) {
       res.statusCode = 400
       res.end(JSON.stringify({ error: 'Valid URL starting with http:// or https:// is required.' }))
       return true

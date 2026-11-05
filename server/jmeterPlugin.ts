@@ -1,6 +1,6 @@
 // master-process-disable-size-check: Monolith queued for modular decomposition via Master Plan
 import type { Plugin, ViteDevServer, Connect } from 'vite'
-import type { IncomingMessage, ServerResponse } from 'node:http'
+import type { ServerResponse } from 'node:http'
 import { existsSync, createReadStream, statSync, mkdirSync, writeFileSync, readdirSync, unlinkSync } from 'node:fs'
 import { join, extname, basename, normalize } from 'node:path'
 import { execSync } from 'node:child_process'
@@ -10,6 +10,8 @@ import { browserRecorder } from './browserRecorder'
 import { sendWebhookNotification } from './webhookNotifier'
 import { computeJmxDiff } from './jmxDiffEngine'
 import { handleDebugProxy } from './routes/debugProxyRouter'
+import { parseJsonBody, statusFromError } from './httpUtils'
+import { gitCheckout, gitCommitAll, gitDiff, isSafeBranchName, isSafeRelativePath } from './gitCommands'
 
 const mimeTypes: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -26,23 +28,6 @@ const mimeTypes: Record<string, string> = {
 
 function parseWebhookType(type: unknown): 'discord' | 'slack' | 'teams' | 'generic' {
   return type === 'slack' || type === 'teams' || type === 'generic' ? type : 'discord'
-}
-
-function parseJsonBody(req: IncomingMessage): Promise<Record<string, unknown>> {
-  return new Promise((resolve, reject) => {
-    let body = ''
-    req.on('data', (chunk: Buffer | string) => {
-      body += chunk.toString()
-    })
-    req.on('end', () => {
-      try {
-        resolve(body ? JSON.parse(body) : {})
-      } catch (err) {
-        reject(err)
-      }
-    })
-    req.on('error', reject)
-  })
 }
 
 function sanitizeAssetFileName(fileName: string): string {
@@ -79,6 +64,14 @@ export function jmeterPlugin(): Plugin {
     configureServer(server: ViteDevServer) {
       server.middlewares.use(async (req: Connect.IncomingMessage, res: ServerResponse, next: Connect.NextFunction) => {
         const url = req.url || ''
+
+        if (url === '/user-guide') {
+          const guidePath = join(process.cwd(), 'docs', 'index.html')
+          if (!existsSync(guidePath)) return next()
+          res.setHeader('Content-Type', mimeTypes['.html'])
+          createReadStream(guidePath).pipe(res)
+          return
+        }
 
         if (!url.startsWith('/api/jmeter')) {
           return next()
@@ -156,7 +149,7 @@ export function jmeterPlugin(): Plugin {
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ success: true, runId, reportDir }))
           } catch (err) {
-            res.statusCode = 500
+            res.statusCode = statusFromError(err)
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ error: err instanceof Error ? err.message : 'Failed to start run.' }))
           }
@@ -177,6 +170,7 @@ export function jmeterPlugin(): Plugin {
           const runId = u.searchParams.get('runId') || undefined
           const results = jmeterRunner.getRunResults(runId)
           res.setHeader('Content-Type', 'application/json')
+          if (!results) res.statusCode = 404
           res.end(JSON.stringify(results || { error: 'No results found' }))
           return
         }
@@ -203,7 +197,7 @@ export function jmeterPlugin(): Plugin {
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify(result))
           } catch (err) {
-            res.statusCode = 500
+            res.statusCode = statusFromError(err)
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ error: err instanceof Error ? err.message : 'Failed to install plugin.' }))
           }
@@ -219,7 +213,7 @@ export function jmeterPlugin(): Plugin {
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify(result))
           } catch (err) {
-            res.statusCode = 500
+            res.statusCode = statusFromError(err)
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ error: err instanceof Error ? err.message : 'Failed to uninstall plugin.' }))
           }
@@ -277,7 +271,7 @@ export function jmeterPlugin(): Plugin {
               size: buffer.length,
             }))
           } catch (err) {
-            res.statusCode = 500
+            res.statusCode = statusFromError(err)
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ error: err instanceof Error ? err.message : 'Failed to upload asset.' }))
           }
@@ -300,7 +294,7 @@ export function jmeterPlugin(): Plugin {
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ success: true }))
           } catch (err) {
-            res.statusCode = 500
+            res.statusCode = statusFromError(err)
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ error: err instanceof Error ? err.message : 'Failed to delete asset.' }))
           }
@@ -411,7 +405,7 @@ export function jmeterPlugin(): Plugin {
               },
             }))
           } catch (err) {
-            res.statusCode = 500
+            res.statusCode = statusFromError(err)
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ exitCode: 2, error: err instanceof Error ? err.message : 'Headless execution error' }))
           }
@@ -448,7 +442,7 @@ export function jmeterPlugin(): Plugin {
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify(result))
           } catch (err) {
-            res.statusCode = 500
+            res.statusCode = statusFromError(err)
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ success: false, error: err instanceof Error ? err.message : 'Webhook error' }))
           }
@@ -496,13 +490,12 @@ export function jmeterPlugin(): Plugin {
         if (url === '/api/jmeter/git/commit' && req.method === 'POST') {
           try {
             const body = await parseJsonBody(req)
-            const message = typeof body.message === 'string' ? body.message : 'Update JMeter Test Plan'
-            execSync('git add .', { stdio: 'pipe' })
-            const output = execSync(`git commit -m "${message.replace(/"/g, '\\"')}"`, { encoding: 'utf-8', stdio: 'pipe' })
+            const message = typeof body.message === 'string' && body.message.trim() ? body.message : 'Update JMeter Test Plan'
+            const output = gitCommitAll(message)
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ success: true, output }))
           } catch (err) {
-            res.statusCode = 500
+            res.statusCode = statusFromError(err)
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ success: false, error: err instanceof Error ? err.message : String(err) }))
           }
@@ -515,7 +508,7 @@ export function jmeterPlugin(): Plugin {
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ success: true, message: output }))
           } catch (err) {
-            res.statusCode = 500
+            res.statusCode = statusFromError(err)
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ success: false, error: err instanceof Error ? err.message : String(err) }))
           }
@@ -528,7 +521,7 @@ export function jmeterPlugin(): Plugin {
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ success: true, message: output }))
           } catch (err) {
-            res.statusCode = 500
+            res.statusCode = statusFromError(err)
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ success: false, error: err instanceof Error ? err.message : String(err) }))
           }
@@ -573,21 +566,18 @@ export function jmeterPlugin(): Plugin {
             const branch = typeof body.branch === 'string' ? body.branch : ''
             const createNew = Boolean(body.createNew)
 
-            if (!branch || /[^\w\-./]/.test(branch)) {
+            if (!isSafeBranchName(branch)) {
               res.statusCode = 400
               res.setHeader('Content-Type', 'application/json')
               res.end(JSON.stringify({ error: 'Invalid branch name.' }))
               return
             }
 
-            const cmd = createNew
-              ? `git checkout -b "${branch.replace(/"/g, '')}"`
-              : `git checkout "${branch.replace(/"/g, '')}"`
-            const output = execSync(cmd, { encoding: 'utf-8', timeout: 10000, stdio: 'pipe' })
+            const output = gitCheckout(branch, createNew)
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ success: true, branch, output }))
           } catch (err) {
-            res.statusCode = 500
+            res.statusCode = statusFromError(err)
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ success: false, error: err instanceof Error ? err.message : String(err) }))
           }
@@ -598,10 +588,15 @@ export function jmeterPlugin(): Plugin {
           try {
             const u = new URL(url, `http://${req.headers.host || 'localhost'}`)
             const targetFile = u.searchParams.get('file') || ''
-            const cmd = targetFile ? `git diff HEAD -- "${targetFile}"` : 'git diff HEAD'
+            if (targetFile && !isSafeRelativePath(targetFile)) {
+              res.statusCode = 400
+              res.setHeader('Content-Type', 'application/json')
+              res.end(JSON.stringify({ diff: '', error: 'Invalid file path.' }))
+              return
+            }
             let diff = ''
             try {
-              diff = execSync(cmd, { encoding: 'utf-8' })
+              diff = gitDiff(targetFile || undefined)
             } catch {
               diff = 'No diff found or untracked file.'
             }
@@ -626,7 +621,7 @@ export function jmeterPlugin(): Plugin {
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify(diff))
           } catch (err) {
-            res.statusCode = 500
+            res.statusCode = statusFromError(err)
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ error: err instanceof Error ? err.message : String(err) }))
           }
@@ -714,7 +709,7 @@ export function jmeterPlugin(): Plugin {
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify(result))
           } catch (err) {
-            res.statusCode = 500
+            res.statusCode = statusFromError(err)
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ error: err instanceof Error ? err.message : 'Failed to launch browser recorder.' }))
           }
@@ -728,7 +723,7 @@ export function jmeterPlugin(): Plugin {
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify(result))
           } catch (err) {
-            res.statusCode = 500
+            res.statusCode = statusFromError(err)
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ error: err instanceof Error ? err.message : 'Failed to stop recorder.' }))
           }
@@ -832,20 +827,6 @@ export function jmeterPlugin(): Plugin {
           res.statusCode = 404
           res.end(`Report file not found: ${subPath}`)
           return
-        }
-
-        // 9. Serve Docs & User Guide HTML
-        if (url.startsWith('/docs') || url === '/user-guide') {
-          const u = new URL(url, `http://${req.headers.host || 'localhost'}`)
-          let subPath = u.pathname.replace(/^\/docs\/?/, '')
-          if (!subPath || subPath === 'user-guide') subPath = 'index.html'
-          const filePath = join(process.cwd(), 'docs', subPath)
-          if (existsSync(filePath) && statSync(filePath).isFile()) {
-            const ext = extname(filePath).toLowerCase()
-            res.setHeader('Content-Type', mimeTypes[ext] || 'application/octet-stream')
-            createReadStream(filePath).pipe(res)
-            return
-          }
         }
 
         next()

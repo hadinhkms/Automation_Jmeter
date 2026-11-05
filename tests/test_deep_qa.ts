@@ -4,6 +4,7 @@ import { extractThreadGroupCurves, computeCompositeCurve } from '../src/utils/wo
 import { evaluateSla, evaluateSamplesSla } from '../src/utils/slaEvaluator'
 import { createNode } from '../src/mock/sampleTestPlan'
 import type { SlaThresholds } from '../src/models/jmeter'
+import { isSafeBranchName, isSafeRelativePath } from '../server/gitCommands'
 
 console.log('====================================================')
 console.log('  DEEP QA & AUDIT VERIFICATION SUITE (DH-01 -> DH-06) ')
@@ -218,12 +219,27 @@ runTest('TC-SEC-01: Asset file name sanitizes path traversal characters', () => 
 })
 
 runTest('TC-SEC-02: Git branch name rejection prevents illegal characters and flags', () => {
-  const invalidRegex = /[^\w\-./]/
-  assert.strictEqual(invalidRegex.test('valid-feature/branch.v1'), false)
-  assert.strictEqual(invalidRegex.test('invalid branch name with spaces'), true)
-  assert.strictEqual(invalidRegex.test('branch;rm -rf /'), true)
-  assert.strictEqual(invalidRegex.test('branch`id`'), true)
-  assert.strictEqual(invalidRegex.test('branch$(whoami)'), true)
+  assert.strictEqual(isSafeBranchName('valid-feature/branch.v1'), true)
+  assert.strictEqual(isSafeBranchName('invalid branch name with spaces'), false)
+  assert.strictEqual(isSafeBranchName('branch;rm -rf /'), false)
+  assert.strictEqual(isSafeBranchName('branch`id`'), false)
+  assert.strictEqual(isSafeBranchName('branch$(whoami)'), false)
+  assert.strictEqual(isSafeBranchName('--help'), false)
+  assert.strictEqual(isSafeBranchName('-bevil'), false)
+  assert.strictEqual(isSafeBranchName('a..b'), false)
+  assert.strictEqual(isSafeBranchName(''), false)
+  assert.strictEqual(isSafeBranchName(42), false)
+})
+
+runTest('TC-SEC-03: Git diff/JMX diff file path must stay inside repo', () => {
+  assert.strictEqual(isSafeRelativePath('plans/test.jmx'), true)
+  assert.strictEqual(isSafeRelativePath('src/app/App.tsx'), true)
+  assert.strictEqual(isSafeRelativePath('../outside.txt'), false)
+  assert.strictEqual(isSafeRelativePath('plans/../../outside.txt'), false)
+  assert.strictEqual(isSafeRelativePath('C:/Windows/win.ini'), false)
+  assert.strictEqual(isSafeRelativePath('--output=x'), false)
+  assert.strictEqual(isSafeRelativePath('.'), false)
+  assert.strictEqual(isSafeRelativePath(''), false)
 })
 
 console.log('\n====================================================')
