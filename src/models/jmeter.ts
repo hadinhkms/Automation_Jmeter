@@ -21,6 +21,7 @@ export type JMeterComponentType =
   | 'TransactionController'
   | 'IfController'
   | 'LoopController'
+  | 'WhileController'
   | 'ConstantTimer'
   | 'JSONExtractor'
   | 'RegexExtractor'

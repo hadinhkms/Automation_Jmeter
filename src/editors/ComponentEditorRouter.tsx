@@ -7,7 +7,7 @@ import { ComponentHeader } from './ComponentHeader'
 import { CSVDataSetEditor, HTTPCookieManagerEditor, HTTPHeaderManagerEditor } from './ConfigEditors'
 import { DebugSamplerEditor, HTTPRequestDefaultsEditor, HTTPRequestEditor, TestPlanEditor, ThreadGroupEditor, UserDefinedVariablesEditor } from './CoreEditors'
 import { AggregateReportEditor, SummaryReportEditor, ViewResultsTreeEditor } from './ListenerEditors'
-import { ConstantTimerEditor, IfControllerEditor, LoopControllerEditor, TransactionControllerEditor } from './LogicEditors'
+import { ConstantTimerEditor, IfControllerEditor, LoopControllerEditor, TransactionControllerEditor, WhileControllerEditor } from './LogicEditors'
 import { JSONExtractorEditor, JSR223Editor, RegexExtractorEditor, ResponseAssertionEditor } from './ProcessorEditors'
 import { JSONPathAssertionEditor } from './JSONPathAssertionEditor'
 import { ConcurrencyThreadGroupEditor, SteppingThreadGroupEditor, UltimateThreadGroupEditor } from './ThreadEditors'
@@ -96,6 +96,7 @@ export function ComponentEditorRouter({
       case 'TransactionController': return <TransactionControllerEditor {...props} />
       case 'IfController': return <IfControllerEditor {...props} />
       case 'LoopController': return <LoopControllerEditor {...props} />
+      case 'WhileController': return <WhileControllerEditor {...props} />
       case 'SimpleController':
       case 'ModuleController':
       case 'TestFragmentController': return <div className="editor-empty-state">No specific configuration required for this controller container.</div>

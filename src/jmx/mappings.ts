@@ -65,6 +65,7 @@ export const typeToElement: Record<Exclude<JMeterComponentType, 'UnsupportedComp
   TransactionController: { tag: 'TransactionController', guiclass: 'TransactionControllerGui', testclass: 'TransactionController' },
   IfController: { tag: 'IfController', guiclass: 'IfControllerPanel', testclass: 'IfController' },
   LoopController: { tag: 'LoopController', guiclass: 'LoopControlPanel', testclass: 'LoopController' },
+  WhileController: { tag: 'WhileController', guiclass: 'WhileControllerGui', testclass: 'WhileController' },
   ConstantTimer: { tag: 'ConstantTimer', guiclass: 'ConstantTimerGui', testclass: 'ConstantTimer' },
   JSONExtractor: { tag: 'JSONPostProcessor', guiclass: 'JSONPostProcessorGui', testclass: 'JSONPostProcessor' },
   RegexExtractor: { tag: 'RegexExtractor', guiclass: 'RegexExtractorGui', testclass: 'RegexExtractor' },

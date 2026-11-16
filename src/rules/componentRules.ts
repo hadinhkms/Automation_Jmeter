@@ -33,6 +33,7 @@ export const componentGroups = {
     'TransactionController',
     'IfController',
     'LoopController',
+    'WhileController',
     'ModuleController',
     'TestFragmentController',
   ],
@@ -72,6 +73,7 @@ const samplerTypes = new Set<JMeterComponentType>([
 const controllerTypes = new Set<JMeterComponentType>([
   'IfController',
   'LoopController',
+  'WhileController',
   'SimpleController',
   'TransactionController',
   'ModuleController',

@@ -43,6 +43,22 @@ export function LoopControllerEditor({ node, updateProperties }: EditorProps) {
   )
 }
 
+export function WhileControllerEditor({ node, updateProperties }: EditorProps) {
+  return (
+    <Section title="While Controller Settings">
+      <TextAreaField
+        label="Condition (function or variable)"
+        rows={4}
+        monospace
+        value={textProp(node, 'condition')}
+        placeholder={'${__groovy(vars.get("retry") == "true")}'}
+        onChange={(condition) => updateProperties({ condition })}
+      />
+      <p className="settings-help">Blank: loop until a sampler fails. LAST: like blank, but also skips the loop if the previous sample failed. Otherwise loops while the value is &quot;true&quot;.</p>
+    </Section>
+  )
+}
+
 export function ConstantTimerEditor({ node, updateProperties }: EditorProps) {
   const delay = numberProp(node, 'delay')
   return (

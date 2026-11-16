@@ -62,6 +62,7 @@ export const componentMeta: Record<
   TransactionController: { label: 'Transaction Controller', icon: GitBranch, tone: 'controller' },
   IfController: { label: 'If Controller', icon: GitBranch, tone: 'controller' },
   LoopController: { label: 'Loop Controller', icon: Repeat2, tone: 'controller' },
+  WhileController: { label: 'While Controller', icon: Repeat2, tone: 'controller' },
   ConstantTimer: { label: 'Constant Timer', icon: Clock3, tone: 'timer' },
   JSONExtractor: { label: 'JSON Extractor', icon: FileJson2, tone: 'processor' },
   RegexExtractor: { label: 'Regular Expression Extractor', icon: Braces, tone: 'processor' },

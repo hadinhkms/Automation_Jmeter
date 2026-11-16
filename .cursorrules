@@ -1,5 +1,6 @@
 Before making any changes in this repository (Web UI, Node.js server, JMeter scripts, Playwright recorder), read and strictly follow:
-1. Canonical Software Delivery Process & Quality Standard: .master_process/SOFTWARE_DELIVERY_PROCESS_MASTER.md
+0. Master Process source: .master_process/ (gitignored). Resolve with `npm run master:link`: links D:\_Master_process if present, otherwise clones https://github.com/hadinhkms/_Process-WoW.git
+1. Canonical Software Delivery Process & Quality Standard: .master_process/00_CORE_PROCESS_GUIDE.md
 2. Master Prompts: .master_process/prompts/
 3. Fast-Track for L1/L2: .master_process/prompts/00_Fast_Track_L1_L2.prompt.md
 

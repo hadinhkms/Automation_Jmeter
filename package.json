@@ -4,14 +4,16 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --port 58936 --host 0.0.0.0",
+    "dev": "vite --port 58936 --host ::",
     "build": "tsc -b && vite build",
     "postbuild": "node scripts/prepare-sites-build.mjs",
     "lint": "eslint .",
     "typecheck": "tsc -b --pretty false",
     "test:qa": "tsx tests/test_deep_qa.ts",
     "test:sprint9": "tsx tests/verify-sprint9.mjs",
-    "test": "npm run test:qa && npm run test:sprint9"
+    "test": "npm run test:qa && npm run test:sprint9",
+    "master:link": "node scripts/link-master-process.mjs",
+    "master:update": "node scripts/link-master-process.mjs --update"
   },
   "dependencies": {
     "lucide-react": "0.468.0",

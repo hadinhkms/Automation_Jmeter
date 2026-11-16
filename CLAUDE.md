@@ -3,8 +3,20 @@
 ## Canonical Single Source of Truth
 Mọi yêu cầu phát triển phần mềm, thay đổi UI/UX, kịch bản test hoặc cải tiến kỹ thuật trong toàn bộ dự án BẮT BUỘC phải tuân thủ tài liệu quy trình chuẩn duy nhất tại:
 
-- **Quy trình tổng thể & Playbook:** [.master_process/SOFTWARE_DELIVERY_PROCESS_MASTER.md](.master_process/SOFTWARE_DELIVERY_PROCESS_MASTER.md) (hoặc [D:\_Master_Process\SOFTWARE_DELIVERY_PROCESS_MASTER.md](file:///D:/_Master_Process/SOFTWARE_DELIVERY_PROCESS_MASTER.md))
+- **Quy trình tổng thể & Playbook:** [.master_process/00_CORE_PROCESS_GUIDE.md](.master_process/00_CORE_PROCESS_GUIDE.md) (+ [03_ACCEPTANCE_GATES.md](.master_process/03_ACCEPTANCE_GATES.md), [README.md](.master_process/README.md))
 - **Thư mục Prompts chuẩn:** [.master_process/prompts/](.master_process/prompts/)
+
+### Nguồn Master Process (Source Resolution)
+`.master_process/` là thư mục **gitignored**, trỏ tới bộ chuẩn phát triển phần mềm trung tâm. Thứ tự lấy nguồn:
+1. **Local hub (ưu tiên):** `D:\_Master_process` → junction/symlink `.master_process` (biến môi trường `MASTER_PROCESS_DIR` để đổi đường dẫn).
+2. **Fallback khi máy không có folder trên:** clone từ GitHub <https://github.com/hadinhkms/_Process-WoW.git> vào `.master_process` (biến `MASTER_PROCESS_REPO` để đổi URL). Repo **private** → cần đăng nhập GitHub trước (`gh auth login` hoặc Git Credential Manager).
+
+Thiết lập/kiểm tra (chạy 1 lần sau khi clone repo, hoặc khi `.master_process` không tồn tại):
+```powershell
+npm run master:link          # link local hub, hoặc clone GitHub nếu không có
+npm run master:update        # pull bản mới nhất khi đang dùng bản clone GitHub
+```
+AI agent: nếu không thấy `.master_process/prompts/`, BẮT BUỘC chạy `npm run master:link` trước khi làm task; nếu không chạy được, đọc trực tiếp `D:\_Master_process\` hoặc repo GitHub ở trên.
 
 ## Tối Ưu Tốc Độ & Tiết Kiệm Token (Speed & Token-Saving Policy)
 - **Tác vụ nhỏ/vừa (L1/L2):** Dùng ngay file gộp siêu tốc [.master_process/prompts/00_Fast_Track_L1_L2.prompt.md](.master_process/prompts/00_Fast_Track_L1_L2.prompt.md) để giải quyết trọn vẹn cả 5 vai trò trong 1 lượt prompt duy nhất, tiết kiệm 80% token.
@@ -20,9 +32,9 @@ Mọi yêu cầu phát triển phần mềm, thay đổi UI/UX, kịch bản tes
 
 ## CLI & Tooling
 ```powershell
-python "D:/_Master_process/master.py" doctor .
-python "D:/_Master_process/master.py" audit .
-python "D:/_Master_process/master.py" optimize .
+python ".master_process/master.py" doctor .
+python ".master_process/master.py" audit .
+python ".master_process/master.py" optimize .
 ```
 
 ## Kỷ luật Giới hạn Kích thước File & Chủ Động Tách File (Proactive File Splitting Protocol)
