@@ -5,6 +5,9 @@
 
 Tài khoản lưu ở runs/accounts/<seeker_id>.json (runs/ đã gitignore). Không in password.
 Chỉ chạy với host QC.
+
+Guest JWT (user=null) cho API register lấy từ env QC_GUEST_TOKEN, hoặc file qc-guest-token.local
+ở gốc repo (gitignore *.local). Lấy token từ request /seeker/fe/register trên web QC (DevTools).
 """
 import base64
 import json
@@ -20,10 +23,19 @@ import uuid
 
 API = os.environ.get("QC_API", "https://api.vl24hv2.qc.sieuviet-team.com")
 BRANCH = os.environ.get("QC_BRANCH", "vl24h.north")
-# Guest JWT (user=null) lấy từ request đăng ký thật trên web QC
-GUEST_TOKEN = ("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjaGFubmVsX2NvZGUiOiJ2bDI0aCIsInVzZXIiOm51bGx9"
-               ".b_GBXepcnCjRzAc9I5OdamF0Mx2K1rEg9sZVYpNx_rU")
-OUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "runs", "accounts")
+REPO_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+GUEST_TOKEN_FILE = os.path.join(REPO_ROOT, "qc-guest-token.local")
+OUT_DIR = os.path.join(REPO_ROOT, "runs", "accounts")
+
+
+def guest_token():
+    token = os.environ.get("QC_GUEST_TOKEN", "").strip()
+    if not token and os.path.isfile(GUEST_TOKEN_FILE):
+        with open(GUEST_TOKEN_FILE, encoding="utf-8") as f:
+            token = f.read().strip()
+    if not token:
+        sys.exit("Thiếu guest token: đặt env QC_GUEST_TOKEN hoặc tạo file qc-guest-token.local ở gốc repo")
+    return token
 
 
 def call(path, token, body):
@@ -72,7 +84,8 @@ def main():
         sys.exit(f"Từ chối host không phải QC: {API}")
     suffix = f"{int(time.time())}{random.randint(100, 999)}"
     email = f"hadtv.nlsv.test+auto_{suffix}@gmail.com"
-    password = "Qa@" + "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(12))
+    # BE yêu cầu >= 8 ký tự, có ít nhất 1 chữ và 1 số
+    password = "Qa@" + secrets.choice(string.digits) + "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(12))
     body = {
         "name": f"QA Auto {suffix[-6:]}",
         "password": password,
@@ -80,7 +93,7 @@ def main():
         "is_check_policy": True,
         "email": email,
     }
-    reg = call("/seeker/fe/register", GUEST_TOKEN, body)
+    reg = call("/seeker/fe/register", guest_token(), body)
     token = find_token(reg.get("data"))
     if str(reg.get("code")) != "200" or not token:
         sys.exit(f"Đăng ký lỗi: code={reg.get('code')} msg={reg.get('msg')} data={str(reg.get('data'))[:300]}")
