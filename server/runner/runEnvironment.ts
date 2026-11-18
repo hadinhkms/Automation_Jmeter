@@ -9,6 +9,8 @@ export interface RunLaunchOptions {
   jvmArgs?: string
 }
 
+export const LOCAL_PROPERTIES_FILE = 'jmeter.properties.local'
+
 // List of LTS Java paths compatible with Groovy & JMeter
 const LTS_JAVA_CANDIDATES = [
   'C:\\Program Files\\Java\\jdk-11',
@@ -55,6 +57,12 @@ export function buildJMeterArgs(
     '-e',
     '-o', paths.reportDir,
   ]
+
+  // Secrets (static bearer tokens...) kept out of git: workspace-root jmeter.properties.local (*.local is gitignored)
+  const localProps = join(workspaceRoot, LOCAL_PROPERTIES_FILE)
+  if (existsSync(localProps)) {
+    args.push('-q', workspacePath(localProps))
+  }
 
   if (remoteHosts) {
     const hosts = Array.isArray(remoteHosts)

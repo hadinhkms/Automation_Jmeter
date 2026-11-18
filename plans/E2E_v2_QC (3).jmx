@@ -538,11 +538,12 @@ if (transientErr &amp;&amp; attempt &lt; maxAttempts) {
       </hashTree>
       <TestFragmentController guiclass="TestFragmentControllerGui" testclass="TestFragmentController" testname="Test Fragment - Random job referrer" enabled="true"/>
       <hashTree>
-        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler" enabled="true"><stringProp name="comments"/><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters"/><stringProp name="filename"/><stringProp name="cacheKey">true</stringProp><stringProp name="script">vars.put("CONTINUE_LOOP", "true");</stringProp></JSR223Sampler>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler" enabled="true"><stringProp name="comments"/><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters"/><stringProp name="filename"/><stringProp name="cacheKey">true</stringProp><stringProp name="script">vars.put("CONTINUE_LOOP", "true");
+vars.put("loopGuard", "0");</stringProp></JSR223Sampler>
         <hashTree>
         </hashTree>
         <WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="While Controller" enabled="true">
-          <stringProp name="WhileController.condition">${__javaScript("${CONTINUE_LOOP}" == "true")}</stringProp>
+          <stringProp name="WhileController.condition">${__groovy(vars.get("CONTINUE_LOOP") == "true" &amp;&amp; (vars.get("loopGuard") ?: "0").toInteger() &lt; 20)}</stringProp>
         </WhileController>
         <hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="1.1 List job base on province - Lấy random pageRequest - không filter province" enabled="true"><stringProp name="comments">Created from cURL on 2025-08-29T16:05:32.2620707</stringProp><elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" enabled="true"><collectionProp name="Arguments.arguments"><elementProp name="is_cv_optional" elementType="HTTPArgument"><stringProp name="Argument.name">is_cv_optional</stringProp><stringProp name="Argument.value">${is_cv_optional}</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp><elementProp name="q" elementType="HTTPArgument"><stringProp name="Argument.name">q</stringProp><stringProp name="Argument.value">${keyword}</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">true</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp><elementProp name="urgent_status" elementType="HTTPArgument"><stringProp name="Argument.name">urgent_status</stringProp><stringProp name="Argument.value">${urgent_status}</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp><elementProp name="page" elementType="HTTPArgument"><stringProp name="Argument.name">page</stringProp><stringProp name="Argument.value">1</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp><elementProp name="branch" elementType="HTTPArgument"><stringProp name="Argument.name">branch</stringProp><stringProp name="Argument.value">vl24h.south</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp><elementProp name="exp_session_id" elementType="HTTPArgument"><stringProp name="Argument.name">exp_session_id</stringProp><stringProp name="Argument.value">736a5d13-018c-4ec5-9e2e-b07ecf5d47b0</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp><elementProp name="device_id" elementType="HTTPArgument"><stringProp name="Argument.name">device_id</stringProp><stringProp name="Argument.value">fc600e5d-5a3b-4dc9-9440-7c3a5fa797a9</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp><elementProp name="request_id" elementType="HTTPArgument"><stringProp name="Argument.name">request_id</stringProp><stringProp name="Argument.value">b8ae541b0e45dcb3b82351b456c6ca12</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp><elementProp name="per_page" elementType="HTTPArgument"><stringProp name="Argument.name">per_page</stringProp><stringProp name="Argument.value">30</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp><elementProp name="sort_q" elementType="HTTPArgument"><stringProp name="Argument.name">sort_q</stringProp><stringProp name="Argument.value">priority_max,desc</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">true</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp><elementProp name="url" elementType="HTTPArgument"><stringProp name="Argument.name">url</stringProp><stringProp name="Argument.value">/viec-lam-tp-hcm-p122.html?urgent_status=1&amp;is_cv_optional=1&amp;q=K%E1%BA%BF%20to%C3%A1n</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">true</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp><elementProp name="user_agent" elementType="HTTPArgument"><stringProp name="Argument.name">user_agent</stringProp><stringProp name="Argument.value">Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">true</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp><elementProp name="refer_page" elementType="HTTPArgument"><stringProp name="Argument.name">refer_page</stringProp><stringProp name="Argument.value">https://vieclam24h.vn/viec-lam-tp-hcm-p122.html?urgent_status=1&amp;is_cv_optional=1</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">true</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp><elementProp name="search_id" elementType="HTTPArgument"><stringProp name="Argument.name">search_id</stringProp><stringProp name="Argument.value">3c3824c53b11fb951105e98b31951170</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp><elementProp name="province_ids[0]" elementType="HTTPArgument"><stringProp name="Argument.name">province_ids[0]</stringProp><stringProp name="Argument.value">${province_id}</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">true</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp><elementProp name="from_page" elementType="HTTPArgument"><stringProp name="Argument.name">from_page</stringProp><stringProp name="Argument.value">JS_Province</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp><elementProp name="action" elementType="HTTPArgument"><stringProp name="Argument.name">action</stringProp><stringProp name="Argument.value">province</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp><elementProp name="request_from" elementType="HTTPArgument"><stringProp name="Argument.name">request_from</stringProp><stringProp name="Argument.value">search_result_web</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp><elementProp name="source" elementType="HTTPArgument"><stringProp name="Argument.name">source</stringProp><stringProp name="Argument.value">web</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp></collectionProp></elementProp><stringProp name="HTTPSampler.domain">apiv2.vieclam24h.vn</stringProp><stringProp name="HTTPSampler.port"/><stringProp name="HTTPSampler.protocol">https</stringProp><stringProp name="HTTPSampler.contentEncoding"/><stringProp name="HTTPSampler.path">${path_job_list}</stringProp><stringProp name="HTTPSampler.method">GET</stringProp><boolProp name="HTTPSampler.follow_redirects">true</boolProp><boolProp name="HTTPSampler.auto_redirects">false</boolProp><boolProp name="HTTPSampler.use_keepalive">true</boolProp><boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp><boolProp name="HTTPSampler.BROWSER_COMPATIBLE_MULTIPART">false</boolProp><boolProp name="HTTPSampler.postBodyRaw">false</boolProp><elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs" guiclass="HTTPFileArgsPanel" testclass="HTTPFileArgs" enabled="true"><collectionProp name="HTTPFileArgs.files"/></elementProp></HTTPSamplerProxy>
@@ -553,10 +554,17 @@ if (transientErr &amp;&amp; attempt &lt; maxAttempts) {
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true"><stringProp name="comments"/><stringProp name="Sample.scope">main-and-sub</stringProp><stringProp name="Assertion.test_field">Assertion.response_data</stringProp><intProp name="Assertion.test_type">16</intProp><collectionProp name="Asserion.test_strings"><stringProp name="0">"code":200</stringProp></collectionProp><boolProp name="Assertion.assume_success">false</boolProp></ResponseAssertion>
             <hashTree>
             </hashTree>
-            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true"><stringProp name="comments"/><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters"/><stringProp name="filename"/><stringProp name="cacheKey">true</stringProp><stringProp name="script">// Lấy giá trị của total_pages từ response
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true"><stringProp name="comments"/><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters"/><stringProp name="filename"/><stringProp name="cacheKey">true</stringProp><stringProp name="script">// Guard chống vòng lặp vô hạn (While Controller dừng khi loopGuard &gt;= 20)
+def guard = (vars.get("loopGuard") ?: "0").toInteger() + 1
+vars.put("loopGuard", guard.toString())
+if (guard &gt;= 20) {
+    log.error("Random job referrer: hết 20 lần thử mà không lấy được job_id_refer – kiểm tra 1.1/1.2 (token PROD?)")
+}
+
+// Lấy giá trị của total_pages từ response
 def response = prev.getResponseDataAsString()
 def jsonResponse = new groovy.json.JsonSlurper().parseText(response)
-def totalPages = jsonResponse.data.total_pages
+def totalPages = (jsonResponse?.data?.total_pages ?: 1) as int
 
 // Kiểm tra nếu total_pages lớn hơn 50 thì giới hạn số ngẫu nhiên từ 1 đến 50
 if (totalPages &gt; 50) {
@@ -635,8 +643,12 @@ if (!globalExistingJobIds.contains(job_id_refer)) {
 	def requiredFields = selectedItem.required_fields ?: []
 	vars.put("required_fields", JsonOutput.toJson(requiredFields))
     vars.put("vacancy_quantity", selectedItem.vacancy_quantity?.toString()?.trim())
-    vars.put("salary_min", selectedItem.salary_min?.toString()?.trim())
-    vars.put("salary_max", selectedItem.salary_max?.toString()?.trim())
+    // Cấu trúc lương theo FE recruiter: salary_range 11 = Thỏa thuận (wage_agreement, min/max = null), 21 = có khoảng lương
+    def wageAgreement = selectedItem.salary_range?.toString()?.trim() == "11"
+    def salaryOrNull = { v -&gt; (!wageAgreement &amp;&amp; v != null &amp;&amp; v.toString().isNumber() &amp;&amp; v.toString().toBigDecimal() &gt; 0) ? v.toString().trim() : "null" }
+    vars.put("wage_agreement", wageAgreement.toString())
+    vars.put("salary_min", salaryOrNull(selectedItem.salary_min))
+    vars.put("salary_max", salaryOrNull(selectedItem.salary_max))
     vars.put("occupation_ids_main", selectedItem.occupation_ids_main?.toString() ?: "[]")
     vars.put("experience_range", selectedItem.experience_range?.toString()?.trim())
     vars.put("resume_apply_expired", expired)
@@ -644,6 +656,8 @@ if (!globalExistingJobIds.contains(job_id_refer)) {
     vars.put("level_requirement", selectedItem.level_requirement?.toString()?.trim())
     vars.put("contact_name", selectedItem.contact_name?.toString()?.trim())
     vars.put("salary_range", selectedItem.salary_range?.toString()?.trim())
+    // salary_type bắt buộc từ API create_new (1=lương cứng, 2=có KPI/hoa hồng, 3=không công khai)
+    vars.put("salary_type", selectedItem.salary_type?.toString()?.trim() ?: "3") // tin PROD cũ chưa có salary_type → mặc định 3 (Không công khai)
     vars.put("is_cv_optional", selectedItem.is_cv_optional?.toString()?.trim())
     vars.put("degree_requirement", selectedItem.degree_requirement?.toString()?.trim())
 
@@ -797,7 +811,7 @@ if (matcher &amp;&amp; matcher[0] &amp;&amp; matcher[0][1]) {
     "contact_name": "${contact_name}",
     "contact_email": "hadtv.nlsv.re@gmail.com",
     "contact_address": "${contact_address}",
-    "wage_agreement": true,
+    "wage_agreement": ${wage_agreement},
     "contact_phone": [
         "${vietnam_phone}"
     ],
@@ -808,6 +822,7 @@ if (matcher &amp;&amp; matcher[0] &amp;&amp; matcher[0][1]) {
     "salary_min": ${salary_min},
     "salary_max": ${salary_max},
     "salary_range": ${salary_range},
+    "salary_type": "${salary_type}",
     "age_range": "",
     "degree_requirement": "${degree_requirement}",
     "is_cv_optional": ${is_cv_optional},
@@ -1974,7 +1989,7 @@ log.info("✅ ai_result = " + vars.get("ai_result"))
 // ========================
 // Cấu hình
 // ========================
-def csvFile = "${folderdata}/csvfile_${vars.get('envi')}.csv"
+def csvFile = vars.get("folderdata") + "/csvfile_" + vars.get("envi") + ".csv"
 
 // Định dạng ngày
 def dateFormat = new SimpleDateFormat("yyyyMMdd")
