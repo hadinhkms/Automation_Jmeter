@@ -1,19 +1,43 @@
 import { useState } from 'react'
-import type { TableRow, TestPlanNode } from '../../../models/jmeter'
+import type { TestPlanNode } from '../../../models/jmeter'
 import { proxyDebugService, type SingleResponseResult } from '../../../services/proxyDebugService'
+import { historyStorageService } from '../../../services/historyStorageService'
 import { useEnvironmentStore } from '../../../store/environmentStore'
 import { useJMeterStore } from '../../../store/jmeterStore'
-import { resolveVariables } from '../../../utils/postman/dynamicVariablesEngine'
-import { resolveCascadedHeaders } from '../../../utils/headerScoping'
+import { buildDebugRequest, type DebugRequest } from '../../../utils/debug/buildDebugRequest'
+import { createId } from '../../../utils/ids'
 
-function textProp(node: TestPlanNode, key: string): string {
-  const val = node.properties[key]
-  return val !== undefined && val !== null ? String(val) : ''
+function clientError(err: unknown): SingleResponseResult {
+  return {
+    status: 0,
+    statusText: 'Client Error',
+    latencyMs: 0,
+    sizeBytes: 0,
+    headers: [],
+    body: err instanceof Error ? err.message : String(err),
+    truncated: false,
+  }
 }
 
-function rowsProp(node: TestPlanNode, key: string): TableRow[] {
-  const current = node.properties[key]
-  return Array.isArray(current) ? (current as TableRow[]) : []
+function recordHistory(node: TestPlanNode, request: DebugRequest, result: SingleResponseResult) {
+  historyStorageService
+    .add({
+      id: createId(),
+      timestamp: Date.now(),
+      nodeId: node.id,
+      nodeName: node.name,
+      method: request.method,
+      url: request.url,
+      headers: request.headers,
+      body: request.body,
+      status: result.status,
+      statusText: result.statusText,
+      latencyMs: result.latencyMs,
+      sizeBytes: result.sizeBytes,
+    })
+    .catch(() => {
+      // History is best-effort; a storage failure must not break Send Request.
+    })
 }
 
 export function useSendRequest(node: TestPlanNode) {
@@ -27,83 +51,12 @@ export function useSendRequest(node: TestPlanNode) {
 
     try {
       const envVars = useEnvironmentStore.getState().getActiveVariables()
-
-      let rawProtocol = resolveVariables(textProp(node, 'protocol') || 'https', envVars).trim()
-      let rawDomain = resolveVariables(textProp(node, 'domain') || textProp(node, 'server'), envVars).trim()
-      const rawPort = resolveVariables(textProp(node, 'port'), envVars).trim()
-      let rawPath = resolveVariables(textProp(node, 'path') || '/', envVars).trim()
-      const method = (textProp(node, 'method') || 'GET').toUpperCase()
-      const rawBody = resolveVariables(textProp(node, 'body') || '', envVars)
-
-      // Handle if domain contains full url like https://domain.com
-      if (/^https?:\/\//i.test(rawDomain)) {
-        try {
-          const parsed = new URL(rawDomain)
-          rawProtocol = parsed.protocol.replace(':', '')
-          rawDomain = parsed.hostname
-          if (parsed.port) rawDomain += `:${parsed.port}`
-          if (parsed.pathname && parsed.pathname !== '/') {
-            rawPath = `${parsed.pathname}${rawPath === '/' ? '' : rawPath}`
-          }
-        } catch {
-          // ignore parse error
-        }
-      }
-
-      // Query params
-      const params = rowsProp(node, 'parameters')
-      let queryString = ''
-      if (params.length > 0) {
-        const validParams = params.filter((p) => p.name)
-        if (validParams.length > 0) {
-          queryString =
-            (rawPath.includes('?') ? '&' : '?') +
-            validParams
-              .map(
-                (p) =>
-                  `${encodeURIComponent(resolveVariables(String(p.name), envVars))}=${encodeURIComponent(
-                    resolveVariables(String(p.value || ''), envVars),
-                  )}`,
-              )
-              .join('&')
-        }
-      }
-
-      const portSegment = rawPort ? `:${rawPort}` : ''
-      const normalizedPath = rawPath.startsWith('/') ? rawPath : `/${rawPath}`
-      const fullUrl = `${rawProtocol}://${rawDomain}${portSegment}${normalizedPath}${queryString}`
-
-      // Extract cascaded headers from tree (TestPlan -> ThreadGroup -> HTTPRequest)
-      const rootTestPlan = useJMeterStore.getState().testPlan
-      const cascaded = resolveCascadedHeaders(node, rootTestPlan)
-      const headers: Array<{ name: string; value: string }> = cascaded.map((h) => ({
-        name: resolveVariables(h.name, envVars),
-        value: resolveVariables(h.value, envVars),
-      }))
-
-      if (rawBody && !headers.some((h) => h.name.toLowerCase() === 'content-type')) {
-        headers.push({ name: 'Content-Type', value: 'application/json' })
-      }
-
-      const result = await proxyDebugService.sendSingleRequest({
-        method,
-        url: fullUrl,
-        headers,
-        body: rawBody || undefined,
-        timeoutMs: 30000,
-      })
-
+      const request = buildDebugRequest(node, useJMeterStore.getState().testPlan, envVars)
+      const result = await proxyDebugService.sendSingleRequest(request)
       setDebugResult(result)
+      recordHistory(node, request, result)
     } catch (err: unknown) {
-      setDebugResult({
-        status: 0,
-        statusText: 'Client Error',
-        latencyMs: 0,
-        sizeBytes: 0,
-        headers: [],
-        body: err instanceof Error ? err.message : String(err),
-        truncated: false,
-      })
+      setDebugResult(clientError(err))
     } finally {
       setIsSending(false)
     }

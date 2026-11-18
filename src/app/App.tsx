@@ -25,6 +25,8 @@ import { WorkloadGraphModal } from '../components/common/WorkloadGraphModal'
 import { SlaSettingsModal } from '../components/common/SlaSettingsModal'
 import { GitManagerModal } from '../components/common/GitManagerModal'
 import { ImportPostmanModal } from '../components/common/postman/ImportPostmanModal'
+import { MockServerManagerModal } from '../components/common/mock/MockServerManagerModal'
+import { WorkspaceTabs } from '../components/workspace/WorkspaceTabs'
 import { evaluateSamplesSla } from '../utils/slaEvaluator'
 import type { SlaThresholds, WebhookConfig } from '../models/jmeter'
 import { parseJtlContent } from '../utils/jtlParser'
@@ -55,6 +57,7 @@ export type ActiveModal =
   | 'recorder'
   | 'curl'
   | 'postman'
+  | 'mock'
   | 'plugins'
   | 'settings'
   | 'save'
@@ -445,6 +448,7 @@ export function App() {
     openWorkloadGraph: () => toggleModal('workload'),
     openSlaSettings: () => toggleModal('sla'),
     openGitManager: () => toggleModal('git'),
+    openMockServer: () => toggleModal('mock'),
     openUserGuide: () => window.open('/docs/index.html', '_blank'),
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [selectedNode.id, store.dirty, store.fileName, store.testPlan, store.executionMode, store.activeRunId, store.isConsoleOpen, activeModal])
@@ -736,6 +740,7 @@ export function App() {
           updateNode={(updates) => store.updateNode(selectedNode.id, updates)}
           updateProperties={(updates) => store.updateNodeProperties(selectedNode.id, updates)}
           resultsCleared={store.resultsCleared}
+          tabs={<WorkspaceTabs root={store.testPlan} selectedId={store.selectedNodeId} onSelect={store.selectNode} />}
         />
       </main>
 
@@ -854,6 +859,7 @@ export function App() {
           dismissNoticeLater(`Successfully imported ${nodes.length} element(s) from Postman Collection.`)
         }}
       />
+      <MockServerManagerModal isOpen={activeModal === 'mock'} onClose={closeModal} />
     </div>
   )
 }

@@ -2,7 +2,7 @@
 ## FEAT-P4: Local Lightweight Mock Server | FEAT-P5: Request History & Multi-Tab Workspace | FEAT-P3c: Chai Transpiler v2
 
 > **Căn cứ:** `.master_process/SOFTWARE_DELIVERY_PROCESS_MASTER.md`  
-> **Trạng thái:** 🔵 BACKLOG (Thực thi sau khi hoàn thành Sprint 9)  
+> **Trạng thái:** ✅ DONE (2026-11-19) — verify: `npm run test:sprint10` (18/18), typecheck + build pass  
 > **Kiến trúc:** Tuân thủ Proactive File Splitting (Mỗi file ≤ 150 dòng)
 
 ---
@@ -47,7 +47,13 @@
 ---
 
 ## 4. Gate 4 – QA Verification Checklist (Phase D)
-- [ ] Gửi request vào `/mock/payment/checkout` -> Trả về JSON giả lập đúng sau đúng số ms delay cấu hình.
-- [ ] History lưu đúng 50 request gần nhất, không làm lag trình duyệt.
-- [ ] Mở nhiều tab sampler không bị mất dữ liệu form khi chuyển tab.
-- [ ] `npm run typecheck` đạt 0 lỗi.
+- [x] Gửi request vào `/mock/payment/checkout` -> Trả về JSON giả lập đúng sau đúng số ms delay cấu hình.
+- [x] History lưu đúng 50 request gần nhất, không làm lag trình duyệt.
+- [x] Mở nhiều tab sampler không bị mất dữ liệu form khi chuyển tab.
+- [x] `npm run typecheck` đạt 0 lỗi.
+- [x] FEAT-P3c Chai Transpiler v2: JSONPath equality/exists, header, response-time → native assertions; phần không dịch được → JSR223 Groovy stub kèm bảng tra cứu (TC-CHAI-01..03).
+
+### Ghi chú triển khai
+- Mock routes lưu tại `.jmeter-web/mock-routes.json` (gitignored, theo máy). API: `GET/POST /api/jmeter/mock/routes`. Path hỗ trợ `:param` và `*` cuối.
+- History: IndexedDB `jmeter-web-studio/requestHistory`, FIFO 50; "Restore" ghi lại URL/query/method/body vào sampler (header lấy từ Header Manager nên không ghi lại).
+- Multi-tab: tự mở tab khi chọn sampler, tối đa 8 tab, middle-click/✕ để đóng, chuột phải = đóng các tab khác.

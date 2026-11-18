@@ -22,6 +22,7 @@ import {
   Activity,
   ShieldCheck,
   GitBranch,
+  Server,
 } from 'lucide-react'
 import type { AppCommands } from '../menu/MenuBar'
 import { useJMeterStore } from '../../store/jmeterStore'
@@ -120,6 +121,13 @@ export function Toolbar({
         active={activeModal === 'postman'}
       >
         <FileJson size={17} style={{ color: activeModal === 'postman' ? '#ffffff' : '#f59e0b' }} />
+      </ToolButton>
+      <ToolButton
+        title="Local Mock Server… (Tools -> Local Mock Server)"
+        action={commands.openMockServer}
+        active={activeModal === 'mock'}
+      >
+        <Server size={17} />
       </ToolButton>
       <ToolButton
         title="Project File Manager (upload CSV, attachments, files)"

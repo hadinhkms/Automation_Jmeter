@@ -1,6 +1,7 @@
 import type { Plugin, ViteDevServer, Connect } from 'vite'
 import type { ServerResponse } from 'node:http'
 import { handleDebugProxy } from './routes/debugProxyRouter'
+import { handleMockRoutesApi, handleMockServe } from './routes/mockServerRouter'
 import { handleRunnerRoutes } from './routes/runnerRoutes'
 import { handlePluginsRoutes } from './routes/pluginsRoutes'
 import { handleAssetRoutes } from './routes/assetRoutes'
@@ -18,6 +19,7 @@ const ROUTE_GROUPS: RouteHandler[] = [
   handleHeadlessRoutes,
   handleGitRoutes,
   handleRecorderRoutes,
+  handleMockRoutesApi,
   handleReportRoutes,
 ]
 
@@ -32,6 +34,9 @@ export function jmeterPlugin(): Plugin {
           if (!serveUserGuide(res)) return next()
           return
         }
+
+        // Local Mock Server (FEAT-P4): /mock/* endpoints for load-test stubs
+        if (await handleMockServe(req, res)) return
 
         if (!url.startsWith('/api/jmeter')) {
           return next()

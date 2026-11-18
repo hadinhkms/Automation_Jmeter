@@ -16,7 +16,7 @@ import type { EditorProps } from './editorUtils'
 import { boolProp, numberProp, rowsProp, textProp } from './editorUtils'
 import { projectAssetService } from '../services/projectAssetService'
 import { useSendRequest } from '../components/common/debug/useSendRequest'
-import { SendRequestButton } from '../components/common/debug/SendRequestButton'
+import { HttpRequestActionBar } from '../components/common/debug/HttpRequestActionBar'
 import { SendInspectPanel } from '../components/common/debug/SendInspectPanel'
 
 export function TestPlanEditor({ node, updateProperties }: EditorProps) {
@@ -209,14 +209,13 @@ export function HTTPRequestEditor({ node, updateProperties }: EditorProps) {
 
   return (
     <>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>HTTP Request Sampler</span>
-        <SendRequestButton
-          isSending={isSending}
-          onSend={sendRequest}
-          disabled={!textProp(node, 'server') && !textProp(node, 'domain')}
-        />
-      </div>
+      <HttpRequestActionBar
+        node={node}
+        isSending={isSending}
+        canSend={Boolean(textProp(node, 'server') || textProp(node, 'domain'))}
+        onSend={sendRequest}
+        updateProperties={updateProperties}
+      />
       <Section title="Web Server">
         <HttpConnectionFields node={node} updateProperties={updateProperties} includeMethod />
       </Section>

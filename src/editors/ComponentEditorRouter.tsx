@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { AlertTriangle } from 'lucide-react'
 import { EditableTable } from '../components/common/EditableTable'
 import { componentMeta } from '../components/componentMeta'
@@ -63,11 +64,14 @@ export function ComponentEditorRouter({
   updateNode,
   updateProperties,
   resultsCleared = false,
+  tabs,
 }: {
   node: TestPlanNode
   updateNode: (updates: Partial<TestPlanNode>) => void
   updateProperties: (updates: Record<string, unknown>) => void
   resultsCleared?: boolean
+  /** Optional tab strip rendered above the title bar (multi-tab workspace). */
+  tabs?: ReactNode
 }) {
   const props = { node, updateProperties }
   const Icon = componentMeta[node.type].icon
@@ -123,6 +127,7 @@ export function ComponentEditorRouter({
 
   return (
     <section className={`editor-panel ${isFullHeightListener ? 'panel-full-height' : ''}`} aria-label={`${componentMeta[node.type].label} editor`}>
+      {tabs}
       <div className="editor-titlebar">
         <Icon size={18} className={`tone-${componentMeta[node.type].tone}`} />
         <div><strong>{componentMeta[node.type].label}</strong><span>{node.type}</span></div>

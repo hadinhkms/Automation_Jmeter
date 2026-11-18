@@ -6,6 +6,9 @@ dist
 *.tsbuildinfo
 .jmeter-web-port
 
+# Local Mock Server routes (per machine)
+.jmeter-web/
+
 # Apache JMeter binaries
 apache-jmeter-*
 

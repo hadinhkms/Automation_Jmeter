@@ -29,6 +29,7 @@ export interface AppCommands {
   openWorkloadGraph: () => void
   openSlaSettings: () => void
   openGitManager: () => void
+  openMockServer: () => void
   openUserGuide: () => void
 }
 
@@ -91,6 +92,7 @@ const menuItems: Record<string, MenuItem[]> = {
     { label: 'Browser & Network Recorder…', shortcut: 'Ctrl+Shift+R', action: 'openBrowserRecorder' },
     { label: 'Import from cURL…', action: 'importCurl' },
     { label: 'Import Postman Collection…', action: 'importPostman' },
+    { label: 'Local Mock Server…', action: 'openMockServer' },
     { label: 'Project File Manager...', action: 'openAssetManager' },
     { label: 'Plugins Manager…', action: 'openPluginsManager' },
     { label: 'Git Manager & Diff…', action: 'openGitManager' },
