@@ -22,5 +22,6 @@ export const boolProp = (node: TestPlanNode, key: string, fallback = false): boo
 
 export const rowsProp = (node: TestPlanNode, key: string): TableRow[] => {
   const value = node.properties[key]
+  // SAFETY: Array.isArray checked; editors always store these table rows as TableRow objects
   return Array.isArray(value) ? (value as TableRow[]) : []
 }

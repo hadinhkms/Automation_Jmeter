@@ -25,6 +25,7 @@ export function parseJsonBody(req: IncomingMessage): Promise<Record<string, unkn
           reject(new HttpError(400, 'Request body must be a JSON object.'))
           return
         }
+        // SAFETY: parsed is checked above to be a non-null, non-array object
         resolve(parsed as Record<string, unknown>)
       } catch {
         reject(new HttpError(400, 'Malformed JSON request body.'))

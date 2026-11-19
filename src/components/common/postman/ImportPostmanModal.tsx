@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { FileCode, X } from 'lucide-react'
 import type { TestPlanNode } from '../../../models/jmeter'
-import type { FlatPostmanItem, PostmanCollection } from '../../../utils/postman/postmanTypes'
+import type { FlatPostmanItem, PostmanCollection } from '../../../models/postman'
 import { convertCollectionToNodes, extractFlatItems, parsePostmanCollection } from '../../../utils/postman/postmanParser'
 import { PostmanFileUploader } from './PostmanFileUploader'
 import { PostmanItemTreePreview } from './PostmanItemTreePreview'

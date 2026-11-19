@@ -61,6 +61,7 @@ export function findSamplerRequestInTestPlan(
   if (props.postBodyRaw) {
     body = String(props.body ?? '')
   } else if (method !== 'GET' && Array.isArray(props.parameters)) {
+    // SAFETY: Array.isArray checked; HTTP sampler parameters are stored as name/value rows
     body = encodeFormParameters(props.parameters as SamplerParameter[])
   }
 
@@ -79,6 +80,7 @@ export function findSamplerHeadersInTestPlan(
     const scopeHeaders = [...inheritedHeaders]
     for (const child of node.children || []) {
       if (child.type === 'HTTPHeaderManager' && child.enabled) {
+        // SAFETY: Header Manager rows are written by its editor as name/value rows; undefined falls back to []
         const hdrs = (child.properties.headers as { name: string; value: string }[]) || []
         for (const h of hdrs) {
           if (h.name && h.value) {

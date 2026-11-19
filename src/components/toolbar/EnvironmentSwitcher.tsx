@@ -14,6 +14,7 @@ export function EnvironmentSwitcher() {
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
+      // SAFETY: DOM event targets are Nodes (or null, which contains() treats as false)
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setOpen(false)
       }

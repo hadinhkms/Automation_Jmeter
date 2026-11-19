@@ -29,6 +29,7 @@ export function normalizeDirectoryVariableRows(rows: TableRow[]): TableRow[] {
 export function normalizeDirectoryVariablesInTree(node: TestPlanNode): TestPlanNode {
   const originalVariables = node.properties.variables
   const variables = Array.isArray(originalVariables)
+    // SAFETY: Array.isArray checked; editors always store these table rows as TableRow objects
     ? normalizeDirectoryVariableRows(node.properties.variables as TableRow[])
     : undefined
   const children = node.children.map(normalizeDirectoryVariablesInTree)

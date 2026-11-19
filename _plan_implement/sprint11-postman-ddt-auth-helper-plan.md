@@ -2,7 +2,7 @@
 ## FEAT-P6: Data-Driven Testing (DDT) CSV Wizard | FEAT-P7: Advanced Auth Helpers (OAuth2 & AWS SigV4)
 
 > **Căn cứ:** `.master_process/SOFTWARE_DELIVERY_PROCESS_MASTER.md`  
-> **Trạng thái:** 🔵 BACKLOG (Thực thi sau khi hoàn thành Sprint 10)  
+> **Trạng thái:** ✅ DONE (2026-11-19) – xem mục 5 Implementation Notes  
 > **Kiến trúc:** Tuân thủ Proactive File Splitting (Mỗi file ≤ 150 dòng)
 
 ---
@@ -45,7 +45,24 @@
 ---
 
 ## 4. Gate 4 – QA Verification Checklist (Phase D)
-- [ ] Upload CSV hợp lệ -> Preview hiển thị đúng 5 dòng, sinh đúng node `CSVDataSetConfig`.
-- [ ] File CSV không có header hoặc rỗng -> Báo lỗi thân thiện.
-- [ ] Cấu hình AWS SigV4 -> Request gửi đi có header `Authorization: AWS4-HMAC-SHA256...` hợp lệ.
-- [ ] `npm run typecheck` đạt 0 lỗi.
+- [x] Upload CSV hợp lệ -> Preview hiển thị đúng 5 dòng, sinh đúng node `CSVDataSetConfig`. *(TC-DDT-01/02/06; UI: 8-row CSV → 5 preview rows, delimiter `;` detected, `${var}` names editable)*
+- [x] File CSV không có header hoặc rỗng -> Báo lỗi thân thiện. *(TC-DDT-03/04; UI: "The CSV file is empty." / "The first row looks like data … Add a header row such as \"username,password\"")*
+- [x] Cấu hình AWS SigV4 -> Request gửi đi có header `Authorization: AWS4-HMAC-SHA256...` hợp lệ. *(TC-SIGV4-01/02 khớp AWS test vector `get-vanilla` + IAM docs; TC-SIGV4-05 chạy JMeter 5.6.3 thật với Groovy sinh ra, server nhận header và tự ký lại → khớp 100%)*
+- [x] `npm run typecheck` đạt 0 lỗi.
+
+---
+
+## 5. Implementation Notes (Sprint 11 delivered)
+| File | Ghi chú |
+|:---|:---|
+| `src/utils/ddt/csvPreviewParser.ts` | Đọc CSV (BOM/CRLF, quoted `""`), auto-detect `,` `;` `	`, preview 5 dòng, lỗi thân thiện: rỗng / không header / header trùng / header-only; giới hạn 20MB + đuôi file. |
+| `src/utils/ddt/csvVariableMapping.ts` | Map cột → `${var}` (sanitize, validate trùng/không hợp lệ) và build properties `CSVDataSet` (`ignoreFirstLine=true`, tab → `	`). |
+| `src/components/common/ddt/*` | `DdtWizardModal` (750px, responsive 390px) + `DdtPreviewTable`, `DdtRunOptionsFields`, `useDdtWizard`. File upload qua `projectAssetService.uploadAsset(file,'data')` → đường dẫn project-relative `data/<file>.csv`. Mở từ **Tools → Data-Driven Test – Import CSV…** hoặc nút toolbar; node chèn vào node đang chọn (fallback parent/Thread Group như `insertNode`). |
+| `src/utils/auth/awsSigV4Signer.ts` + `awsSigV4Canonical.ts` | Signer tham chiếu (Web Crypto) – dùng để test với AWS test vector. |
+| `src/utils/auth/awsSigV4Groovy.ts` + `awsSigV4Generator.ts` | Sinh `JSR223PreProcessor` (property `language: 'groovy'`). Script đọc key **theo tên biến** (JMeter var → `-J` property → env var), không bao giờ chứa key thật, không chứa `${` (tránh JMeter substitute). Validate region/service, chặn dán key thật (`AKIA…`/secret 40 ký tự) vào ô tên biến. Hỗ trợ session token, `X-Amz-Content-Sha256` (bắt buộc với S3). |
+| `src/utils/auth/oauth2TokenFetcher.ts` + `oauth2TokenResponse.ts` + `oauth2BearerNodes.ts` | Client Credentials / Password grant, client auth body hoặc Basic; gọi qua proxy dev-server `/api/jmeter/proxy/send-single` (không CORS). Field hỗ trợ `${VAR}` resolve từ Environment đang active; mặc định client secret = `${OAUTH_CLIENT_SECRET}`. Chèn `HTTP Header Manager` (`Authorization: Bearer ${ACCESS_TOKEN}`) + UDV ở Test Plan, hoặc header literal. |
+| `src/components/common/debug/HttpAuthWizard.tsx` (+ `OAuth2AuthForm`, `AwsSigV4AuthForm`, `AuthField`, `useOAuth2Wizard`, `authWizard.css`) | Nút **Auth** trên `HttpRequestActionBar` mở panel trong HTTP Request editor (thay cho dự kiến sửa `ProtocolEditors.tsx` – không làm phình `CoreEditors.tsx`). |
+| Wiring | `App.tsx` (+`'ddt'` modal, `openDdtWizard`), `MenuBar.tsx`, `Toolbar.tsx` – chỉ thêm vài dòng. |
+| `tests/verify-sprint11.mjs` | 16 TC (DDT 6, SigV4 5 gồm e2e JMeter, OAuth 5 gồm e2e qua proxy thật tới token server local). `npm run test:sprint11`, đã nối vào `npm test`. |
+
+**Giới hạn đã biết:** Nút *Send Request* (debug) không chạy JSR223 PreProcessor nên không ký SigV4 – chữ ký chỉ áp dụng khi chạy JMeter thật. Token OAuth lưu trong UDV sẽ hết hạn – cần lấy lại qua Auth wizard trước khi chạy dài.

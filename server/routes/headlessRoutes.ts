@@ -27,8 +27,11 @@ export const handleHeadlessRoutes: RouteHandler = async (req, res, url) => {
       const body = await parseJsonBody(req)
       const jmx = typeof body.jmx === 'string' ? body.jmx : ''
       const name = typeof body.name === 'string' ? body.name : 'headless_test'
+      // SAFETY: client JSON (or undefined → {}); evaluateSla reads every threshold as optional and coerces with Number()
       const slaThresholds = (body.slaThresholds as Record<string, unknown>) || {}
+      // SAFETY: client JSON (or undefined → {}); webhook fields are only truth-tested and coerced with String()
       const webhook = (body.webhook as Record<string, unknown>) || {}
+      // SAFETY: buildRunArgs accepts a string or a string list and ignores anything falsy
       const remoteHosts = body.remoteHosts as string[] | string | undefined
 
       if (!jmx) {

@@ -1,6 +1,6 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { Loader2, Save } from 'lucide-react'
-import { MOCK_MAX_DELAY_MS, MOCK_METHODS, validateMockRoute, type MockMethod, type MockRoute } from '../../../models/mockServer'
+import { MOCK_MAX_DELAY_MS, MOCK_MAX_STATUS, MOCK_METHODS, MOCK_MIN_STATUS, validateMockRoute, type MockMethod, type MockRoute } from '../../../models/mockServer'
 
 interface MockRouteFormProps {
   initial: MockRoute
@@ -15,6 +15,8 @@ const CONTENT_TYPES = ['application/json', 'application/xml', 'text/plain', 'tex
 export function MockRouteForm({ initial, others, saving, onSave, onCancel }: MockRouteFormProps) {
   const [draft, setDraft] = useState<MockRoute>(initial)
   const [touched, setTouched] = useState(false)
+  // A stored value outside the presets is shown as its own option so the select reflects the real value
+  const contentTypes = CONTENT_TYPES.includes(draft.contentType) ? CONTENT_TYPES : [...CONTENT_TYPES, draft.contentType]
   const errors = useMemo(() => validateMockRoute(draft, others), [draft, others])
   const hasErrors = Object.keys(errors).length > 0
   const show = (key: keyof typeof errors) => (touched || draft[key] !== initial[key] ? errors[key] : undefined)
@@ -32,6 +34,7 @@ export function MockRouteForm({ initial, others, saving, onSave, onCancel }: Moc
       <div className="mock-form-grid">
         <label className="form-field">
           Method
+          {/* // SAFETY: value comes from a select element whose option values are exactly this union */}
           <select value={draft.method} onChange={(e) => set('method', e.target.value as MockMethod)}>
             {MOCK_METHODS.map((m) => <option key={m} value={m}>{m}</option>)}
           </select>
@@ -43,7 +46,7 @@ export function MockRouteForm({ initial, others, saving, onSave, onCancel }: Moc
         </label>
         <label className="form-field">
           <span>Status <span className="mock-required">*</span></span>
-          <input type="number" min={100} max={599} value={Number.isNaN(draft.status) ? '' : draft.status} onChange={(e) => set('status', e.target.valueAsNumber)} aria-invalid={Boolean(show('status'))} />
+          <input type="number" min={MOCK_MIN_STATUS} max={MOCK_MAX_STATUS} value={Number.isNaN(draft.status) ? '' : draft.status} onChange={(e) => set('status', e.target.valueAsNumber)} aria-invalid={Boolean(show('status'))} />
           {show('status') ? <span className="field-error">{show('status')}</span> : null}
         </label>
         <label className="form-field">
@@ -53,9 +56,10 @@ export function MockRouteForm({ initial, others, saving, onSave, onCancel }: Moc
         </label>
         <label className="form-field">
           Content-Type
-          <select value={draft.contentType} onChange={(e) => set('contentType', e.target.value)}>
-            {CONTENT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+          <select value={draft.contentType} onChange={(e) => set('contentType', e.target.value)} aria-invalid={Boolean(show('contentType'))}>
+            {contentTypes.map((t) => <option key={t} value={t}>{t}</option>)}
           </select>
+          {show('contentType') ? <span className="field-error">{show('contentType')}</span> : null}
         </label>
       </div>
       <label className="form-field">

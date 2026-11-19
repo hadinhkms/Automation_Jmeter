@@ -19,9 +19,11 @@ export function generateCurlCommand(
 
   const planRequest = findSamplerRequestInTestPlan(testPlan, sample.label)
   let method = (sample.method || '').toUpperCase()
+  // SAFETY: includes() only tests membership against the known HTTP method list
   if (!method || method === 'HTTP' || !HTTP_METHODS.includes(method as typeof HTTP_METHODS[number])) {
     method = planRequest?.method || ''
   }
+  // SAFETY: includes() only tests membership against the known HTTP method list
   if (!HTTP_METHODS.includes(method as typeof HTTP_METHODS[number])) {
     const text = `${sample.label} ${url} ${sample.request || ''}`.toUpperCase()
     if (/\b(GET)\b/.test(text)) method = 'GET'

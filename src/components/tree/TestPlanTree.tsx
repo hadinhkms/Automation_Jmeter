@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { PanelLeftClose, Plus } from 'lucide-react'
 import { TreeRow } from './TreeRow'
-import type { TreeProps } from './treeTypes'
+import type { TreeProps } from '../../models/tree'
 
 export function TestPlanTree(props: TreeProps) {
   const [draggedNodeId, setDraggedNodeId] = useState<string | null>(null)

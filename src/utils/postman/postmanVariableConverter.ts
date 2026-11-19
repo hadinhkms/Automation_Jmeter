@@ -22,6 +22,7 @@ export function normalizePostmanUrl(urlInput: unknown): {
   if (typeof urlInput === 'string') {
     raw = urlInput
   } else if (urlInput && typeof urlInput === 'object') {
+    // SAFETY: typeof object checked above; raw is assumed to be a string per the Postman v2 schema (falsy → '')
     const obj = urlInput as { raw?: string }
     raw = obj.raw || ''
   }

@@ -46,11 +46,11 @@ await test('TC-MOCK-01: Path must start with /mock/ and name an endpoint', () =>
   assert.deepStrictEqual(validateMockRoute(route({ path: '/mock/sms/send' })), {})
 })
 
-await test('TC-MOCK-02: Delay BVA 0..10000 and status 100..599', () => {
+await test('TC-MOCK-02: Delay BVA 0..10000 and status 200..599 (1xx hangs clients)', () => {
   for (const ok of [0, 1, 9999, 10000]) assert.strictEqual(validateMockRoute(route({ path: '/mock/a', delayMs: ok })).delayMs, undefined, `delay ${ok}`)
   for (const bad of [-1, 10001, 1.5, NaN]) assert.ok(validateMockRoute(route({ path: '/mock/a', delayMs: bad })).delayMs, `delay ${bad}`)
-  for (const ok of [100, 200, 599]) assert.strictEqual(validateMockRoute(route({ path: '/mock/a', status: ok })).status, undefined)
-  for (const bad of [99, 600, NaN]) assert.ok(validateMockRoute(route({ path: '/mock/a', status: bad })).status)
+  for (const ok of [200, 201, 599]) assert.strictEqual(validateMockRoute(route({ path: '/mock/a', status: ok })).status, undefined)
+  for (const bad of [99, 100, 101, 199, 600, NaN]) assert.ok(validateMockRoute(route({ path: '/mock/a', status: bad })).status, `status ${bad}`)
 })
 
 await test('TC-MOCK-03: JSON body must parse when Content-Type is JSON', () => {
@@ -143,7 +143,7 @@ await test('TC-MOCK-10: Invalid save rejected with 400 and failing index; store 
   const data = await res.json()
   assert.strictEqual(data.index, 1)
   assert.ok(data.errors.delayMs)
-  const malformed = await fetch(`${base}/api/jmeter/mock/routes`, { method: 'POST', body: '{nope' })
+  const malformed = await fetch(`${base}/api/jmeter/mock/routes`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{nope' })
   assert.strictEqual(malformed.status, 400)
   const list = await (await fetch(`${base}/api/jmeter/mock/routes`)).json()
   assert.strictEqual(list.routes.length, 2, 'previous routes kept')
@@ -203,7 +203,11 @@ await test('TC-HIST-04: buildDebugRequest resolves env vars, query params and ca
   root.children.push(req)
   const out = buildDebugRequest(req, root, { host: 'api.test', id: '7' })
   assert.strictEqual(out.method, 'POST')
-  assert.strictEqual(out.url, 'https://api.test/users/7?q=a%20b')
+  assert.strictEqual(out.url, 'https://api.test/users/7', 'raw body replaces parameters, like the JMX writer')
+  assert.strictEqual(out.body, '{"x":1}')
+  const get = createNode('HTTPRequest', 'Search', { protocol: 'https', server: '{{host}}', path: '/s', method: 'GET', parameters: [{ name: 'q', value: 'a b' }] })
+  root.children.push(get)
+  assert.strictEqual(buildDebugRequest(get, root, { host: 'api.test' }).url, 'https://api.test/s?q=a%20b')
   assert.ok(out.headers.some((h) => h.name === 'Content-Type' && h.value === 'application/json'))
 })
 

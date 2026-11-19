@@ -7,6 +7,9 @@ export interface DebugRequest extends SingleRequestConfig {
   headers: Array<{ name: string; value: string }>
 }
 
+/** Methods whose parameters JMeter sends as an x-www-form-urlencoded body when there is no raw body. */
+const FORM_METHODS = new Set(['POST', 'PUT', 'PATCH'])
+
 function textProp(node: TestPlanNode, key: string): string {
   const val = node.properties[key]
   return val !== undefined && val !== null ? String(val) : ''
@@ -14,6 +17,7 @@ function textProp(node: TestPlanNode, key: string): string {
 
 function rowsProp(node: TestPlanNode, key: string): TableRow[] {
   const current = node.properties[key]
+  // SAFETY: Array.isArray checked; editors always store these table rows as TableRow objects
   return Array.isArray(current) ? (current as TableRow[]) : []
 }
 
@@ -38,11 +42,18 @@ export function buildDebugRequest(node: TestPlanNode, root: TestPlanNode, envVar
     }
   }
 
-  const params = rowsProp(node, 'parameters').filter((p) => p.name)
-  const query = params
+  // Mirror what the JMX writer makes JMeter send: a non-empty raw body replaces the parameters entirely;
+  // otherwise parameters go in the query (GET/HEAD/DELETE/OPTIONS...) or as a form body (POST/PUT/PATCH).
+  const rawFlag = node.properties.postBodyRaw
+  const isRawBody = rawFlag === undefined || rawFlag === null ? Boolean(body) : rawFlag === true || rawFlag === 'true'
+  const sendsBody = isRawBody && Boolean(body)
+  const params = sendsBody ? [] : rowsProp(node, 'parameters').filter((p) => p.name)
+  const encoded = params
     .map((p) => `${encodeURIComponent(resolveVariables(String(p.name), envVars))}=${encodeURIComponent(resolveVariables(String(p.value || ''), envVars))}`)
     .join('&')
-  const queryString = query ? (path.includes('?') ? '&' : '?') + query : ''
+  const formBody = FORM_METHODS.has(method) && encoded ? encoded : ''
+  const queryString = encoded && !formBody ? (path.includes('?') ? '&' : '?') + encoded : ''
+  const requestBody = sendsBody ? body : formBody
 
   const normalizedPath = path.startsWith('/') ? path : `/${path}`
   const url = `${protocol}://${domain}${port ? `:${port}` : ''}${normalizedPath}${queryString}`
@@ -51,9 +62,9 @@ export function buildDebugRequest(node: TestPlanNode, root: TestPlanNode, envVar
     name: resolveVariables(h.name, envVars),
     value: resolveVariables(h.value, envVars),
   }))
-  if (body && !headers.some((h) => h.name.toLowerCase() === 'content-type')) {
-    headers.push({ name: 'Content-Type', value: 'application/json' })
+  if (requestBody && !headers.some((h) => h.name.toLowerCase() === 'content-type')) {
+    headers.push({ name: 'Content-Type', value: formBody ? 'application/x-www-form-urlencoded' : 'application/json' })
   }
 
-  return { method, url, headers, body: body || undefined, timeoutMs: 30000 }
+  return { method, url, headers, body: requestBody || undefined, timeoutMs: 30000 }
 }

@@ -1,4 +1,4 @@
-import type { EnvironmentItem } from './environmentTypes'
+import type { EnvironmentItem } from '../models/environment'
 
 export const STORAGE_KEY = 'jmeter_environments_v1'
 

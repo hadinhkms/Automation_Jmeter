@@ -65,6 +65,7 @@ export function value(node: TestPlanNode, key: string, fallback: unknown = ''): 
 
 export function rows(node: TestPlanNode, key: string): TableRow[] {
   const current = node.properties[key]
+  // SAFETY: Array.isArray checked; editors always store these table rows as TableRow objects
   return Array.isArray(current) ? (current as TableRow[]) : []
 }
 

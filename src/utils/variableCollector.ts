@@ -24,6 +24,7 @@ export function collectKnownVariables(
 
   // 1. Root TestPlan variables
   if (testPlan?.properties?.variables && Array.isArray(testPlan.properties.variables)) {
+    // SAFETY: Array.isArray checked; name and value stay unknown and are coerced with String()
     for (const row of testPlan.properties.variables as { name?: unknown; value?: unknown }[]) {
       const key = typeof row?.name === 'string' ? row.name.trim() : ''
       if (key) {
@@ -36,6 +37,7 @@ export function collectKnownVariables(
   if (testPlan) {
     const walk = (node: TestPlanNode) => {
       if (node.type === 'UserDefinedVariables' && node.enabled !== false && Array.isArray(node.properties?.variables)) {
+        // SAFETY: Array.isArray checked; name and value stay unknown and are coerced with String()
         for (const row of node.properties.variables as { name?: unknown; value?: unknown }[]) {
           const key = typeof row?.name === 'string' ? row.name.trim() : ''
           if (key) {

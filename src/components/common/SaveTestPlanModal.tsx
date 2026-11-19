@@ -1,8 +1,7 @@
-// master-process-disable-size-check: Monolith queued for modular decomposition via Master Plan
-import { useState, useEffect, useMemo } from 'react'
-import { Save, Play, Download, X, FileCode, AlertCircle } from 'lucide-react'
-import { useJMeterStore } from '../../store/jmeterStore'
-import { localProjectService } from '../../services/projectService'
+import { Save, X, FileCode, AlertCircle } from 'lucide-react'
+import { useSaveTestPlan } from './saveTestPlan/useSaveTestPlan'
+import { SaveFilePreviewCard } from './saveTestPlan/SaveFilePreviewCard'
+import { SaveTestPlanFooter } from './saveTestPlan/SaveTestPlanFooter'
 
 export interface SaveTestPlanModalProps {
   isOpen: boolean
@@ -19,65 +18,13 @@ export function SaveTestPlanModal({
   onSavedAndRun,
   onRunWithoutSaving,
 }: SaveTestPlanModalProps) {
-  const store = useJMeterStore()
-  const defaultName = useMemo(() => {
-    if (store.fileName) return store.fileName
-    const cleanRootName = store.testPlan.name
-      .trim()
-      .replace(/[^a-zA-Z0-9_-]+/g, '_')
-      .replace(/^_+|_+$/g, '')
-    return `${cleanRootName || 'Test_Plan'}.jmx`
-  }, [store.fileName, store.testPlan.name])
-
-  const [fileNameInput, setFileNameInput] = useState(defaultName)
-  const [errorMsg, setErrorMsg] = useState('')
-  const [isSaving, setIsSaving] = useState(false)
-
-  useEffect(() => {
-    if (isOpen) {
-      setFileNameInput(defaultName)
-      setErrorMsg('')
-      setIsSaving(false)
-    }
-  }, [isOpen, defaultName])
+  const { store, fileNameInput, setFileNameInput, errorMsg, setErrorMsg, isSaving, handleSave } = useSaveTestPlan(
+    isOpen,
+    onClose,
+    onSavedAndRun,
+  )
 
   if (!isOpen) return null
-
-  const handleSave = async (andRun = false) => {
-    const trimmed = fileNameInput.trim()
-    if (!trimmed) {
-      setErrorMsg('Vui lòng nhập tên file (.jmx)')
-      return
-    }
-
-    const finalName = trimmed.endsWith('.jmx') ? trimmed : `${trimmed}.jmx`
-
-    try {
-      setIsSaving(true)
-      // Export and download JMX
-      const xml = await localProjectService.exportJmx(store.testPlan)
-      const blobUrl = URL.createObjectURL(new Blob([xml], { type: 'application/xml' }))
-      const link = document.createElement('a')
-      link.href = blobUrl
-      link.download = finalName
-      document.body.appendChild(link)
-      link.click()
-      link.remove()
-      URL.revokeObjectURL(blobUrl)
-
-      // Update store
-      store.markSaved(finalName)
-      setIsSaving(false)
-      onClose()
-
-      if (andRun && onSavedAndRun) {
-        onSavedAndRun()
-      }
-    } catch (err) {
-      setIsSaving(false)
-      setErrorMsg(err instanceof Error ? err.message : 'Không thể lưu file JMX')
-    }
-  }
 
   return (
     <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
@@ -136,69 +83,16 @@ export function SaveTestPlanModal({
             {errorMsg ? <div className="save-error-msg">{errorMsg}</div> : null}
           </div>
 
-          <div className="save-file-preview-card">
-            <div className="preview-row">
-              <span className="preview-label">Định dạng tệp:</span>
-              <span className="preview-val">Apache JMeter Test Plan XML (5.0 / 5.6.3)</span>
-            </div>
-            <div className="preview-row">
-              <span className="preview-label">Node gốc:</span>
-              <span className="preview-val"><strong>{store.testPlan.name}</strong></span>
-            </div>
-            <div className="preview-row">
-              <span className="preview-label">Trạng thái lưu:</span>
-              <span className="preview-val" style={{ color: store.dirty ? '#ef4444' : '#10b981' }}>
-                {store.dirty ? '● Có thay đổi chưa lưu' : '✓ Đã đồng bộ'}
-              </span>
-            </div>
-          </div>
+          <SaveFilePreviewCard planName={store.testPlan.name} dirty={store.dirty} />
         </div>
 
-        <div className="modal-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 20px', background: '#f8fafc', borderTop: '1px solid #e2e8f0' }}>
-          {isPromptBeforeRun ? (
-            <button
-              type="button"
-              className="btn btn-outline"
-              onClick={() => {
-                onClose()
-                if (onRunWithoutSaving) onRunWithoutSaving()
-              }}
-              title="Chạy trực tiếp mà không lưu thành file JMX"
-            >
-              <span>Chạy không lưu</span>
-            </button>
-          ) : (
-            <div />
-          )}
-
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button type="button" className="btn btn-outline" onClick={onClose}>
-              Hủy
-            </button>
-
-            {isPromptBeforeRun ? (
-              <button
-                type="button"
-                className="btn btn-primary btn-run-save"
-                disabled={isSaving}
-                onClick={() => handleSave(true)}
-              >
-                <Play size={14} fill="currentColor" />
-                <span>{isSaving ? 'Đang lưu...' : 'Lưu & Chạy Test'}</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="btn btn-primary"
-                disabled={isSaving}
-                onClick={() => handleSave(false)}
-              >
-                <Download size={14} />
-                <span>{isSaving ? 'Đang lưu...' : 'Lưu File (.jmx)'}</span>
-              </button>
-            )}
-          </div>
-        </div>
+        <SaveTestPlanFooter
+          isPromptBeforeRun={isPromptBeforeRun}
+          isSaving={isSaving}
+          onClose={onClose}
+          onRunWithoutSaving={onRunWithoutSaving}
+          onSave={handleSave}
+        />
       </div>
     </div>
   )

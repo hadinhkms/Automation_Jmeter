@@ -5,6 +5,7 @@ import { historyStorageService } from '../../../services/historyStorageService'
 import { useEnvironmentStore } from '../../../store/environmentStore'
 import { useJMeterStore } from '../../../store/jmeterStore'
 import { buildDebugRequest, type DebugRequest } from '../../../utils/debug/buildDebugRequest'
+import { maskHistoryHeaders, samplerSource } from '../../../utils/debug/historyRestore'
 import { createId } from '../../../utils/ids'
 
 function clientError(err: unknown): SingleResponseResult {
@@ -28,12 +29,14 @@ function recordHistory(node: TestPlanNode, request: DebugRequest, result: Single
       nodeName: node.name,
       method: request.method,
       url: request.url,
-      headers: request.headers,
+      headers: maskHistoryHeaders(request.headers),
+      // Body is kept as sent (Restore needs it); only header secrets are masked.
       body: request.body,
       status: result.status,
       statusText: result.statusText,
       latencyMs: result.latencyMs,
       sizeBytes: result.sizeBytes,
+      source: samplerSource(node),
     })
     .catch(() => {
       // History is best-effort; a storage failure must not break Send Request.

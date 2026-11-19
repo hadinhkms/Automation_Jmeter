@@ -1,4 +1,3 @@
-// master-process-disable-size-check: Monolith queued for modular decomposition via Master Plan
 import {
   Clipboard,
   Copy,
@@ -9,52 +8,15 @@ import {
   Play,
   Save,
   Scissors,
-  Settings2,
   Square,
-  Terminal,
   Trash2,
-  ExternalLink,
-  FileCode2,
-  FileJson,
-  FolderArchive,
-  Radio,
-  Sparkles,
-  Activity,
-  ShieldCheck,
-  GitBranch,
-  Server,
 } from 'lucide-react'
 import type { AppCommands } from '../menu/MenuBar'
 import { useJMeterStore } from '../../store/jmeterStore'
-import { jmeterRunnerService } from '../../services/jmeterRunnerService'
 import { EnvironmentSwitcher } from './EnvironmentSwitcher'
-
-function ToolButton({
-  title,
-  action,
-  disabled,
-  active,
-  children,
-}: {
-  title: string
-  action: () => void
-  disabled?: boolean
-  active?: boolean
-  children: React.ReactNode
-}) {
-  return (
-    <button
-      type="button"
-      className={`tool-button ${active ? 'active-tool' : ''}`}
-      title={title}
-      aria-label={title}
-      onClick={action}
-      disabled={disabled}
-    >
-      {children}
-    </button>
-  )
-}
+import { ToolButton } from './toolbarParts/ToolButton'
+import { ToolbarFeatureButtons, ToolbarImportButtons } from './toolbarParts/ToolbarModalButtons'
+import { ToolbarRightActions } from './toolbarParts/ToolbarRightActions'
 
 export function Toolbar({
   commands,
@@ -67,82 +29,15 @@ export function Toolbar({
 }) {
   const store = useJMeterStore()
 
-  const openHtmlReport = () => {
-    if (store.activeRunId) {
-      window.open(jmeterRunnerService.getReportUrl(store.activeRunId), '_blank')
-    }
-  }
-
   return (
     <div className="toolbar" role="toolbar" aria-label="JMeter actions">
       <ToolButton title="New test plan" action={commands.newPlan}><FilePlus2 size={17} /></ToolButton>
       <ToolButton title="Open JMX" action={commands.openJmx}><FolderOpen size={17} /></ToolButton>
       <ToolButton title="Save" action={commands.save} disabled={disabled.save}><Save size={17} /></ToolButton>
       <ToolButton title="Export JMX" action={commands.exportJmx}><Download size={17} /></ToolButton>
-      <ToolButton
-        title="Enterprise Template Gallery"
-        action={commands.openTemplateGallery}
-        active={activeModal === 'templates'}
-      >
-        <Sparkles size={17} style={{ color: activeModal === 'templates' ? '#ffffff' : '#f59e0b' }} />
-      </ToolButton>
-      <ToolButton
-        title="Visual Workload Curve & VUs Ramp-Up"
-        action={commands.openWorkloadGraph}
-        active={activeModal === 'workload'}
-      >
-        <Activity size={17} style={{ color: activeModal === 'workload' ? '#ffffff' : '#3b82f6' }} />
-      </ToolButton>
-      <ToolButton
-        title="SLA Quality Gates & Alerting"
-        action={commands.openSlaSettings}
-        active={activeModal === 'sla'}
-      >
-        <ShieldCheck size={17} style={{ color: activeModal === 'sla' ? '#ffffff' : '#10b981' }} />
-      </ToolButton>
-      <ToolButton
-        title="Git Version Control & Visual Diff"
-        action={commands.openGitManager}
-        active={activeModal === 'git'}
-      >
-        <GitBranch size={17} style={{ color: activeModal === 'git' ? '#ffffff' : '#a78bfa' }} />
-      </ToolButton>
+      <ToolbarFeatureButtons commands={commands} activeModal={activeModal} />
       <span className="toolbar-separator" />
-      <ToolButton
-        title="Import from cURL… (Tools -> Import from cURL)"
-        action={commands.importCurl}
-        active={activeModal === 'curl'}
-      >
-        <FileCode2 size={17} />
-      </ToolButton>
-      <ToolButton
-        title="Import Postman Collection… (Tools -> Import Postman Collection)"
-        action={commands.importPostman}
-        active={activeModal === 'postman'}
-      >
-        <FileJson size={17} style={{ color: activeModal === 'postman' ? '#ffffff' : '#f59e0b' }} />
-      </ToolButton>
-      <ToolButton
-        title="Local Mock Server… (Tools -> Local Mock Server)"
-        action={commands.openMockServer}
-        active={activeModal === 'mock'}
-      >
-        <Server size={17} />
-      </ToolButton>
-      <ToolButton
-        title="Project File Manager (upload CSV, attachments, files)"
-        action={commands.openAssetManager}
-        active={activeModal === 'assets'}
-      >
-        <FolderArchive size={17} />
-      </ToolButton>
-      <ToolButton
-        title="Browser & Network API Recorder… (Tools -> Browser Recorder)"
-        action={commands.openBrowserRecorder}
-        active={activeModal === 'recorder'}
-      >
-        <Radio size={17} style={{ color: activeModal === 'recorder' ? '#ffffff' : '#818cf8' }} />
-      </ToolButton>
+      <ToolbarImportButtons commands={commands} activeModal={activeModal} />
       <span className="toolbar-separator" />
       <ToolButton title="Cut selected node" action={commands.cut} disabled={disabled.cut}><Scissors size={17} /></ToolButton>
       <ToolButton title="Copy selected node" action={commands.copy}><Copy size={17} /></ToolButton>
@@ -168,44 +63,7 @@ export function Toolbar({
       <span className="toolbar-spacer" />
 
       {/* Mode Badge & Action Buttons */}
-      <div className="toolbar-right-actions">
-        <button
-          type="button"
-          className={`mode-badge ${store.executionMode === 'real' ? 'mode-real' : 'mode-mock'}`}
-          title="Click to configure JMeter environment and execution mode"
-          onClick={() => store.setSettingsOpen(true)}
-        >
-          <span className="mode-dot" />
-          <span>{store.executionMode === 'real' ? (store.jmeterConfig.version ? `JMeter ${store.jmeterConfig.version}` : 'Real JMeter') : 'Mock Mode'}</span>
-        </button>
-
-        {store.hasHtmlReport ? (
-          <button
-            type="button"
-            className="tool-report-button"
-            title="Open generated JMeter HTML Dashboard Report in new tab"
-            onClick={openHtmlReport}
-          >
-            <ExternalLink size={14} />
-            <span>HTML Report</span>
-          </button>
-        ) : null}
-
-        <ToolButton
-          title={store.isConsoleOpen ? 'Hide Console Log' : 'Show JMeter Live Console Log'}
-          action={() => store.setConsoleOpen(!store.isConsoleOpen)}
-          active={store.isConsoleOpen}
-        >
-          <Terminal size={17} />
-        </ToolButton>
-
-        <ToolButton
-          title="JMeter Settings & Configuration"
-          action={() => store.setSettingsOpen(true)}
-        >
-          <Settings2 size={17} />
-        </ToolButton>
-      </div>
+      <ToolbarRightActions store={store} />
     </div>
   )
 }

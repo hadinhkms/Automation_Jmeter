@@ -1,6 +1,6 @@
 import type { TestPlanNode } from '../../models/jmeter'
 import { createNode } from '../../mock/sampleTestPlan'
-import type { FlatPostmanItem, PostmanCollection, PostmanItem } from './postmanTypes'
+import type { FlatPostmanItem, PostmanCollection, PostmanItem } from '../../models/postman'
 import {
   type ConvertRequestOptions,
   convertPostmanRequestToNode,
@@ -12,6 +12,7 @@ export function parsePostmanCollection(jsonString: string): {
   version?: 'v2.0' | 'v2.1' | 'unknown'
 } {
   try {
+    // SAFETY: shape is validated right below (info + item array) before the collection is used
     const parsed = JSON.parse(jsonString) as PostmanCollection
     if (!parsed || typeof parsed !== 'object' || !parsed.info || !Array.isArray(parsed.item)) {
       return { collection: null, error: 'JSON does not match Postman Collection format.' }

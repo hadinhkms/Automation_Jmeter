@@ -1,6 +1,6 @@
 import type { TestPlanNode } from '../../models/jmeter'
 import { createNode } from '../../mock/sampleTestPlan'
-import type { PostmanItem } from './postmanTypes'
+import type { PostmanItem } from '../../models/postman'
 import { normalizePostmanUrl } from './postmanVariableConverter'
 import { transpileVariablesToJMeter } from './dynamicVariablesEngine'
 import { transpilePostmanScript } from './postmanScriptTranspiler'

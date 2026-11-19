@@ -25,6 +25,7 @@ export function LiveControls({ rec }: { rec: RecorderModel }) {
       <select
         value={rec.selectedBrowser}
         disabled={isRecording}
+        // SAFETY: value comes from a select element whose option values are exactly this union
         onChange={(e) => rec.setSelectedBrowser(e.target.value as BrowserChoice)}
         style={S.browserSelect}
       >

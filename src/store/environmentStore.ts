@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { parsePostmanEnvironment } from '../utils/postman/postmanEnvironmentParser'
-import type { EnvironmentItem, EnvironmentStore, EnvironmentVariable } from './environmentTypes'
+import type { EnvironmentItem, EnvironmentStore, EnvironmentVariable } from '../models/environment'
 import { DEFAULT_ENVIRONMENTS, STORAGE_KEY } from './environmentDefaults'
 
 export type { EnvironmentItem, EnvironmentStore, EnvironmentVariable }

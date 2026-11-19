@@ -3,8 +3,10 @@
 // cũng không dính REQUEST_LIMIT. Best-effort: lỗi (thiếu python/creds) -&gt; log &amp; tiếp tục, KHÔNG fail test.
 try {
     if ((vars.get('autoReset') ?: 'true') != 'true') { SampleResult.setResponseData('autoReset=false -&gt; skip', 'UTF-8'); return }
-    def root = new File(System.getProperty('user.dir'))
-    def script = new File(root, 'otp-tools/reset-otp-quota.py')
+    def cwd = new File(System.getProperty('user.dir'))
+    // Web-studio runs execute in runs/&lt;runId&gt;/, two levels below the workspace root where scripts/ lives.
+    def root = [cwd, cwd.parentFile?.parentFile].findAll { it }.find { new File(it, 'scripts/reset-otp-quota.py').exists() } ?: cwd
+    def script = new File(root, 'scripts/reset-otp-quota.py')
     if (!script.exists()) { SampleResult.setResponseData('Khong tim thay ' + script, 'UTF-8'); return }
     def phones = [vars.get('phone'), vars.get('phoneB'), vars.get('phoneC')].findAll { it }.unique()
     // Bỏ env QC_DB_* cũ (Windows user scope) để script đọc đúng D:/_Account_DB/qc_db.env
@@ -12,7 +14,7 @@ try {
     def out = new StringBuilder()
     phones.each { ph -&gt;
         try {
-            def p = ['python', '-I', 'otp-tools/reset-otp-quota.py', ph, '--yes'].execute(envList, root)
+            def p = ['python', '-I', 'scripts/reset-otp-quota.py', ph, '--yes'].execute(envList, root)
             def so = new StringBuilder(); def se = new StringBuilder()
             p.waitForProcessOutput(so, se)
             out.append('[' + ph + '] exit=' + p.exitValue() + ' ' + so.toString().readLines().findAll { it.contains('Deleted') || it.contains('Rows') || it.contains('Error') }.join(' | ') + '\n')

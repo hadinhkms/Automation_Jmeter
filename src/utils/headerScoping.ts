@@ -33,6 +33,7 @@ export function resolveCascadedHeaders(
   for (const n of allNodes) {
     for (const child of n.children) {
       if (child.type === 'HTTPHeaderManager' && child.enabled !== false) {
+        // SAFETY: Header Manager rows are written by its editor as TableRow[]; undefined falls back to []
         const rows = (child.properties.headers as TableRow[]) || []
         for (const row of rows) {
           if (row.name) {

@@ -12,7 +12,10 @@
     "test:qa": "tsx tests/test_deep_qa.ts",
     "test:sprint9": "tsx tests/verify-sprint9.mjs",
     "test:sprint10": "tsx tests/verify-sprint10.mjs",
-    "test": "npm run test:qa && npm run test:sprint9 && npm run test:sprint10",
+    "test:sprint10qa": "tsx tests/verify-sprint10-qa.mjs",
+    "test:sprint11": "tsx tests/verify-sprint11.mjs",
+    "test:sprint11qa": "tsx tests/verify-sprint11-qa.mjs",
+    "test": "npm run test:qa && npm run test:sprint9 && npm run test:sprint10 && npm run test:sprint10qa && npm run test:sprint11 && npm run test:sprint11qa",
     "master:link": "node scripts/link-master-process.mjs",
     "master:update": "node scripts/link-master-process.mjs --update"
   },

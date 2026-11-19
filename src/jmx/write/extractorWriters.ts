@@ -41,7 +41,9 @@ function writeResponseAssertion(documentNode: XmlDocument, element: Element, nod
   if (value(node, 'not', false)) testType |= 4
   if (value(node, 'or', false)) testType |= 32
   const testField = String(value(node, 'field', 'response-code')).replace('-', '_')
-  p.str('Sample.scope', value(node, 'applyTo', 'main-and-sub'))
+  // Editor values (main-and-sub/sub/main) -> JMeter's (all/children/omitted = main sample only)
+  const scope = editorScopeToJMeterScope(value(node, 'applyTo', 'main-and-sub'))
+  writeScope(p, scope, scope !== 'main', String(value(node, 'scopeVariable', '')))
   p.str('Assertion.test_field', `Assertion.${testField}`)
   appendProperty(documentNode, element, 'intProp', 'Assertion.test_type', testType)
   const patterns = documentNode.createElement('collectionProp')

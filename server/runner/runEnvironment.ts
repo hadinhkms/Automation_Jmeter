@@ -76,6 +76,7 @@ export function buildJMeterArgs(
 }
 
 export function buildRunEnv(javaHome: string | null, customHeap: string, options?: RunLaunchOptions): Record<string, string> {
+  // SAFETY: process.env values are strings; undefined entries are dropped by spawn
   const env: Record<string, string> = { ...(process.env as Record<string, string>) }
   const existingPath = process.env.Path || process.env.PATH || ''
   const systemRoot = process.env.SystemRoot || 'C:\\Windows'

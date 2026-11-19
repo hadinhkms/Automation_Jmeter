@@ -4,6 +4,17 @@ export const HISTORY_LIMIT = 50
 const DB_NAME = 'jmeter-web-studio'
 const STORE = 'requestHistory'
 
+/** The sampler's raw, unresolved fields at send time (`${VAR}` kept), so Restore can write them back exactly. */
+export interface HistorySource {
+  protocol: string
+  server: string
+  port: string
+  path: string
+  method: string
+  body: string
+  parameters: Array<Record<string, string | boolean>>
+}
+
 export interface HistoryEntry {
   id: string
   timestamp: number
@@ -17,6 +28,8 @@ export interface HistoryEntry {
   statusText: string
   latencyMs: number
   sizeBytes: number
+  /** Missing on entries recorded before restore-from-source existed. */
+  source?: HistorySource
 }
 
 type Listener = () => void
@@ -66,6 +79,7 @@ class HistoryStorageService {
   async list(): Promise<HistoryEntry[]> {
     const db = await this.open()
     if (!db) return [...this.memory].sort((a, b) => b.timestamp - a.timestamp)
+    // SAFETY: this object store only ever receives HistoryEntry records via add()
     const all = await promisify(db.transaction(STORE).objectStore(STORE).getAll() as IDBRequest<HistoryEntry[]>)
     return all.sort((a, b) => b.timestamp - a.timestamp)
   }
@@ -78,6 +92,7 @@ class HistoryStorageService {
       const tx = db.transaction(STORE, 'readwrite')
       const store = tx.objectStore(STORE)
       store.put(entry)
+      // SAFETY: IDBIndex.getAllKeys resolves to primary keys, which are IDBValidKey values
       const keys = await promisify(store.index('timestamp').getAllKeys() as IDBRequest<IDBValidKey[]>)
       // Index keys come back oldest first; drop everything beyond the limit.
       keys.slice(0, Math.max(0, keys.length - HISTORY_LIMIT)).forEach((key) => store.delete(key))

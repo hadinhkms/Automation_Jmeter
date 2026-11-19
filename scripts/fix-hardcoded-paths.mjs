@@ -68,7 +68,17 @@ for (const filePath of filesToFix) {
   if (content.includes('testname="User Defined Variables - envi QC"') && !content.includes('name="folderdata"')) {
     const qcUDVRegex = /(<Arguments[^>]*testname="User Defined Variables - envi QC"[^>]*>[\s\S]*?<collectionProp name="Arguments\.arguments">)/
     if (qcUDVRegex.test(content)) {
-      content = content.replace(qcUDVRegex, `$1<elementProp name="folderdata" elementType="Argument"><stringProp name="Argument.name">folderdata</stringProp><stringProp name="Argument.value">D:/Project_Jmeter/data</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp><elementProp name="folderGPKD" elementType="Argument"><stringProp name="Argument.name">folderGPKD</stringProp><stringProp name="Argument.value">D:/Project_Jmeter/</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>`)
+      content = content.replace(
+        qcUDVRegex,
+        `$1<elementProp name="folderdata" elementType="Argument">` +
+        `<stringProp name="Argument.name">folderdata</stringProp>` +
+        `<stringProp name="Argument.value">D:/Project_Jmeter/data</stringProp>` +
+        `<stringProp name="Argument.metadata">=</stringProp></elementProp>` +
+        `<elementProp name="folderGPKD" elementType="Argument">` +
+        `<stringProp name="Argument.name">folderGPKD</stringProp>` +
+        `<stringProp name="Argument.value">D:/Project_Jmeter/</stringProp>` +
+        `<stringProp name="Argument.metadata">=</stringProp></elementProp>`,
+      )
       modified = true
     }
   }
@@ -76,7 +86,17 @@ for (const filePath of filesToFix) {
   if (content.includes('testname="User Defined Variables - envi STG"') && !content.includes('name="folderdata"')) {
     const stgUDVRegex = /(<Arguments[^>]*testname="User Defined Variables - envi STG"[^>]*>[\s\S]*?<collectionProp name="Arguments\.arguments">)/
     if (stgUDVRegex.test(content)) {
-      content = content.replace(stgUDVRegex, `$1<elementProp name="folderdata" elementType="Argument"><stringProp name="Argument.name">folderdata</stringProp><stringProp name="Argument.value">D:/Project_Jmeter/data</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp><elementProp name="folderGPKD" elementType="Argument"><stringProp name="Argument.name">folderGPKD</stringProp><stringProp name="Argument.value">D:/Project_Jmeter/</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>`)
+      content = content.replace(
+        stgUDVRegex,
+        `$1<elementProp name="folderdata" elementType="Argument">` +
+        `<stringProp name="Argument.name">folderdata</stringProp>` +
+        `<stringProp name="Argument.value">D:/Project_Jmeter/data</stringProp>` +
+        `<stringProp name="Argument.metadata">=</stringProp></elementProp>` +
+        `<elementProp name="folderGPKD" elementType="Argument">` +
+        `<stringProp name="Argument.name">folderGPKD</stringProp>` +
+        `<stringProp name="Argument.value">D:/Project_Jmeter/</stringProp>` +
+        `<stringProp name="Argument.metadata">=</stringProp></elementProp>`,
+      )
       modified = true
     }
   }

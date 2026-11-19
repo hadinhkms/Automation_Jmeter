@@ -97,6 +97,7 @@ class BrowserRecorderService {
 
     const safeParse = <T>(data: string): T | null => {
       try {
+        // SAFETY: SSE payloads come from our own recorder routes; callers null-check the result
         return JSON.parse(data) as T
       } catch {
         return null

@@ -49,6 +49,7 @@ export const handleRunnerRoutes: RouteHandler = async (req, res, url) => {
         return true
       }
 
+      // SAFETY: buildRunArgs accepts a string or a string list and ignores anything falsy
       const remoteHosts = body.remoteHosts as string[] | string | undefined
       const heap = typeof body.heap === 'string' ? body.heap : undefined
       const { runId, reportDir } = await jmeterRunner.startRun(jmx, name, { remoteHosts, heap })

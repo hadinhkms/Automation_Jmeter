@@ -113,6 +113,7 @@ export function mapElementToType(element: Element): JMeterComponentType {
   if (tag === 'TCPSampler' || gui.includes('TCPSampler') || test === 'TCPSampler') return 'TCPSampler'
   if (tag === 'BackendListener' || gui.includes('BackendListener') || test.includes('BackendListener')) return 'BackendListener'
 
+  // SAFETY: Object.entries loses key types; typeToElement is typed with exactly these keys
   const entry = (Object.entries(typeToElement) as Array<[Exclude<JMeterComponentType, 'UnsupportedComponent'>, ElementMapping]>).find(
     ([, mapping]) => mapping.tag === tag,
   )

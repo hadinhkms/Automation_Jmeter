@@ -5,6 +5,7 @@ import { componentGroups } from '../../rules/componentRules'
 import { useWorkspaceTabsStore } from '../../store/workspaceTabsStore'
 import { collectNodeIds, findNode } from '../../utils/treeUtils'
 import { componentMeta } from '../componentMeta'
+import { closeOtherTabs } from './workspaceTabActions'
 import './workspaceTabs.css'
 
 const samplerTypes = new Set<JMeterComponentType>(componentGroups.Sampler)
@@ -60,7 +61,7 @@ export function WorkspaceTabs({ root, selectedId, onSelect }: WorkspaceTabsProps
             onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onSelect(node.id)}
             onContextMenu={(e) => {
               e.preventDefault()
-              if (window.confirm(`Close all tabs except "${node.name}"?`)) closeOthers(node.id)
+              if (window.confirm(`Close all tabs except "${node.name}"?`)) closeOtherTabs(node.id, closeOthers, onSelect)
             }}
           >
             {method ? <span className="workspace-tab-method">{method}</span> : <Icon size={13} />}

@@ -111,6 +111,7 @@ export async function handleDebugProxy(req: IncomingMessage, res: ServerResponse
       res.end(JSON.stringify(result))
     } catch (fetchErr: unknown) {
       clearTimeout(timer)
+      // SAFETY: catch value is read only via optional-chained .name/.message, so non-Error throws are safe
       const isAbort = (fetchErr as Error)?.name === 'AbortError'
       const latencyMs = Date.now() - startTime
 
@@ -121,12 +122,14 @@ export async function handleDebugProxy(req: IncomingMessage, res: ServerResponse
         latencyMs,
         sizeBytes: 0,
         headers: [],
+        // SAFETY: catch value is read only via optional-chained .name/.message, so non-Error throws are safe
         body: (fetchErr as Error)?.message || 'Proxy request failed',
         truncated: false,
       }))
     }
   } catch (err: unknown) {
     res.statusCode = 500
+    // SAFETY: catch value is read only via optional-chained .name/.message, so non-Error throws are safe
     res.end(JSON.stringify({ error: (err as Error)?.message || 'Internal proxy error' }))
   }
 

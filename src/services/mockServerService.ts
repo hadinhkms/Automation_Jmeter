@@ -11,6 +11,7 @@ export class MockSaveError extends Error {
 
 async function readJson(response: Response): Promise<Record<string, unknown>> {
   try {
+    // SAFETY: payload comes from our own dev-server API; callers check error/index types and trust routes/errors to the server's validation
     return (await response.json()) as Record<string, unknown>
   } catch {
     return {}
@@ -22,6 +23,7 @@ class MockServerService {
     const response = await fetch(ROUTES_API)
     const data = await readJson(response)
     if (!response.ok) throw new Error(typeof data.error === 'string' ? data.error : `Could not load mocks (HTTP ${response.status}).`)
+    // SAFETY: Array.isArray checked; the server validates and normalises every route before returning it
     return Array.isArray(data.routes) ? (data.routes as MockRoute[]) : []
   }
 
@@ -35,8 +37,10 @@ class MockServerService {
     const data = await readJson(response)
     if (!response.ok) {
       const message = typeof data.error === 'string' ? data.error : `Could not save mocks (HTTP ${response.status}).`
+      // SAFETY: errors object comes from validateMockRouteList on the server; only used for display
       throw new MockSaveError(message, typeof data.index === 'number' ? data.index : undefined, data.errors as MockRouteErrors | undefined)
     }
+    // SAFETY: Array.isArray checked; the server validates and normalises every route before returning it
     return Array.isArray(data.routes) ? (data.routes as MockRoute[]) : routes
   }
 

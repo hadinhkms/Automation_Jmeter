@@ -1,4 +1,5 @@
 import type { ComponentWriter } from './types'
+import { SHARE_MODE_ALL, shareModeToJmx } from '../../utils/ddt/csvShareMode'
 import { appendCollection, propertySink, rows, value } from './xmlPrimitives'
 
 /** HTTP header / cookie managers and CSV data set config elements. */
@@ -32,7 +33,7 @@ export const writeConfigComponent: ComponentWriter = (documentNode, element, nod
       p.bool('quotedData', value(node, 'quotedData', false))
       p.bool('recycle', value(node, 'recycle', true))
       p.bool('stopThread', value(node, 'stopThread', false))
-      p.str('shareMode', value(node, 'sharingMode', 'all'))
+      p.str('shareMode', shareModeToJmx(value(node, 'sharingMode', SHARE_MODE_ALL), value(node, 'identifier', '')))
       return true
     default:
       return false

@@ -1,7 +1,4 @@
 import assert from 'node:assert'
-import { writeFileSync, mkdirSync, existsSync, rmSync } from 'node:fs'
-import { join } from 'node:path'
-import { execSync } from 'node:child_process'
 import { browserRecorder } from '../server/browserRecorder.ts'
 import { parseHarContent, safeBase64Decode } from '../src/utils/harParser.ts'
 import {
@@ -12,62 +9,18 @@ import {
   convertRecordedRequestsToNodes,
   convertRecordToSampler,
 } from '../src/utils/recordedRequestConverter.ts'
-import {
-  isSensitiveKey,
-  isSensitiveHeader,
-  maskString,
-  getJMeterVariableName,
-  redactHeaders,
-  redactParams,
-  redactBodyContent,
-  detectSensitiveInRequest,
-} from '../src/utils/redactionUtils.ts'
+import { isSensitiveKey, isSensitiveHeader, maskString, getJMeterVariableName } from '../src/utils/redaction/sensitiveKeys.ts'
+import { redactHeaders, redactParams } from '../src/utils/redaction/redactFields.ts'
+import { redactBodyContent } from '../src/utils/redaction/redactBody.ts'
+import { detectSensitiveInRequest } from '../src/utils/redaction/detectSensitive.ts'
 import { browserJmxWriter } from '../src/jmx/writer.ts'
 import { createNode } from '../src/mock/sampleTestPlan.ts'
+import { installRecorderDomShim } from './helpers/recorderDomShim.mjs'
+import { rawHeaders, sampleHar } from './helpers/recorderFixtures.mjs'
+import { runGoldenJmeterCli } from './helpers/goldenJmeterCli.mjs'
 
 // Lightweight DOM shim for Node environment testing
-if (typeof globalThis.document === 'undefined') {
-  class MockElement {
-    constructor(tagName) {
-      this.tagName = tagName
-      this.attributes = {}
-      this.children = []
-      this.textContent = ''
-    }
-    setAttribute(name, val) {
-      this.attributes[name] = String(val)
-    }
-    getAttribute(name) {
-      return this.attributes[name]
-    }
-    appendChild(child) {
-      this.children.push(child)
-      return child
-    }
-  }
-  class MockDocument {
-    createElement(tag) {
-      return new MockElement(tag)
-    }
-  }
-  globalThis.document = {
-    implementation: {
-      createDocument: () => new MockDocument(),
-    },
-  }
-  globalThis.XMLSerializer = class {
-    serializeToString(el) {
-      const attrs = Object.entries(el.attributes)
-        .map(([k, v]) => ` ${k}="${v}"`)
-        .join('')
-      if (el.children.length === 0 && !el.textContent) {
-        return `<${el.tagName}${attrs}/>`
-      }
-      const inner = el.textContent || el.children.map((c) => this.serializeToString(c)).join('')
-      return `<${el.tagName}${attrs}>${inner}</${el.tagName}>`
-    }
-  }
-}
+installRecorderDomShim()
 
 console.log('--- 1. Testing Browser Detection ---')
 const detection = browserRecorder.detectBrowsers()
@@ -85,14 +38,6 @@ assert.strictEqual(isAnalyticsUrl('https://api.my-app.com/orders'), false)
 console.log('✓ Static & analytics URL filters PASS')
 
 console.log('\n--- 3. Testing Redundant Header Cleaning ---')
-const rawHeaders = [
-  { name: 'Host', value: 'api.example.com' },
-  { name: 'sec-ch-ua', value: '"Chromium";v="124"' },
-  { name: 'sec-fetch-dest', value: 'empty' },
-  { name: 'Authorization', value: 'Bearer eyJhbGciOi...' },
-  { name: 'Content-Type', value: 'application/json' },
-  { name: 'X-Custom-Header', value: 'MyValue' },
-]
 const cleaned = filterRecordedHeaders(rawHeaders)
 assert.strictEqual(cleaned.length, 3, 'Should remove Host and sec- headers')
 assert.deepStrictEqual(
@@ -147,64 +92,6 @@ assert.strictEqual(bVars.API_KEY, 'key_abc_123')
 console.log('✓ Redaction & Parameterization PASS')
 
 console.log('\n--- 5. Testing HAR Parser with QueryParams, FormUrlEncoded, Cookies & Unicode ---')
-const sampleHar = {
-  log: {
-    version: '1.2',
-    creator: { name: 'Chrome DevTools', version: '124' },
-    pages: [{ id: 'page_1', title: 'Login Page' }],
-    entries: [
-      {
-        pageref: 'page_1',
-        startedDateTime: '2026-09-02T01:00:00.000Z',
-        time: 120,
-        request: {
-          method: 'GET',
-          url: 'https://api.example.com/v1/users?page=1&limit=20&search=h%C3%A0+n%E1%BB%99i',
-          queryString: [
-            { name: 'page', value: '1' },
-            { name: 'limit', value: '20' },
-            { name: 'search', value: 'hà nội' },
-          ],
-          headers: [{ name: 'Authorization', value: 'Bearer test_token' }],
-          cookies: [{ name: 'sessionId', value: 'sess_12345', domain: 'example.com' }],
-        },
-        response: {
-          status: 200,
-          statusText: 'OK',
-          headers: [{ name: 'Content-Type', value: 'application/json; charset=utf-8' }],
-          content: {
-            size: 150,
-            mimeType: 'application/json',
-            text: Buffer.from(JSON.stringify({ message: 'Xin chào Việt Nam' })).toString('base64'),
-            encoding: 'base64',
-          },
-        },
-      },
-      {
-        pageref: 'page_1',
-        startedDateTime: '2026-09-02T01:00:01.000Z',
-        time: 250,
-        request: {
-          method: 'POST',
-          url: 'https://api.example.com/v1/login',
-          headers: [{ name: 'Content-Type', value: 'application/x-www-form-urlencoded' }],
-          postData: {
-            mimeType: 'application/x-www-form-urlencoded',
-            params: [
-              { name: 'username', value: 'user1' },
-              { name: 'password', value: 'secretPass' },
-            ],
-          },
-        },
-        response: {
-          status: 200,
-          statusText: 'OK',
-          content: { mimeType: 'application/json', text: '{"status":"success"}' },
-        },
-      },
-    ],
-  },
-}
 
 const harResult = parseHarContent(JSON.stringify(sampleHar))
 assert.strictEqual(harResult.success, true)
@@ -276,42 +163,7 @@ assert(jmxXml.includes('CookiePanel'), 'Must export CookieManager')
 console.log('✓ Golden JMX XML Export PASS')
 
 console.log('\n--- 8. Testing Real Apache JMeter CLI Execution & Verification ---')
-const fixturesDir = join(process.cwd(), 'tests', 'fixtures')
-mkdirSync(fixturesDir, { recursive: true })
-const jmxFilePath = join(fixturesDir, 'golden_recorded_plan.jmx')
-const jtlFilePath = join(fixturesDir, 'golden_recorded_run.jtl')
-const reportDirPath = join(fixturesDir, 'golden_recorded_report')
-
-writeFileSync(jmxFilePath, jmxXml, 'utf-8')
-console.log(`✓ Exported JMX file written to: ${jmxFilePath}`)
-
-// Locate JMeter executable
-const candidates = [
-  join(process.cwd(), 'apache-jmeter-5.6.3', 'apache-jmeter-5.6.3', 'bin', process.platform === 'win32' ? 'jmeter.bat' : 'jmeter'),
-  join(process.cwd(), 'apache-jmeter-5.6.3', 'bin', process.platform === 'win32' ? 'jmeter.bat' : 'jmeter'),
-]
-const jmeterExe = candidates.find((p) => existsSync(p))
-
-if (jmeterExe) {
-  console.log(`Running JMeter CLI: ${jmeterExe}`)
-  try {
-    if (existsSync(jtlFilePath)) rmSync(jtlFilePath, { force: true })
-    if (existsSync(reportDirPath)) rmSync(reportDirPath, { recursive: true, force: true })
-
-    const cmd = `"${jmeterExe}" -n -t "${jmxFilePath}" -l "${jtlFilePath}" -e -o "${reportDirPath}" -f`
-    const output = execSync(cmd, { encoding: 'utf-8', stdio: 'pipe' })
-    console.log(output)
-
-    assert(existsSync(jtlFilePath), 'JTL results file must be generated')
-    assert(existsSync(join(reportDirPath, 'index.html')), 'HTML Dashboard report index.html must be generated')
-    console.log('✓ Apache JMeter 5.6.3 CLI Non-GUI Run & HTML Report Generation PASS 100%!')
-  } catch (err) {
-    console.error('JMeter CLI Execution Error:', err)
-    throw err
-  }
-} else {
-  console.log('⚠ JMeter executable not found in workspace, skipping CLI execution step.')
-}
+runGoldenJmeterCli(jmxXml)
 
 console.log('\n===========================================')
 console.log('ALL RECORDER & CONVERTER TESTS PASSED (100%)!')

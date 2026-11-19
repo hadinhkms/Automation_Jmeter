@@ -22,6 +22,7 @@ export const handleRecorderRoutes: RouteHandler = async (req, res, url) => {
   if (url === '/api/jmeter/recorder/start' && req.method === 'POST') {
     try {
       const body = await parseJsonBody(req)
+      // SAFETY: unknown browserType values fall through to the first detected browser in resolveBrowserExecutable
       const browserType = (body.browserType as 'chrome' | 'edge' | 'custom') || 'chrome'
       const browserPath = typeof body.browserPath === 'string' ? body.browserPath : undefined
       const targetUrl = typeof body.targetUrl === 'string' ? body.targetUrl : 'about:blank'

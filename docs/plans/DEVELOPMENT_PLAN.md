@@ -84,10 +84,10 @@ Variables used throughout:
 **Why:** 48 instances - critical for test flow
 
 **What to add:**
-1. [src/jmx/mappings.ts](src/jmx/mappings.ts)
+1. [src/jmx/mappings.ts](../../src/jmx/mappings.ts)
    - Add `ModuleController: { tag: 'ModuleController', guiclass: 'ModuleControllerGui', testclass: 'ModuleController' }`
 
-2. [src/jmx/parser.ts](src/jmx/parser.ts) - Add case:
+2. [src/jmx/parser.ts](../../src/jmx/parser.ts) - Add case:
 ```typescript
 case 'ModuleController':
   return { 
@@ -96,14 +96,14 @@ case 'ModuleController':
   }
 ```
 
-3. [src/jmx/writer.ts](src/jmx/writer.ts) - Add case:
+3. [src/jmx/writer.ts](../../src/jmx/writer.ts) - Add case:
 ```typescript
 case 'ModuleController':
   stringProp(documentNode, element, 'ModuleController.node_path', value(node, 'nodePath'))
   break
 ```
 
-4. [src/models/jmeter.ts](src/models/jmeter.ts)
+4. [src/models/jmeter.ts](../../src/models/jmeter.ts)
    - Add to JMeterComponentType: `'ModuleController'`
    - Add to type definitions
 

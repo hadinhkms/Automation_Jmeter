@@ -39,7 +39,7 @@ graph TD
 ```
 
 ### 📸 Giao diện tổng quan của hệ thống:
-![Giao diện tổng quan JMeter Web UI](./docs/images/reloaded_ui_check_1788207657903.png)
+![Giao diện tổng quan JMeter Web UI](../images/reloaded_ui_check_1788207657903.png)
 
 ### 2 Chế độ thực thi:
 1. **Real JMeter Execution Mode (Chế độ thật)**:
@@ -52,7 +52,7 @@ graph TD
 > [!TIP]
 > Bạn có thể bấm vào huy hiệu **Mode Badge** ở góc trên bên phải thanh công cụ để mở hộp thoại cấu hình môi trường JMeter bất cứ lúc nào.
 
-![JMeter Settings Modal](./docs/images/settings_modal_1788190642131.png)
+![JMeter Settings Modal](../images/settings_modal_1788190642131.png)
 
 ---
 
@@ -77,7 +77,7 @@ graph TD
 - **Tiêu đề & Nhãn form**: Sử dụng màu xám đen đậm (`#0f172a` / `#1e293b`), font chữ sắc nét đạt chuẩn độ tương phản cao **WCAG AAA**.
 - **Ô nhập liệu (Inputs & Selects)**: Nền trắng với viền rõ ràng, khi focus có viền xanh dương hiện đại (`#2563eb`), chữ nhập màu đen đậm cực kỳ dễ đọc.
 
-![SLA Quality Gates Modal - High Contrast Light Theme](./docs/images/sla_modal_light_theme_1788369020692.png)
+![SLA Quality Gates Modal - High Contrast Light Theme](../images/sla_modal_light_theme_1788369020692.png)
 
 ### 2.4. Bố cục Master-Detail Song Song (Side-by-Side View)
 - Đối với các hộp thoại có luồng danh sách và nội dung chi tiết (như **Git Version Control & Visual Diff**):
@@ -85,12 +85,12 @@ graph TD
   - **Cột phải (toàn bộ phần còn lại)**: Khung xem diff mã nguồn với chiều cao tối đa, hiển thị trực quan dòng thêm/xóa.
   - Khi click chọn bất kỳ file nào ở cột trái, khung diff bên phải cập nhật ngay lập tức mà **cả 2 bên đều giữ nguyên kích thước ổn định**, không bị co giật hay chèn ép lẫn nhau.
 
-![Git Master-Detail Side-by-Side View](./docs/images/git_side_by_side_1788370118380.png)
+![Git Master-Detail Side-by-Side View](../images/git_side_by_side_1788370118380.png)
 
 ### 2.5. Kiến trúc Cuộn Độc Lập Cho Editor & Bảng Biến
 - Khung cấu hình component và các bảng biến dài (User Defined Variables, Parameters) được tách biệt luồng cuộn dọc riêng biệt (`.editor-scroll`). Dù bảng có hàng chục hoặc hàng trăm dòng dữ liệu, thanh cuộn hoạt động mượt mà và nút **`+ Add`** ở chân bảng luôn luôn tiếp cận được.
 
-![Editor Scrolling Architecture](./docs/images/table_bottom_add_button_1788372015140.png)
+![Editor Scrolling Architecture](../images/table_bottom_add_button_1788372015140.png)
 
 ---
 
@@ -106,14 +106,14 @@ Click chuột phải vào bất kỳ node nào trên cây để mở menu thao t
 - **Remove (`Delete`) / Disable / Enable / Rename (`F2`)**.
 - **Move to Top / Move Up / Move Down / Move to Bottom**.
 
-![Context Menu Add Elements](./docs/images/expanded_add_menu_1788199666132.png)
+![Context Menu Add Elements](../images/expanded_add_menu_1788199666132.png)
 
 ### 2.2. Thao tác Kéo & Thả (Drag & Drop)
 - **Sắp xếp thứ tự**: Kéo một component thả lên trên hoặc dưới component khác để đổi vị trí.
 - **Di chuyển vào container**: Kéo Sampler/Timer thả vào bên trong một Thread Group hoặc Logic Controller.
 - **Kéo thả File từ máy tính**: Kéo file `.jmx`, `.jtl`, `.csv`, `.xml` từ Windows Explorer thả trực tiếp vào cửa sổ trình duyệt để tự động nạp dữ liệu.
 
-![CSV Data Config Tree View](./docs/images/csv_data_config_1788200276044.png)
+![CSV Data Config Tree View](../images/csv_data_config_1788200276044.png)
 
 ---
 
@@ -124,23 +124,23 @@ Cho phép nhập nhanh bất kỳ yêu cầu API nào từ DevTools của trình
 ### 3.1. Mở menu Import from cURL
 Truy cập menu **`Tools -> Import from cURL…`** (hoặc click chuột phải trên cây -> `Import from cURL…`, hoặc bấm nút cURL trên Toolbar):
 
-![Tools Menu Import cURL](./docs/images/tools_menu_open_1788206333133.png)
+![Tools Menu Import cURL](../images/tools_menu_open_1788206333133.png)
 
 ---
 
 ### 3.2. Hộp thoại Live Preview cURL
 Dán câu lệnh cURL vào ô nhập liệu. Hệ thống sẽ **Live Preview** tách toàn bộ Method, Domain, Path, Headers và Body Data theo thời gian thực:
 
-![cURL Live Preview Modal](./docs/images/curl_preview_loaded_1788206358155.png)
+![cURL Live Preview Modal](../images/curl_preview_loaded_1788206358155.png)
 
 ---
 
 ### 3.3. Tự động sinh HTTP Request & HTTP Header Manager
 Bấm **Import into Test Plan**, hệ thống sẽ tự động tạo sampler **`HTTP Request`** và node con **`HTTP Header Manager`** tương ứng:
 
-![Imported HTTP Request](./docs/images/imported_request_details_1788206379501.png)
+![Imported HTTP Request](../images/imported_request_details_1788206379501.png)
 
-![Imported HTTP Headers](./docs/images/imported_headers_details_1788206402412.png)
+![Imported HTTP Headers](../images/imported_headers_details_1788206402412.png)
 
 ---
 
@@ -151,7 +151,7 @@ Bộ hiển thị kết quả chi tiết của JMeter được tái hiện đầ
 ### 4.1. Tab Sampler Result
 Xem toàn bộ thông số chi tiết: Mã phản hồi (`200 OK`, `500`), Load time, Connect time, Latency, Data size, Headers size, Content type.
 
-![View Results Tree Overview](./docs/images/results_tree_mock_1788204505660.png)
+![View Results Tree Overview](../images/results_tree_mock_1788204505660.png)
 
 ---
 
@@ -161,7 +161,7 @@ Hiển thị đầy đủ thông tin gửi đi với cấu trúc **Code snippet 
 - Định dạng JSON Body trong `--data-raw '{ ... }'`.
 - Nút **Copy cURL** sao chép trực tiếp lệnh CLI để chạy ngay trong Terminal hoặc import vào Postman/Insomnia.
 
-![Request Tab with Postman cURL](./docs/images/postman_curl_request_verified_1788214264768.png)
+![Request Tab with Postman cURL](../images/postman_curl_request_verified_1788214264768.png)
 
 ---
 
@@ -172,7 +172,7 @@ Tái hiện trung thực giao diện Response Inspector phong cách Postman:
 - **Bộ công cụ xem JSON**: Hỗ trợ chuyển đổi **`JSON (Pretty)`**, **`Raw`**, **`Preview`**, thanh tìm kiếm nội dung và nút sao chép nhanh.
 - **Tự động giải mã Unicode tiếng Việt**: Toàn bộ ký tự tiếng Việt có dấu được giải mã chuẩn xác, hiển thị trực quan và dễ đọc.
 
-![Response Body JSON View](./docs/images/postman_response_view_verified_1788214300938.png)
+![Response Body JSON View](../images/postman_response_view_verified_1788214300938.png)
 
 ---
 
@@ -188,14 +188,14 @@ Tương thích hoàn toàn với hệ sinh thái mở rộng của `jmeter-plugi
 ### 5.1. Tab Available Plugins (Kho Plugin chính thức)
 Kho plugin phong phú (*Custom Thread Groups, Dummy Sampler, Throughput Shaping Timer, Flexible File Writer, 3 Basic Graphs, AutoStop Listener, WebSocket Samplers, Custom Functions...*). Bạn chỉ cần chọn plugin và bấm **`Install Plugin`**:
 
-![Available Plugins Tab](./docs/images/plugins_avail_1788209016653.png)
+![Available Plugins Tab](../images/plugins_avail_1788209016653.png)
 
 ---
 
 ### 5.2. Tab Installed Plugins (Quản lý các plugin đã cài)
 Tự động quét toàn bộ file `.jar` trong `lib/ext` và `lib` của JMeter, hiển thị phiên bản, dung lượng và đường dẫn cài đặt:
 
-![Installed Plugins Tab](./docs/images/plugins_inst_1788209029965.png)
+![Installed Plugins Tab](../images/plugins_inst_1788209029965.png)
 
 ---
 
@@ -204,7 +204,7 @@ Tự động quét toàn bộ file `.jar` trong `lib/ext` và `lib` của JMeter
 ### 6.1. Khởi chạy & Giám sát Live Console
 Bấm nút **Play (▶️)** trên Toolbar hoặc phím tắt **`Ctrl+R`**. Mở Live Console Log (icon Terminal 🖥️) để theo dõi tiến trình chạy thời gian thực:
 
-![Live Load Test Running](./docs/images/load_test_running_1788207901712.png)
+![Live Load Test Running](../images/load_test_running_1788207901712.png)
 
 ---
 
@@ -212,7 +212,7 @@ Bấm nút **Play (▶️)** trên Toolbar hoặc phím tắt **`Ctrl+R`**. Mở
 - **Nút Stop (⏹️ ô vuông đỏ)** và **Shutdown (⏸️)** trên Toolbar luôn luôn sáng và bấm được bất kỳ lúc nào.
 - Khi có tiến trình ngầm cần dọn dẹp, nút **`Force Stop & Reset`** màu đỏ trên thanh thông báo sẽ lập tức gọi `taskkill /F` để giải phóng tiến trình Java:
 
-![Stop Test Executed](./docs/images/stop_test_executed_1788207017284.png)
+![Stop Test Executed](../images/stop_test_executed_1788207017284.png)
 
 ---
 
@@ -221,14 +221,14 @@ Bấm nút **Play (▶️)** trên Toolbar hoặc phím tắt **`Ctrl+R`**. Mở
 ### 7.1. Trình soạn thảo JSON Body
 Tích hợp trong **HTTP Request** với số dòng code, tô màu cú pháp và nút **Prettify JSON** tự động căn lề chuẩn đẹp:
 
-![JSON Code Editor Prettified](./docs/images/json_editor_prettified_correctly_1788194997408.png)
+![JSON Code Editor Prettified](../images/json_editor_prettified_correctly_1788194997408.png)
 
 ---
 
 ### 7.2. Trình soạn thảo JSR223 (Groovy / JavaScript / BeanShell)
 Tích hợp trong **JSR223 Sampler**, **PreProcessor**, **PostProcessor**, **Assertion** với các đối tượng `vars`, `props`, `prev`:
 
-![Debug Sampler & JSR223 Properties](./docs/images/debug_sampler_fields_1788204641425.png)
+![Debug Sampler & JSR223 Properties](../images/debug_sampler_fields_1788204641425.png)
 
 ---
 

@@ -1,6 +1,6 @@
 import type { TestPlanNode } from '../../models/jmeter'
 import { TreeRowContent } from './TreeRowContent'
-import type { TreeDragState, TreeProps } from './treeTypes'
+import type { TreeDragState, TreeProps } from '../../models/tree'
 import { useTreeRowDrag } from './useTreeRowDrag'
 
 interface TreeRowProps extends TreeDragState {

@@ -20,10 +20,15 @@ function unquote(literal: string): string {
   return /^["']/.test(literal) ? literal.slice(1, -1) : literal
 }
 
+/** Expected value as JMeter compares it: strings unquoted, numbers canonical (`10.50` -> `10.5`, like JSON serialisation). */
+function expectedText(literal: string): string {
+  return /^-?\d/.test(literal) ? String(Number(literal)) : unquote(literal)
+}
+
 export const CHAI_RULES: ChaiRule[] = [
   // pm.response.to.have.status(200) | pm.expect(pm.response.code).to.eq(200) | responseCode.code === 200
   {
-    regex: /(?:pm\.response\.to\.(?:have|be)\.status|pm\.expect\(pm\.response\.code\)\.to\.(?:eq|equal|eql)|responseCode\.code\s*===?)\s*\(?\s*["']?(\d{3})["']?\s*\)?/g,
+    regex: /(?:pm\.response\.to\.(?:have|be)\.status|pm\.expect\(pm\.response\.code\)\.to\.(?:eq|equal|eql)|responseCode\.code\s*===?)\s*\(?\s*["']?(\d{3})(?!\d)["']?\s*\)?/g,
     build: (m) => ({
       key: `status:${m[1]}`,
       node: createNode('ResponseAssertion', `Status Code is ${m[1]}`, { field: 'response-code', matchType: 'equals', patterns: [{ pattern: m[1] }] }),
@@ -44,7 +49,7 @@ export const CHAI_RULES: ChaiRule[] = [
   {
     regex: new RegExp(String.raw`pm\.(?:environment|collectionVariables|globals|variables)\.set\s*\(\s*["']([^"']+)["']\s*,\s*${JSON_SOURCE}${JSON_PATH}\s*\)`, 'g'),
     build: (m) => ({
-      key: `extract:${m[1]}`,
+      key: `extract:${m[1]}=${m[2]}`,
       node: createNode('JSONExtractor', `Extract ${m[1]}`, { variableNames: m[1], jsonPaths: toJsonPath(m[2]), matchNumbers: '1', defaults: 'NOT_FOUND' }),
     }),
   },
@@ -54,10 +59,11 @@ export const CHAI_RULES: ChaiRule[] = [
     build: (m) => {
       const path = toJsonPath(m[1])
       const expectNull = m[2] === 'null'
+      const expected = expectedText(m[2])
       return {
-        key: `jsonEq:${path}=${m[2]}`,
-        node: createNode('JSONPathAssertion', `${path} equals ${unquote(m[2])}`, {
-          jsonPath: path, expectedValue: expectNull ? '' : unquote(m[2]), jsonValidation: !expectNull, expectNull, invert: false, isRegex: false,
+        key: `jsonEq:${path}=${expected}`,
+        node: createNode('JSONPathAssertion', `${path} equals ${expected}`, {
+          jsonPath: path, expectedValue: expectNull ? '' : expected, jsonValidation: !expectNull, expectNull, invert: false, isRegex: false,
         }),
       }
     },
@@ -73,13 +79,17 @@ export const CHAI_RULES: ChaiRule[] = [
       }
     },
   },
-  // pm.response.to.have.header("Content-Type")
+  // pm.response.to.have.header("Content-Type") | .header("Content-Type", "application/json")
   {
-    regex: /pm\.response\.to\.have\.header\s*\(\s*["']([^"']+)["']/g,
-    build: (m) => ({
-      key: `header:${m[1].toLowerCase()}`,
-      node: createNode('ResponseAssertion', `Has header ${m[1]}`, { field: 'response-headers', matchType: 'substring', patterns: [{ pattern: `${m[1]}:` }] }),
-    }),
+    regex: /pm\.response\.to\.have\.header\s*\(\s*["']([^"']+)["']\s*(?:,\s*["']([^"']*)["']\s*)?\)/g,
+    build: (m) => {
+      const pattern = m[2] === undefined ? `${m[1]}:` : `${m[1]}: ${m[2]}`
+      const name = m[2] === undefined ? `Has header ${m[1]}` : `Header ${m[1]} is ${m[2]}`
+      return {
+        key: `header:${m[1].toLowerCase()}:${m[2] ?? ''}`,
+        node: createNode('ResponseAssertion', name, { field: 'response-headers', matchType: 'substring', patterns: [{ pattern }] }),
+      }
+    },
   },
   // pm.expect(pm.response.responseTime).to.be.below(500)
   {

@@ -25,6 +25,7 @@ function UnsupportedComponentEditor({
 }) {
   const rawXml = node.metadata?.rawXml || ''
   const rows: TableRow[] = Array.isArray(node.properties.rawProperties)
+    // SAFETY: Array.isArray checked; editors always store these table rows as TableRow objects
     ? node.properties.rawProperties as TableRow[]
     : parseRawJmxProperties(rawXml)
 

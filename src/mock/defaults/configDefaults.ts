@@ -30,7 +30,7 @@ export function configDefaults(
         quotedData: false,
         recycle: true,
         stopThread: false,
-        sharingMode: 'all',
+        sharingMode: 'shareMode.all',
         identifier: '',
       }
     case 'TransactionController':

@@ -1,6 +1,7 @@
 import { boolProp, collectionRows, namedElement, numProp, prop } from './domReaders'
-import { assertionMatchType, regexFieldToEditorValue, sampleScopeToEditorValue } from './editorValues'
+import { assertionMatchType, assertionScopeToEditorValue, regexFieldToEditorValue, sampleScopeToEditorValue } from './editorValues'
 import type { ParsedProperties, PropertyParser } from './types'
+import { shareModeFromJmx } from '../../utils/ddt/csvShareMode'
 
 const COOKIE_FIELDS = {
   name: 'Cookie.name',
@@ -16,6 +17,7 @@ function backendListenerProperties(element: Element, common: ParsedProperties): 
     name: 'Argument.name',
     value: 'Argument.value',
   })
+  // SAFETY: Argument rows are parsed from stringProp values, so value is a string
   const getArg = (name: string, fallback = '') => (backendArgs.find((a) => a.name === name)?.value as string) || fallback
   return {
     ...common,
@@ -58,7 +60,7 @@ export const parseConfigProperties: PropertyParser = (element, type, common) => 
         quotedData: boolProp(element, 'quotedData'),
         recycle: boolProp(element, 'recycle', true),
         stopThread: boolProp(element, 'stopThread'),
-        sharingMode: prop(element, 'shareMode', 'all'),
+        ...shareModeFromJmx(prop(element, 'shareMode', 'shareMode.all')),
       }
     default:
       return undefined
@@ -143,7 +145,8 @@ export const parseExtractorProperties: PropertyParser = (element, type, common) 
       const patternItems = Array.from(namedElement(element, 'Asserion.test_strings')?.children ?? [])
       return {
         ...common,
-        applyTo: prop(element, 'Sample.scope', 'main-and-sub'),
+        applyTo: assertionScopeToEditorValue(prop(element, 'Sample.scope', 'main')),
+        scopeVariable: prop(element, 'Scope.variable', ''),
         field: rawField.replace('Assertion.', '').replace('_', '-'),
         matchType: assertionMatchType(element),
         patterns: patternItems.map((item) => ({ pattern: item.textContent ?? '' })),

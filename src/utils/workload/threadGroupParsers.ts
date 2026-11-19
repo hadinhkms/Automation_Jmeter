@@ -69,6 +69,7 @@ export function parseSteppingThreadGroup(n: TestPlanNode): ThreadGroupCurve {
 }
 
 export function parseUltimateThreadGroup(n: TestPlanNode): ThreadGroupCurve {
+  // SAFETY: schedule rows are written by the Ultimate Thread Group editor as string records
   const rows = (n.properties.scheduleRows as Array<Record<string, string>>) || []
   let maxT = 10
   rows.forEach((r) => {

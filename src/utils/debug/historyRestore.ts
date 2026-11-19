@@ -1,5 +1,61 @@
-import type { TableRow } from '../../models/jmeter'
-import type { HistoryEntry } from '../../services/historyStorageService'
+import type { TableRow, TestPlanNode } from '../../models/jmeter'
+import type { HistoryEntry, HistorySource } from '../../services/historyStorageService'
+import { isSensitiveHeader, maskString } from '../redaction/sensitiveKeys'
+
+function text(node: TestPlanNode, key: string): string {
+  const val = node.properties[key]
+  return val !== undefined && val !== null ? String(val) : ''
+}
+
+/** Snapshot of the sampler's raw fields (unresolved `${VAR}`/`{{var}}` kept) for exact restore. */
+export function samplerSource(node: TestPlanNode): HistorySource {
+  const params = node.properties.parameters
+  return {
+    protocol: text(node, 'protocol'),
+    server: text(node, 'domain') || text(node, 'server'),
+    port: text(node, 'port'),
+    path: text(node, 'path'),
+    method: text(node, 'method'),
+    body: text(node, 'body'),
+    // SAFETY: Array.isArray checked; editors store parameter rows as TableRow objects (copied, not shared)
+    parameters: Array.isArray(params) ? (params as TableRow[]).map((row) => ({ ...row })) : [],
+  }
+}
+
+/** History keeps headers for display only: secret values (Authorization, cookies, API keys) are masked before storing. */
+export function maskHistoryHeaders(headers: Array<{ name: string; value: string }>): Array<{ name: string; value: string }> {
+  return headers.map((h) => (isSensitiveHeader(h.name) ? { name: h.name, value: maskString(h.value) } : h))
+}
+
+const URL_PARTS = /^([a-z][\w+.-]*):\/\/([^/?#]*)([^?#]*)(\?[^#]*)?(?:#.*)?$/i
+
+/** Fallback for old entries without `source`: split the URL by hand so unresolved templates are not lower-cased or encoded. */
+function propertiesFromUrl(entry: HistoryEntry): Record<string, unknown> | null {
+  const m = URL_PARTS.exec(entry.url.trim())
+  if (!m || !m[2]) return null
+  const hostMatch = /^(\[[^\]]*\]|[^:]*)(?::(\d*))?$/.exec(m[2])
+  if (!hostMatch || !hostMatch[1]) return null
+
+  let path = m[3] || '/'
+  try {
+    path = decodeURI(path)
+  } catch {
+    // keep the raw path when it is not valid percent-encoding
+  }
+
+  const parameters: TableRow[] = []
+  new URLSearchParams(m[4] ?? '').forEach((value, name) => {
+    parameters.push({ name, value, encode: true, includeEquals: true })
+  })
+
+  return {
+    protocol: m[1].toLowerCase(),
+    server: hostMatch[1],
+    port: hostMatch[2] ?? '',
+    path,
+    parameters,
+  }
+}
 
 /**
  * Maps a history entry back onto HTTP Request sampler properties
@@ -7,28 +63,17 @@ import type { HistoryEntry } from '../../services/historyStorageService'
  * Headers are not written back: they come from Header Managers in the tree.
  */
 export function historyEntryToProperties(entry: HistoryEntry): Record<string, unknown> | null {
-  let parsed: URL
-  try {
-    parsed = new URL(entry.url)
-  } catch {
-    return null
-  }
-
-  const parameters: TableRow[] = []
-  parsed.searchParams.forEach((value, name) => {
-    parameters.push({ name, value, encode: true, includeEquals: true })
-  })
-
+  const src = entry.source
+  const target = src
+    ? { protocol: src.protocol, server: src.server, port: src.port, path: src.path, parameters: src.parameters.map((row) => ({ ...row })) }
+    : propertiesFromUrl(entry)
+  if (!target) return null
   return {
-    protocol: parsed.protocol.replace(':', ''),
-    server: parsed.hostname,
+    ...target,
     // `server` is the canonical field; clear the legacy `domain` so it cannot shadow it.
     domain: undefined,
-    port: parsed.port,
-    path: parsed.pathname || '/',
-    parameters,
-    method: entry.method,
-    body: entry.body ?? '',
+    method: src ? src.method || entry.method : entry.method,
+    body: src ? src.body : entry.body ?? '',
   }
 }
 

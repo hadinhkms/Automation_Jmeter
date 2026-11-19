@@ -56,4 +56,5 @@ _plan_implement/sprint9_hardening/
 - [x] **TC-FIX-03:** Đổi môi trường trên Toolbar -> Kiểm tra cây Test Plan thấy node `UserDefinedVariables` tự cập nhật danh sách biến mới.
 - [x] **TC-FIX-04:** HTTP Request nằm trong Thread Group có `HTTPHeaderManager` (Authorization: Bearer) -> Bấm `[Send Request]` proxy gửi đầy đủ Authorization header.
 - [x] **TC-FIX-05:** Import Postman Request có script `res.token` hoặc `{{$randomUUID}}` -> Transpiler sinh đúng `JSONExtractor` và `${__UUID()}`.
-- [ ] **TC-FIX-06:** `npm run typecheck`, `npm run build`, `python "D:/_Master_process/master.py" doctor .` đều pass 100%.
+- [x] **TC-FIX-06:** `npm run typecheck`, `npm run build`, `python "D:/_Master_process/master.py" doctor .` đều pass 100%.
+  - *Đóng (2026-11-19):* typecheck ✅, build ✅, `npm test` ✅ (61/61), doctor `PASS` (exit 0). Tách 36 file vượt trần (0 suppression/exemption), cài pre-push hook. 459 secret findings (JWT trong 7 file `plans/*.jmx` + key mẫu tài liệu AWS trong `tests/verify-sprint11.mjs`) được ghi vào `.secret-allowlist.json` (approver hadinhkms, hết hạn 2027-05-19) — vẫn nên rotate/gỡ token khỏi JMX.

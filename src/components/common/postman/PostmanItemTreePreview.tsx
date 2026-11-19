@@ -1,5 +1,5 @@
 import { Folder } from 'lucide-react'
-import type { FlatPostmanItem } from '../../../utils/postman/postmanTypes'
+import type { FlatPostmanItem } from '../../../models/postman'
 
 interface PostmanItemTreePreviewProps {
   items: FlatPostmanItem[]

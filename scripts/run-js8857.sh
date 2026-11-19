@@ -15,7 +15,7 @@ PHONE="${1:-0971344520}"; shift || true
 
 echo "[1/2] Reset quota OTP hôm nay cho $PHONE (QC DB)"
 # Xóa env var QC_DB_* cũ còn sót trong Windows user scope để script đọc đúng creds trong .env (D:/_Account_DB/qc_db.env)
-env -u QC_DB_USER -u QC_DB_PASS -u QC_DB_HOST python -I otp-tools/reset-otp-quota.py "$PHONE" --yes
+env -u QC_DB_USER -u QC_DB_PASS -u QC_DB_HOST python -I scripts/reset-otp-quota.py "$PHONE" --yes
 
 RUN="runs/js8857_$(date +%Y%m%d_%H%M%S)"
 mkdir -p "$RUN"

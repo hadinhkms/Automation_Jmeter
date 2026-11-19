@@ -1,7 +1,7 @@
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { componentMeta } from '../componentMeta'
 import type { TestPlanNode } from '../../models/jmeter'
-import type { TreeProps } from './treeTypes'
+import type { TreeProps } from '../../models/tree'
 
 interface TreeRowContentProps {
   node: TestPlanNode

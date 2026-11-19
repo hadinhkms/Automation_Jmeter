@@ -19,6 +19,7 @@ export function useEnvironmentSync() {
     const currentTestPlan = useJMeterStore.getState().testPlan
 
     // 1. Sync to TestPlan root variables
+    // SAFETY: property is written only by its editor as TableRow[]; missing value falls back to the default
     const planVars = (currentTestPlan.properties.variables as TableRow[]) || []
     const updatedPlanVars = [...planVars]
     for (const row of udvRows) {
@@ -34,6 +35,7 @@ export function useEnvironmentSync() {
     // 2. Sync to child UserDefinedVariables node
     const existingUDV = currentTestPlan.children.find((c) => c.type === 'UserDefinedVariables')
     if (existingUDV) {
+      // SAFETY: property is written only by its editor as TableRow[]; missing value falls back to the default
       const childVars = (existingUDV.properties.variables as TableRow[]) || []
       const updatedChildVars = [...childVars]
       for (const row of udvRows) {
@@ -63,6 +65,7 @@ export function useEnvironmentSync() {
 
     const reader = new FileReader()
     reader.onload = (evt) => {
+      // SAFETY: readAsText() was used, so FileReader.result is a string
       const content = evt.target?.result as string
       const res = importFromPostmanJson(content)
       if (res.success) {

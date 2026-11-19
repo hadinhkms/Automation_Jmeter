@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import type { TestPlanNode } from '../../models/jmeter'
-import type { DropPosition, TreeDragState, TreeProps } from './treeTypes'
+import type { DropPosition, TreeDragState, TreeProps } from '../../models/tree'
 
 /** Drag-and-drop state and handlers for a single tree row. */
 export function useTreeRowDrag(node: TestPlanNode, props: TreeProps, drag: TreeDragState) {
@@ -54,6 +54,7 @@ export function useTreeRowDrag(node: TestPlanNode, props: TreeProps, drag: TreeD
   }
 
   const handleDragLeave = (event: React.DragEvent) => {
+    // SAFETY: DOM event targets are Nodes (or null, which contains() treats as false)
     if (!rowRef.current?.contains(event.relatedTarget as Node)) {
       setDropPosition(null)
     }

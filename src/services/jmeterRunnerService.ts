@@ -1,76 +1,14 @@
-// master-process-disable-size-check: Monolith queued for modular decomposition via Master Plan
-export interface JMeterDetectionResult {
-  found: boolean
-  path: string | null
-  version: string | null
-  error?: string
-}
+import type { JMeterDetectionResult, RunSummary, StreamCallbacks } from '../models/jmeterRunner'
+import { connectRunnerStream } from './jmeterRunner/stream'
 
-export interface JtlSample {
-  id: string
-  label: string
-  code: number
-  elapsed: number
-  success: boolean
-  method: string
-  url: string
-  request: string
-  response: string
-  threadName: string
-  timestamp: string
-  bytes: number
-  sentBytes: number
-  latency: number
-  connectTime: number
-  requestHeaders?: string
-  responseHeaders?: string
-}
-
-export interface RunProgressMetrics {
-  samples: number
-  errors: number
-  throughput: number
-  avgTime: number
-  minTime: number
-  maxTime: number
-  activeThreads: number
-  durationSeconds: number
-}
-
-export interface RunSummary {
-  runId: string
-  status: 'running' | 'completed' | 'failed' | 'stopped'
-  exitCode: number | null
-  samples: JtlSample[]
-  summaryRows: string[][]
-  aggregateRows: string[][]
-  totalSamples: number
-  errorRate: number
-  hasReport: boolean
-  reportDir: string
-  error?: string
-}
-
-export interface RunSamplesUpdate {
-  runId: string
-  samples: JtlSample[]
-  summaryRows: string[][]
-  aggregateRows: string[][]
-  totalSamples: number
-  totalErrors: number
-  errorRate: number
-  hasReport: boolean
-}
-
-export interface StreamCallbacks {
-  onStart?: (data: { runId: string; jmxPath?: string }) => void
-  onLog?: (line: string, type: 'stdout' | 'stderr') => void
-  onProgress?: (metrics: RunProgressMetrics) => void
-  onSamples?: (update: RunSamplesUpdate) => void
-  onComplete?: (summary: RunSummary) => void
-  onStopped?: () => void
-  onError?: (error: string) => void
-}
+export type {
+  JMeterDetectionResult,
+  JtlSample,
+  RunProgressMetrics,
+  RunSummary,
+  RunSamplesUpdate,
+  StreamCallbacks,
+} from '../models/jmeterRunner'
 
 export const jmeterRunnerService = {
   async detectJMeter(): Promise<JMeterDetectionResult> {
@@ -146,72 +84,6 @@ export const jmeterRunnerService = {
   },
 
   connectStream(callbacks: StreamCallbacks): () => void {
-    if (typeof EventSource === 'undefined') {
-      return () => {}
-    }
-
-    const es = new EventSource('/api/jmeter/stream')
-
-    es.addEventListener('start', (event) => {
-      try {
-        const data = JSON.parse(event.data)
-        callbacks.onStart?.(data)
-      } catch {
-        // ignore
-      }
-    })
-
-    es.addEventListener('log', (event) => {
-      try {
-        const data = JSON.parse(event.data)
-        callbacks.onLog?.(data.line, data.type)
-      } catch {
-        // ignore
-      }
-    })
-
-    es.addEventListener('progress', (event) => {
-      try {
-        const data = JSON.parse(event.data)
-        callbacks.onProgress?.(data.metrics)
-      } catch {
-        // ignore
-      }
-    })
-
-    es.addEventListener('samples', (event) => {
-      try {
-        const data = JSON.parse(event.data)
-        callbacks.onSamples?.(data)
-      } catch {
-        // ignore
-      }
-    })
-
-    es.addEventListener('complete', (event) => {
-      try {
-        const data = JSON.parse(event.data)
-        callbacks.onComplete?.(data)
-      } catch {
-        // ignore
-      }
-    })
-
-    es.addEventListener('stopped', () => {
-      callbacks.onStopped?.()
-    })
-
-    es.addEventListener('error', (event) => {
-      try {
-        const data = JSON.parse((event as MessageEvent).data)
-        callbacks.onError?.(data.error || 'Runner stream error')
-      } catch {
-        // ignore
-      }
-    })
-
-    return () => {
-      es.close()
-    }
+    return connectRunnerStream(callbacks)
   },
 }

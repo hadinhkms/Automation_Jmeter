@@ -18,6 +18,14 @@ export function sampleScopeToEditorValue(rawScope: string): string {
   return 'main'
 }
 
+/** Response Assertion "Apply to" uses its own editor values; a missing Sample.scope is JMeter's default (main sample only). */
+export function assertionScopeToEditorValue(rawScope: string): string {
+  const scope = sampleScopeToEditorValue(rawScope)
+  if (scope === 'all') return 'main-and-sub'
+  if (scope === 'children') return 'sub'
+  return scope
+}
+
 export function regexFieldToEditorValue(rawField: string): string {
   const field = rawField.trim()
   const normalized = field.toLowerCase()
