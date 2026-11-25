@@ -7,8 +7,8 @@ export function LatencyTimelineChart({ trendPoints, maxChartLatency }: { trendPo
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
             <h4 style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>Response Time Timeline (Avg vs P95)</h4>
             <div style={{ display: 'flex', gap: 12, fontSize: 11 }}>
-              <span style={{ color: '#3b82f6', display: 'flex', alignItems: 'center', gap: 4 }}>â— Avg Latency</span>
-              <span style={{ color: '#f472b6', display: 'flex', alignItems: 'center', gap: 4 }}>â— P95 Latency</span>
+              <span style={{ color: '#3b82f6', display: 'flex', alignItems: 'center', gap: 4 }}>● Avg Latency</span>
+              <span style={{ color: '#f472b6', display: 'flex', alignItems: 'center', gap: 4 }}>● P95 Latency</span>
             </div>
           </div>
 

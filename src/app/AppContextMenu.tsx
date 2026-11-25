@@ -34,7 +34,7 @@ export function AppContextMenu({
       onDuplicate={() => store.duplicateNode(menuNode.id)}
       onDelete={() => {
         if (menuNode.id === store.testPlan.id) return
-        if (menuNode.children.length === 0 || window.confirm(`Remove â€œ${menuNode.name}â€ and all of its children?`)) store.deleteNode(menuNode.id)
+        if (menuNode.children.length === 0 || window.confirm(`Remove “${menuNode.name}” and all of its children?`)) store.deleteNode(menuNode.id)
       }}
       onToggleEnabled={() => store.toggleEnabled(menuNode.id)}
       onRename={() => setRenameId(menuNode.id)}

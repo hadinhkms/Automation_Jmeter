@@ -1,11 +1,11 @@
 import { CheckboxField, FormField, RadioGroup, Section } from '../../components/common/FormControls'
 import type { EditorProps } from '../editorUtils'
-import { boolProp, numberProp, textProp } from '../editorUtils'
+import { boolProp, countError, countInput, numberProp, textProp } from '../editorUtils'
 
 export function ThreadGroupEditor({ node, updateProperties }: EditorProps) {
   const threads = numberProp(node, 'threads', 1)
   const rampUp = numberProp(node, 'rampUp')
-  const loops = numberProp(node, 'loops', 1)
+  const loops = textProp(node, 'loops', '1')
   const duration = numberProp(node, 'duration')
   const startupDelay = numberProp(node, 'startupDelay')
   const scheduler = boolProp(node, 'scheduler')
@@ -31,7 +31,7 @@ export function ThreadGroupEditor({ node, updateProperties }: EditorProps) {
         <div className="form-grid three-columns">
           <FormField label="Number of Threads (users)" type="number" min={1} value={textProp(node, 'threads', '1')} error={threads < 1 ? 'Must be at least 1' : undefined} onChange={numeric('threads')} />
           <FormField label="Ramp-up Period (seconds)" type="number" min={0} value={textProp(node, 'rampUp', '0')} error={rampUp < 0 ? 'Cannot be negative' : undefined} onChange={numeric('rampUp')} />
-          <FormField label="Loop Count" type="number" min={1} value={textProp(node, 'loops', '1')} error={loops < 1 ? 'Must be at least 1' : undefined} onChange={numeric('loops')} />
+          <FormField label="Loop Count" value={loops} placeholder="1 or ${loopCount}" error={countError(loops)} onChange={(value) => updateProperties({ loops: countInput(value) })} />
         </div>
         <div className="checkbox-stack inline-checks">
           <CheckboxField label="Same user on each iteration" checked={boolProp(node, 'sameUser', true)} onChange={(sameUser) => updateProperties({ sameUser })} />

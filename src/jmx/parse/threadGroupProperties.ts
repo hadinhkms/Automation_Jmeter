@@ -1,6 +1,6 @@
 import type { TableRow } from '../../models/jmeter'
 import { normalizeDirectoryVariableRows } from '../../utils/jmeterPathVariables'
-import { boolProp, collectionRows, namedElement, numProp, prop } from './domReaders'
+import { boolProp, collectionRows, countProp, namedElement, numProp, prop } from './domReaders'
 import type { PropertyParser } from './types'
 
 const ARGUMENT_FIELDS = { name: 'Argument.name', value: 'Argument.value', description: 'Argument.desc' }
@@ -45,7 +45,7 @@ export const parseThreadGroupProperties: PropertyParser = (element, type, common
         onError: prop(element, 'ThreadGroup.on_sample_error', 'continue'),
         threads: numProp(element, 'ThreadGroup.num_threads', 1),
         rampUp: numProp(element, 'ThreadGroup.ramp_time', 1),
-        loops: numProp(element, 'LoopController.loops', 1),
+        loops: countProp(element, 'LoopController.loops', 1),
         sameUser: boolProp(element, 'ThreadGroup.same_user_on_next_iteration', true),
         delayedStart: boolProp(element, 'ThreadGroup.delayedStart'),
         scheduler: boolProp(element, 'ThreadGroup.scheduler'),

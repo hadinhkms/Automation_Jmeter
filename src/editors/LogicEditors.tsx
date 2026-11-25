@@ -5,7 +5,7 @@ import {
   TextAreaField,
 } from '../components/common/FormControls'
 import type { EditorProps } from './editorUtils'
-import { boolProp, numberProp, textProp } from './editorUtils'
+import { boolProp, countError, countInput, numberProp, textProp } from './editorUtils'
 
 export function TransactionControllerEditor({ node, updateProperties }: EditorProps) {
   return (
@@ -32,11 +32,11 @@ export function IfControllerEditor({ node, updateProperties }: EditorProps) {
 
 export function LoopControllerEditor({ node, updateProperties }: EditorProps) {
   const forever = boolProp(node, 'forever')
-  const loops = numberProp(node, 'loops', 1)
+  const loops = textProp(node, 'loops', '1')
   return (
     <Section title="Loop Controller Settings">
       <div className="compact-form-row">
-        <FormField label="Loop Count" type="number" min={1} value={textProp(node, 'loops', '1')} error={!forever && loops < 1 ? 'Must be at least 1' : undefined} onChange={(value) => updateProperties({ loops: value === '' ? '' : Number(value) })} />
+        <FormField label="Loop Count" value={loops} placeholder="5 or ${loopCount}" error={forever ? undefined : countError(loops)} onChange={(value) => updateProperties({ loops: countInput(value) })} />
         <CheckboxField label="Forever" checked={forever} onChange={(value) => updateProperties({ forever: value })} />
       </div>
     </Section>

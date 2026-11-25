@@ -40,7 +40,7 @@ export function useFileCommands({ store, selectedNode, dismissNoticeLater, openM
 
   const removeSelected = () => {
     if (selectedNode.id === store.testPlan.id) return
-    if (selectedNode.children.length > 0 && !window.confirm(`Remove â€œ${selectedNode.name}â€ and all of its children?`)) return
+    if (selectedNode.children.length > 0 && !window.confirm(`Remove “${selectedNode.name}” and all of its children?`)) return
     store.deleteNode(selectedNode.id)
   }
 

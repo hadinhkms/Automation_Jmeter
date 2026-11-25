@@ -20,7 +20,7 @@ export function KpiCards({ stats, runMetrics, isRunning }: KpiCardsProps) {
             {stats.total.toLocaleString()}
           </div>
           <div style={{ fontSize: 11, color: 'var(--text-muted, #888)', marginTop: 4 }}>
-            {isRunning ? 'ðŸŸ¢ Stream live executing...' : 'Completed samples'}
+            {isRunning ? '🟢 Stream live executing...' : 'Completed samples'}
           </div>
         </div>
 

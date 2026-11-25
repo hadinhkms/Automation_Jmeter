@@ -22,7 +22,7 @@ export function DashboardViewToggle({ viewMode, setViewMode, pointsCount }: Dash
               cursor: 'pointer',
             }}
           >
-            ðŸ“Š KPI & Summary
+            📊 KPI & Summary
           </button>
           <button
             onClick={() => setViewMode('chart')}
@@ -37,7 +37,7 @@ export function DashboardViewToggle({ viewMode, setViewMode, pointsCount }: Dash
               cursor: 'pointer',
             }}
           >
-            ðŸ“ˆ Grafana Canvas Charts
+            📈 Grafana Canvas Charts
           </button>
         </div>
         <div style={{ fontSize: 11.5, color: 'var(--text-muted, #94a3b8)' }}>

@@ -1,4 +1,4 @@
-import { boolProp, collectionRows, namedElement, numProp, prop } from './domReaders'
+import { boolProp, collectionRows, countProp, namedElement, numProp, prop } from './domReaders'
 import { assertionMatchType, assertionScopeToEditorValue, regexFieldToEditorValue, sampleScopeToEditorValue } from './editorValues'
 import type { ParsedProperties, PropertyParser } from './types'
 import { shareModeFromJmx } from '../../utils/ddt/csvShareMode'
@@ -86,7 +86,7 @@ export const parseControllerProperties: PropertyParser = (element, type, common)
     case 'LoopController':
       return {
         ...common,
-        loops: numProp(element, 'LoopController.loops', 1),
+        loops: countProp(element, 'LoopController.loops', 1),
         forever: boolProp(element, 'LoopController.continue_forever'),
       }
     case 'WhileController':

@@ -24,6 +24,23 @@ export function numProp(element: Element, name: string, fallback: number): numbe
   return Number.isFinite(value) ? value : fallback
 }
 
+const JMETER_EXPRESSION = /\$\{[^}]+\}/
+
+/** True when the text holds a JMeter variable/function reference such as `${loopCompany}`. */
+export function isJmeterExpression(value: string): boolean {
+  return JMETER_EXPRESSION.test(value)
+}
+
+/**
+ * Count-like property (loops, …) that JMeter also accepts as an expression.
+ * Keeps `${var}` / `${__P(x,1)}` verbatim instead of collapsing it to the fallback number.
+ */
+export function countProp(element: Element, name: string, fallback: number): number | string {
+  const raw = prop(element, name, String(fallback)).trim()
+  if (isJmeterExpression(raw)) return raw
+  return numProp(element, name, fallback)
+}
+
 export function collectionRows(
   element: Element,
   collectionName: string,

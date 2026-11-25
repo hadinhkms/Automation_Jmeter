@@ -5,7 +5,9 @@ export function parseStandardThreadGroup(n: TestPlanNode): ThreadGroupCurve {
   const threads = Number(n.properties.threads ?? 1)
   const rampUp = Number(n.properties.rampUp ?? 1)
   const duration = Number(n.properties.duration ?? 0)
-  const loops = Number(n.properties.loops ?? 1)
+  // loops may be a `${var}` expression, which only JMeter can resolve; estimate with 1 iteration
+  const parsedLoops = Number(n.properties.loops ?? 1)
+  const loops = Number.isFinite(parsedLoops) ? parsedLoops : 1
   const totalTime = duration > 0 ? duration : rampUp + loops * 5
   return {
     name: n.name,

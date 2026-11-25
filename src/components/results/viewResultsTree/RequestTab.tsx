@@ -30,7 +30,7 @@ export function RequestTab({ selectedSample, details, tabs }: RequestTabProps) {
                     {activeRequestSubTab === 'curl' && isSelectedHttpRequest ? (
                       <div className="curl-view">
                         <CodeEditor
-                          label={`cURL Â· ${selectedSample.label}`}
+                          label={`cURL · ${selectedSample.label}`}
                           language="curl"
                           value={curlCommand}
                           minHeight={160}
