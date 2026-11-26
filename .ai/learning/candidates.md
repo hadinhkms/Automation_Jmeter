@@ -28,3 +28,5 @@
 - **Owner duyệt:** Tech Lead | Principal QA | BA
 - **Status:** PENDING
 -->
+- [2026-11-26][JS-8826] Property có `${...}` bị JMeter parse như function: `\` thành `\` (body JSON có `\` thành JSON hỏng, script Groovy có GString mất backslash). Script Groovy dùng nối chuỗi thay GString; body có `\` thì nhân đôi. UDV không resolve biến khai báo trong cùng UDV (dùng `${__P(...)}` trực tiếp).
+- [2026-11-26][JS-8826] BE seeker luôn kèm `"error":"#0 /app/...php"` trong response lỗi: assertion "lộ stack trace" nên đếm riêng, chỉ chặn ở case có expected đó, nếu không sẽ che kết quả logic của case.

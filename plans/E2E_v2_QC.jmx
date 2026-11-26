@@ -167,7 +167,15 @@ log.info("Cập nhật giá trị pathFile mới nhất là: " + pathFile);
         <stringProp name="TestPlan.comments">Login Admin</stringProp>
       </TestFragmentController>
       <hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="a. Login Admin" enabled="true"><stringProp name="comments"/><elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" enabled="true"><collectionProp name="Arguments.arguments"><elementProp name="" elementType="HTTPArgument"><stringProp name="Argument.name"/><stringProp name="Argument.value">{
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Retry - init a. Login Admin" enabled="true"><stringProp name="comments"/><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters"/><stringProp name="filename"/><stringProp name="cacheKey">true</stringProp><stringProp name="script">// Reset trạng thái retry login (sample này bị ẩn khỏi kết quả)
+SampleResult.setIgnore()
+vars.put("login_retry", "true")
+vars.put("login_retry_attempt", "0")
+</stringProp></JSR223Sampler>
+<hashTree/>
+<WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="Retry - While a. Login Admin" enabled="true"><stringProp name="comments"/><stringProp name="WhileController.condition">${__groovy(vars.get("login_retry") == "true")}</stringProp></WhileController>
+<hashTree>
+<HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="a. Login Admin" enabled="true"><stringProp name="comments"/><elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" enabled="true"><collectionProp name="Arguments.arguments"><elementProp name="" elementType="HTTPArgument"><stringProp name="Argument.name"/><stringProp name="Argument.value">{
     "login_name": "${loginEmail}",
     "step": 1
 }</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp></collectionProp></elementProp><stringProp name="HTTPSampler.domain">${baseUrl}</stringProp><stringProp name="HTTPSampler.port"/><stringProp name="HTTPSampler.protocol">https</stringProp><stringProp name="HTTPSampler.contentEncoding"/><stringProp name="HTTPSampler.path">${path_admin_login}</stringProp><stringProp name="HTTPSampler.method">POST</stringProp><boolProp name="HTTPSampler.follow_redirects">true</boolProp><boolProp name="HTTPSampler.auto_redirects">false</boolProp><boolProp name="HTTPSampler.use_keepalive">true</boolProp><boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp><boolProp name="HTTPSampler.BROWSER_COMPATIBLE_MULTIPART">false</boolProp><boolProp name="HTTPSampler.postBodyRaw">true</boolProp><elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs" guiclass="HTTPFileArgsPanel" testclass="HTTPFileArgs" enabled="true"><collectionProp name="HTTPFileArgs.files"/></elementProp></HTTPSamplerProxy>
@@ -178,8 +186,52 @@ log.info("Cập nhật giá trị pathFile mới nhất là: " + pathFile);
           <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true"><stringProp name="comments"/><collectionProp name="HeaderManager.headers"><elementProp name="accept" elementType="Header"><stringProp name="Header.name">accept</stringProp><stringProp name="Header.value">application/json</stringProp></elementProp><elementProp name="accept-language" elementType="Header"><stringProp name="Header.name">accept-language</stringProp><stringProp name="Header.value">vi-VN,vi;q=0.9</stringProp></elementProp><elementProp name="authorization" elementType="Header"><stringProp name="Header.name">authorization</stringProp><stringProp name="Header.value">Bearer ${__P(static_token,)} </stringProp></elementProp><elementProp name="content-type" elementType="Header"><stringProp name="Header.name">content-type</stringProp><stringProp name="Header.value">application/json</stringProp></elementProp><elementProp name="origin" elementType="Header"><stringProp name="Header.name">origin</stringProp><stringProp name="Header.value">https://${adminUrl}</stringProp></elementProp><elementProp name="priority" elementType="Header"><stringProp name="Header.name">priority</stringProp><stringProp name="Header.value">u=1, i</stringProp></elementProp><elementProp name="referer" elementType="Header"><stringProp name="Header.name">referer</stringProp><stringProp name="Header.value">https://${adminUrl}/</stringProp></elementProp><elementProp name="sec-ch-ua" elementType="Header"><stringProp name="Header.name">sec-ch-ua</stringProp><stringProp name="Header.value">"Not)A;Brand";v="99", "Google Chrome";v="127", "Chromium";v="127"</stringProp></elementProp><elementProp name="sec-ch-ua-mobile" elementType="Header"><stringProp name="Header.name">sec-ch-ua-mobile</stringProp><stringProp name="Header.value">?0</stringProp></elementProp><elementProp name="sec-ch-ua-platform" elementType="Header"><stringProp name="Header.name">sec-ch-ua-platform</stringProp><stringProp name="Header.value">"Windows"</stringProp></elementProp><elementProp name="sec-fetch-dest" elementType="Header"><stringProp name="Header.name">sec-fetch-dest</stringProp><stringProp name="Header.value">empty</stringProp></elementProp><elementProp name="sec-fetch-mode" elementType="Header"><stringProp name="Header.name">sec-fetch-mode</stringProp><stringProp name="Header.value">cors</stringProp></elementProp><elementProp name="sec-fetch-site" elementType="Header"><stringProp name="Header.name">sec-fetch-site</stringProp><stringProp name="Header.value">same-site</stringProp></elementProp><elementProp name="user-agent" elementType="Header"><stringProp name="Header.name">user-agent</stringProp><stringProp name="Header.value">Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36</stringProp></elementProp><elementProp name="x-branch" elementType="Header"><stringProp name="Header.name">x-branch</stringProp><stringProp name="Header.value">vl24h.north</stringProp></elementProp><elementProp name="x-correlation-id" elementType="Header"><stringProp name="Header.name">x-correlation-id</stringProp><stringProp name="Header.value">b3947689-18c4-4be0-8b1c-3a6f218ec279</stringProp></elementProp><elementProp name="x-lang" elementType="Header"><stringProp name="Header.name">x-lang</stringProp><stringProp name="Header.value">vi</stringProp></elementProp><elementProp name="x-request-id" elementType="Header"><stringProp name="Header.name">x-request-id</stringProp><stringProp name="Header.value">17bbf4f4-7172-4def-be73-e7f5a3ae3faa</stringProp></elementProp></collectionProp></HeaderManager>
           <hashTree>
           </hashTree>
-        </hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="b. Login Admin" enabled="true"><stringProp name="comments"/><elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" enabled="true"><collectionProp name="Arguments.arguments"><elementProp name="" elementType="HTTPArgument"><stringProp name="Argument.name"/><stringProp name="Argument.value">{
+        <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor - retry login khi lỗi kết nối" enabled="true"><stringProp name="comments"/><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters"/><stringProp name="filename"/><stringProp name="cacheKey">true</stringProp><stringProp name="script">// Retry login khi lỗi kết nối/DNS tạm thời (UnknownHost, SocketException, 502/503/504...).
+// Dùng biến riêng login_retry* để không đè vòng retry api_retry của các bước khác.
+// Override: -Jlogin_retry_max=6 -Jlogin_retry_delay_ms=5000
+int maxAttempts = (props.getProperty("login_retry_max") ?: "6") as int
+long delayMs = (props.getProperty("login_retry_delay_ms") ?: "5000") as long
+
+int attempt = ((vars.get("login_retry_attempt") ?: "0") as int) + 1
+vars.put("login_retry_attempt", attempt as String)
+
+String body = prev.getResponseDataAsString() ?: ""
+String code = prev.getResponseCode() ?: ""
+def transientPattern = ~/(?i)cURL error (6|7|28|35|52|56)\b|Failed to connect|Connection refused|Connection reset|Operation timed out/
+boolean transientErr = code.startsWith("Non HTTP") || (code in ["502", "503", "504"]) || transientPattern.matcher(body).find()
+
+if (transientErr &amp;&amp; attempt &lt; maxAttempts) {
+    vars.put("login_retry", "true")
+    String label = prev.getSampleLabel()
+    prev.setSampleLabel(label + " [lần " + attempt + "/" + maxAttempts + " - lỗi kết nối, retry]")
+    log.warn(label + ": lỗi kết nối (lần " + attempt + "/" + maxAttempts + "), retry sau " + delayMs + "ms")
+    try {
+        Thread.sleep(delayMs)
+    } catch (InterruptedException ignored) {
+        vars.put("login_retry", "false")
+        Thread.currentThread().interrupt()
+    }
+} else {
+    vars.put("login_retry", "false")
+    if (transientErr) {
+        log.error(prev.getSampleLabel() + ": vẫn lỗi kết nối sau " + attempt + " lần, dừng retry")
+    } else if (attempt &gt; 1) {
+        log.info(prev.getSampleLabel() + ": thành công/không còn lỗi kết nối ở lần " + attempt)
+    }
+}
+</stringProp></JSR223PostProcessor>
+<hashTree/>
+</hashTree>
+</hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Retry - init b. Login Admin" enabled="true"><stringProp name="comments"/><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters"/><stringProp name="filename"/><stringProp name="cacheKey">true</stringProp><stringProp name="script">// Reset trạng thái retry login (sample này bị ẩn khỏi kết quả)
+SampleResult.setIgnore()
+vars.put("login_retry", "true")
+vars.put("login_retry_attempt", "0")
+</stringProp></JSR223Sampler>
+<hashTree/>
+<WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="Retry - While b. Login Admin" enabled="true"><stringProp name="comments"/><stringProp name="WhileController.condition">${__groovy(vars.get("login_retry") == "true")}</stringProp></WhileController>
+<hashTree>
+<HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="b. Login Admin" enabled="true"><stringProp name="comments"/><elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" enabled="true"><collectionProp name="Arguments.arguments"><elementProp name="" elementType="HTTPArgument"><stringProp name="Argument.name"/><stringProp name="Argument.value">{
     "id": "${id_var}",
     "login_name": "${loginEmail}",
     "status": 1,
@@ -194,13 +246,59 @@ log.info("Cập nhật giá trị pathFile mới nhất là: " + pathFile);
           <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Regular Expression Extractor" enabled="true"><stringProp name="comments"/><stringProp name="RegexExtractor.useHeaders">false</stringProp><stringProp name="RegexExtractor.refname">token_auth</stringProp><stringProp name="RegexExtractor.regex">"refresh_token":"(.*?)"</stringProp><stringProp name="RegexExtractor.template">$1$</stringProp><stringProp name="RegexExtractor.match_number">1</stringProp><stringProp name="RegexExtractor.default">${token_auth_default}</stringProp><boolProp name="RegexExtractor.default_empty_value">false</boolProp></RegexExtractor>
           <hashTree>
           </hashTree>
-        </hashTree>
+        <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor - retry login khi lỗi kết nối" enabled="true"><stringProp name="comments"/><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters"/><stringProp name="filename"/><stringProp name="cacheKey">true</stringProp><stringProp name="script">// Retry login khi lỗi kết nối/DNS tạm thời (UnknownHost, SocketException, 502/503/504...).
+// Dùng biến riêng login_retry* để không đè vòng retry api_retry của các bước khác.
+// Override: -Jlogin_retry_max=6 -Jlogin_retry_delay_ms=5000
+int maxAttempts = (props.getProperty("login_retry_max") ?: "6") as int
+long delayMs = (props.getProperty("login_retry_delay_ms") ?: "5000") as long
+
+int attempt = ((vars.get("login_retry_attempt") ?: "0") as int) + 1
+vars.put("login_retry_attempt", attempt as String)
+
+String body = prev.getResponseDataAsString() ?: ""
+String code = prev.getResponseCode() ?: ""
+def transientPattern = ~/(?i)cURL error (6|7|28|35|52|56)\b|Failed to connect|Connection refused|Connection reset|Operation timed out/
+boolean transientErr = code.startsWith("Non HTTP") || (code in ["502", "503", "504"]) || transientPattern.matcher(body).find()
+
+if (transientErr &amp;&amp; attempt &lt; maxAttempts) {
+    vars.put("login_retry", "true")
+    String label = prev.getSampleLabel()
+    prev.setSampleLabel(label + " [lần " + attempt + "/" + maxAttempts + " - lỗi kết nối, retry]")
+    log.warn(label + ": lỗi kết nối (lần " + attempt + "/" + maxAttempts + "), retry sau " + delayMs + "ms")
+    try {
+        Thread.sleep(delayMs)
+    } catch (InterruptedException ignored) {
+        vars.put("login_retry", "false")
+        Thread.currentThread().interrupt()
+    }
+} else {
+    vars.put("login_retry", "false")
+    if (transientErr) {
+        log.error(prev.getSampleLabel() + ": vẫn lỗi kết nối sau " + attempt + " lần, dừng retry")
+    } else if (attempt &gt; 1) {
+        log.info(prev.getSampleLabel() + ": thành công/không còn lỗi kết nối ở lần " + attempt)
+    }
+}
+</stringProp></JSR223PostProcessor>
+<hashTree/>
+</hashTree>
+</hashTree>
       </hashTree>
       <TestFragmentController guiclass="TestFragmentControllerGui" testclass="TestFragmentController" testname="Test Fragment - Duyệt GPKD" enabled="true">
         <stringProp name="TestPlan.comments">Từ upload đến duyệt GPKD</stringProp>
       </TestFragmentController>
       <hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="5.2.1 upload-file GPKD - new" enabled="true"><stringProp name="comments">Upload file </stringProp><elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" enabled="true"><collectionProp name="Arguments.arguments"><elementProp name="folder" elementType="HTTPArgument"><stringProp name="Argument.name">folder</stringProp><stringProp name="Argument.value">default</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp><elementProp name="name" elementType="HTTPArgument"><stringProp name="Argument.name">name</stringProp><stringProp name="Argument.value">file_GPKD.pdf</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp></collectionProp></elementProp><stringProp name="HTTPSampler.domain">${uploadURL}</stringProp><stringProp name="HTTPSampler.port"/><stringProp name="HTTPSampler.protocol">https</stringProp><stringProp name="HTTPSampler.contentEncoding"/><stringProp name="HTTPSampler.path">${path_cdn_secure_upload}</stringProp><stringProp name="HTTPSampler.method">POST</stringProp><boolProp name="HTTPSampler.follow_redirects">true</boolProp><boolProp name="HTTPSampler.auto_redirects">false</boolProp><boolProp name="HTTPSampler.use_keepalive">true</boolProp><boolProp name="HTTPSampler.DO_MULTIPART_POST">true</boolProp><boolProp name="HTTPSampler.BROWSER_COMPATIBLE_MULTIPART">false</boolProp><boolProp name="HTTPSampler.postBodyRaw">false</boolProp><elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs" guiclass="HTTPFileArgsPanel" testclass="HTTPFileArgs" enabled="true"><collectionProp name="HTTPFileArgs.files"><elementProp name="HTTPFileArg-0" elementType="HTTPFileArg"><stringProp name="File.path">${folderGPKD}\GPKD\Giay-De-nghi-DKKD-CTY-TNHH-MTV_Bao-Tin.pdf</stringProp><stringProp name="File.paramname">image</stringProp><stringProp name="File.mimetype">application/pdf</stringProp></elementProp></collectionProp></elementProp></HTTPSamplerProxy>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Retry - init 5.2.1" enabled="true"><stringProp name="comments"/><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters"/><stringProp name="filename"/><stringProp name="cacheKey">true</stringProp><stringProp name="script">// Reset trạng thái retry + cờ GPKD trước khi upload (sample này bị ẩn khỏi kết quả)
+SampleResult.setIgnore()
+vars.put("api_retry", "true")
+vars.put("api_retry_attempt", "0")
+vars.put("gpkd_ok", "false")
+vars.put("path_file_GPKD", "NOT_FOUND")
+</stringProp></JSR223Sampler>
+<hashTree/>
+<WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="Retry - While 5.2.1 upload-file GPKD" enabled="true"><stringProp name="comments"/><stringProp name="WhileController.condition">${__groovy(vars.get("api_retry") == "true")}</stringProp></WhileController>
+<hashTree>
+<HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="5.2.1 upload-file GPKD - new" enabled="true"><stringProp name="comments">Upload file </stringProp><elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" enabled="true"><collectionProp name="Arguments.arguments"><elementProp name="folder" elementType="HTTPArgument"><stringProp name="Argument.name">folder</stringProp><stringProp name="Argument.value">default</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp><elementProp name="name" elementType="HTTPArgument"><stringProp name="Argument.name">name</stringProp><stringProp name="Argument.value">file_GPKD.pdf</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp></collectionProp></elementProp><stringProp name="HTTPSampler.domain">${uploadURL}</stringProp><stringProp name="HTTPSampler.port"/><stringProp name="HTTPSampler.protocol">https</stringProp><stringProp name="HTTPSampler.contentEncoding"/><stringProp name="HTTPSampler.path">${path_cdn_secure_upload}</stringProp><stringProp name="HTTPSampler.method">POST</stringProp><boolProp name="HTTPSampler.follow_redirects">true</boolProp><boolProp name="HTTPSampler.auto_redirects">false</boolProp><boolProp name="HTTPSampler.use_keepalive">true</boolProp><boolProp name="HTTPSampler.DO_MULTIPART_POST">true</boolProp><boolProp name="HTTPSampler.BROWSER_COMPATIBLE_MULTIPART">false</boolProp><boolProp name="HTTPSampler.postBodyRaw">false</boolProp><elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs" guiclass="HTTPFileArgsPanel" testclass="HTTPFileArgs" enabled="true"><collectionProp name="HTTPFileArgs.files"><elementProp name="HTTPFileArg-0" elementType="HTTPFileArg"><stringProp name="File.path">${folderGPKD}\GPKD\Giay-De-nghi-DKKD-CTY-TNHH-MTV_Bao-Tin.pdf</stringProp><stringProp name="File.paramname">image</stringProp><stringProp name="File.mimetype">application/pdf</stringProp></elementProp></collectionProp></elementProp></HTTPSamplerProxy>
         <hashTree>
           <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP HeaderManager" enabled="true"><stringProp name="comments">Created from cURL on 2025-08-13T23:52:56.7678839</stringProp><collectionProp name="HeaderManager.headers"><elementProp name="accept" elementType="Header"><stringProp name="Header.name">accept</stringProp><stringProp name="Header.value">*/*</stringProp></elementProp><elementProp name="accept-language" elementType="Header"><stringProp name="Header.name">accept-language</stringProp><stringProp name="Header.value">vi,fr-FR;q=0.9,fr;q=0.8,en-US;q=0.7,en;q=0.6,zh-CN;q=0.5,zh;q=0.4</stringProp></elementProp><elementProp name="authorization" elementType="Header"><stringProp name="Header.name">authorization</stringProp><stringProp name="Header.value">Bearer ${token_auth}</stringProp></elementProp><elementProp name="origin" elementType="Header"><stringProp name="Header.name">origin</stringProp><stringProp name="Header.value">https://${adminUrl}</stringProp></elementProp><elementProp name="priority" elementType="Header"><stringProp name="Header.name">priority</stringProp><stringProp name="Header.value">u=1, i</stringProp></elementProp><elementProp name="referer" elementType="Header"><stringProp name="Header.name">referer</stringProp><stringProp name="Header.value">https://${adminUrl}/</stringProp></elementProp><elementProp name="sec-ch-ua" elementType="Header"><stringProp name="Header.name">sec-ch-ua</stringProp><stringProp name="Header.value">"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"</stringProp></elementProp><elementProp name="sec-ch-ua-mobile" elementType="Header"><stringProp name="Header.name">sec-ch-ua-mobile</stringProp><stringProp name="Header.value">?0</stringProp></elementProp><elementProp name="sec-ch-ua-platform" elementType="Header"><stringProp name="Header.name">sec-ch-ua-platform</stringProp><stringProp name="Header.value">"Windows"</stringProp></elementProp><elementProp name="sec-fetch-dest" elementType="Header"><stringProp name="Header.name">sec-fetch-dest</stringProp><stringProp name="Header.value">empty</stringProp></elementProp><elementProp name="sec-fetch-mode" elementType="Header"><stringProp name="Header.name">sec-fetch-mode</stringProp><stringProp name="Header.value">cors</stringProp></elementProp><elementProp name="sec-fetch-site" elementType="Header"><stringProp name="Header.name">sec-fetch-site</stringProp><stringProp name="Header.value">same-site</stringProp></elementProp><elementProp name="user-agent" elementType="Header"><stringProp name="Header.name">user-agent</stringProp><stringProp name="Header.value">Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36</stringProp></elementProp><elementProp name="x-correlation-id" elementType="Header"><stringProp name="Header.name">x-correlation-id</stringProp><stringProp name="Header.value">2601c20f-2f6e-4ceb-86dd-0dfdd31a9792</stringProp></elementProp><elementProp name="x-request-id" elementType="Header"><stringProp name="Header.name">x-request-id</stringProp><stringProp name="Header.value">fe9de30b-44c3-444e-8d3c-445e8639e612-0</stringProp></elementProp></collectionProp></HeaderManager>
           <hashTree>
@@ -211,8 +309,46 @@ log.info("Cập nhật giá trị pathFile mới nhất là: " + pathFile);
           <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true"><stringProp name="comments"/><stringProp name="Sample.scope">main-and-sub</stringProp><stringProp name="Assertion.test_field">Assertion.response_data</stringProp><intProp name="Assertion.test_type">16</intProp><collectionProp name="Asserion.test_strings"><stringProp name="0">"code":200</stringProp></collectionProp><boolProp name="Assertion.assume_success">false</boolProp></ResponseAssertion>
           <hashTree>
           </hashTree>
-        </hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="5.2.2 upload-license" enabled="true"><stringProp name="comments">upload file đó vào đúng employer</stringProp><elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" enabled="true"><collectionProp name="Arguments.arguments"><elementProp name="" elementType="HTTPArgument"><stringProp name="Argument.name"/><stringProp name="Argument.value">{
+        <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor - retry khi lỗi kết nối" enabled="true"><stringProp name="comments"/><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters"/><stringProp name="filename"/><stringProp name="cacheKey">true</stringProp><stringProp name="script">// Retry khi upstream (vd: service-payment) lỗi kết nối tạm thời.
+// Override: -Jso_retry_max=5 -Jso_retry_delay_ms=3000
+int maxAttempts = (props.getProperty("so_retry_max") ?: "5") as int
+long delayMs = (props.getProperty("so_retry_delay_ms") ?: "3000") as long
+
+int attempt = ((vars.get("api_retry_attempt") ?: "0") as int) + 1
+vars.put("api_retry_attempt", attempt as String)
+
+String body = prev.getResponseDataAsString() ?: ""
+String code = prev.getResponseCode() ?: ""
+def transientPattern = ~/(?i)cURL error (6|7|28|35|52|56)\b|Failed to connect|Connection refused|Connection reset|Operation timed out/
+boolean transientErr = code.startsWith("Non HTTP") || (code in ["502", "503", "504"]) || transientPattern.matcher(body).find()
+
+if (transientErr &amp;&amp; attempt &lt; maxAttempts) {
+    vars.put("api_retry", "true")
+    String label = prev.getSampleLabel()
+    prev.setSampleLabel(label + " [lần " + attempt + "/" + maxAttempts + " - lỗi kết nối, retry]")
+    log.warn(label + ": lỗi kết nối (lần " + attempt + "/" + maxAttempts + "), retry sau " + delayMs + "ms")
+    try {
+        Thread.sleep(delayMs)
+    } catch (InterruptedException ignored) {
+        vars.put("api_retry", "false")
+        Thread.currentThread().interrupt()
+    }
+} else {
+    vars.put("api_retry", "false")
+    if (transientErr) {
+        log.error(prev.getSampleLabel() + ": vẫn lỗi kết nối sau " + attempt + " lần, dừng retry")
+    } else if (attempt &gt; 1) {
+        log.info(prev.getSampleLabel() + ": thành công/không còn lỗi kết nối ở lần " + attempt)
+    }
+}
+</stringProp></JSR223PostProcessor>
+            <hashTree>
+            </hashTree>
+</hashTree>
+</hashTree>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="If upload GPKD OK" enabled="true"><stringProp name="comments">Chỉ gắn/duyệt GPKD khi upload file thành công</stringProp><stringProp name="IfController.condition">${__groovy(vars.get("path_file_GPKD") != "NOT_FOUND")}</stringProp><boolProp name="IfController.evaluateAll">false</boolProp><boolProp name="IfController.useExpression">true</boolProp></IfController>
+<hashTree>
+<HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="5.2.2 upload-license" enabled="true"><stringProp name="comments">upload file đó vào đúng employer</stringProp><elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" enabled="true"><collectionProp name="Arguments.arguments"><elementProp name="" elementType="HTTPArgument"><stringProp name="Argument.name"/><stringProp name="Argument.value">{
   "employer_id": ${re_account}, 
   "file": [
     "${path_file_GPKD}"
@@ -254,13 +390,32 @@ log.info("Cập nhật giá trị pathFile mới nhất là: " + pathFile);
           <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true"><stringProp name="comments"/><stringProp name="Sample.scope">main-and-sub</stringProp><stringProp name="Assertion.test_field">Assertion.response_data</stringProp><intProp name="Assertion.test_type">16</intProp><collectionProp name="Asserion.test_strings"><stringProp name="0">"code":200</stringProp></collectionProp><boolProp name="Assertion.assume_success">false</boolProp></ResponseAssertion>
           <hashTree>
           </hashTree>
-        </hashTree>
+        <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor - set gpkd_ok" enabled="true"><stringProp name="comments"/><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters"/><stringProp name="filename"/><stringProp name="cacheKey">true</stringProp><stringProp name="script">// Đánh dấu RE đã được duyệt GPKD. Nếu false, Thread Group sẽ bỏ qua saleOrder + Create jobs
+// của RE này (tránh hàng loạt lỗi 1009 "Tài khoản chưa bổ sung giấy phép kinh doanh").
+String body = prev.getResponseDataAsString() ?: ""
+boolean ok = prev.getResponseCode() == "200" &amp;&amp; body.contains('"code":200')
+vars.put("gpkd_ok", ok ? "true" : "false")
+if (!ok) {
+    log.error("GPKD chưa được duyệt cho employer " + vars.get("re_account") + " -&gt; bỏ qua saleOrder/Create jobs. Response: " + body.take(300))
+}
+</stringProp></JSR223PostProcessor>
+<hashTree/>
+</hashTree>
+</hashTree>
       </hashTree>
       <TestFragmentController guiclass="TestFragmentControllerGui" testclass="TestFragmentController" testname="Test Fragment - Login RE" enabled="true">
         <stringProp name="TestPlan.comments">Login Admin</stringProp>
       </TestFragmentController>
       <hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="2. Login RE - bk" enabled="true"><stringProp name="comments">dùng cho viêc tạo RE mới</stringProp><elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" enabled="true"><collectionProp name="Arguments.arguments"><elementProp name="" elementType="HTTPArgument"><stringProp name="Argument.name"/><stringProp name="Argument.value">{
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Retry - init 2. Login RE - bk" enabled="true"><stringProp name="comments"/><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters"/><stringProp name="filename"/><stringProp name="cacheKey">true</stringProp><stringProp name="script">// Reset trạng thái retry login (sample này bị ẩn khỏi kết quả)
+SampleResult.setIgnore()
+vars.put("login_retry", "true")
+vars.put("login_retry_attempt", "0")
+</stringProp></JSR223Sampler>
+<hashTree/>
+<WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="Retry - While 2. Login RE - bk" enabled="true"><stringProp name="comments"/><stringProp name="WhileController.condition">${__groovy(vars.get("login_retry") == "true")}</stringProp></WhileController>
+<hashTree>
+<HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="2. Login RE - bk" enabled="true"><stringProp name="comments">dùng cho viêc tạo RE mới</stringProp><elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" enabled="true"><collectionProp name="Arguments.arguments"><elementProp name="" elementType="HTTPArgument"><stringProp name="Argument.name"/><stringProp name="Argument.value">{
     "email": "${__P(re_email_global)}",
     "password": "${__P(re_email_global)}"
 }</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp></collectionProp></elementProp><stringProp name="HTTPSampler.domain">${baseUrl}</stringProp><stringProp name="HTTPSampler.port"/><stringProp name="HTTPSampler.protocol">https</stringProp><stringProp name="HTTPSampler.contentEncoding"/><stringProp name="HTTPSampler.path">${path_re_login}</stringProp><stringProp name="HTTPSampler.method">POST</stringProp><boolProp name="HTTPSampler.follow_redirects">true</boolProp><boolProp name="HTTPSampler.auto_redirects">false</boolProp><boolProp name="HTTPSampler.use_keepalive">true</boolProp><boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp><boolProp name="HTTPSampler.BROWSER_COMPATIBLE_MULTIPART">false</boolProp><boolProp name="HTTPSampler.postBodyRaw">true</boolProp><elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs" guiclass="HTTPFileArgsPanel" testclass="HTTPFileArgs" enabled="true"><collectionProp name="HTTPFileArgs.files"/></elementProp></HTTPSamplerProxy>
@@ -277,7 +432,43 @@ log.info("Cập nhật giá trị pathFile mới nhất là: " + pathFile);
           <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP HeaderManager" enabled="true"><stringProp name="comments">Created from cURL on 2024-12-03T17:18:49.674</stringProp><collectionProp name="HeaderManager.headers"><elementProp name="accept" elementType="Header"><stringProp name="Header.name">accept</stringProp><stringProp name="Header.value">application/json</stringProp></elementProp><elementProp name="accept-language" elementType="Header"><stringProp name="Header.name">accept-language</stringProp><stringProp name="Header.value">vi-VN,vi;q=0.9</stringProp></elementProp><elementProp name="authorization" elementType="Header"><stringProp name="Header.name">authorization</stringProp><stringProp name="Header.value">Bearer ${__P(static_token,)}</stringProp></elementProp><elementProp name="content-type" elementType="Header"><stringProp name="Header.name">content-type</stringProp><stringProp name="Header.value">application/json</stringProp></elementProp><elementProp name="origin" elementType="Header"><stringProp name="Header.name">origin</stringProp><stringProp name="Header.value">https://${reUrl}</stringProp></elementProp><elementProp name="priority" elementType="Header"><stringProp name="Header.name">priority</stringProp><stringProp name="Header.value">u=1, i</stringProp></elementProp><elementProp name="referer" elementType="Header"><stringProp name="Header.name">referer</stringProp><stringProp name="Header.value">https://${reUrl}/</stringProp></elementProp><elementProp name="sec-ch-ua" elementType="Header"><stringProp name="Header.name">sec-ch-ua</stringProp><stringProp name="Header.value">"Not)A;Brand";v="99", "Google Chrome";v="127", "Chromium";v="127"</stringProp></elementProp><elementProp name="sec-ch-ua-mobile" elementType="Header"><stringProp name="Header.name">sec-ch-ua-mobile</stringProp><stringProp name="Header.value">?0</stringProp></elementProp><elementProp name="sec-ch-ua-platform" elementType="Header"><stringProp name="Header.name">sec-ch-ua-platform</stringProp><stringProp name="Header.value">"Windows"</stringProp></elementProp><elementProp name="sec-fetch-dest" elementType="Header"><stringProp name="Header.name">sec-fetch-dest</stringProp><stringProp name="Header.value">empty</stringProp></elementProp><elementProp name="sec-fetch-mode" elementType="Header"><stringProp name="Header.name">sec-fetch-mode</stringProp><stringProp name="Header.value">cors</stringProp></elementProp><elementProp name="sec-fetch-site" elementType="Header"><stringProp name="Header.name">sec-fetch-site</stringProp><stringProp name="Header.value">same-site</stringProp></elementProp><elementProp name="user-agent" elementType="Header"><stringProp name="Header.name">user-agent</stringProp><stringProp name="Header.value">Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36</stringProp></elementProp><elementProp name="x-branch" elementType="Header"><stringProp name="Header.name">x-branch</stringProp><stringProp name="Header.value">vl24h.south</stringProp></elementProp><elementProp name="x-correlation-id" elementType="Header"><stringProp name="Header.name">x-correlation-id</stringProp><stringProp name="Header.value">3ac4da04-c6d2-4935-a50e-9ca1d04e427a</stringProp></elementProp><elementProp name="x-lang" elementType="Header"><stringProp name="Header.name">x-lang</stringProp><stringProp name="Header.value">vi</stringProp></elementProp><elementProp name="x-request-id" elementType="Header"><stringProp name="Header.name">x-request-id</stringProp><stringProp name="Header.value">ee1fd479-0878-4eac-bb3e-0457a6cdbca2</stringProp></elementProp></collectionProp></HeaderManager>
           <hashTree>
           </hashTree>
-        </hashTree>
+        <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor - retry login khi lỗi kết nối" enabled="true"><stringProp name="comments"/><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters"/><stringProp name="filename"/><stringProp name="cacheKey">true</stringProp><stringProp name="script">// Retry login khi lỗi kết nối/DNS tạm thời (UnknownHost, SocketException, 502/503/504...).
+// Dùng biến riêng login_retry* để không đè vòng retry api_retry của các bước khác.
+// Override: -Jlogin_retry_max=6 -Jlogin_retry_delay_ms=5000
+int maxAttempts = (props.getProperty("login_retry_max") ?: "6") as int
+long delayMs = (props.getProperty("login_retry_delay_ms") ?: "5000") as long
+
+int attempt = ((vars.get("login_retry_attempt") ?: "0") as int) + 1
+vars.put("login_retry_attempt", attempt as String)
+
+String body = prev.getResponseDataAsString() ?: ""
+String code = prev.getResponseCode() ?: ""
+def transientPattern = ~/(?i)cURL error (6|7|28|35|52|56)\b|Failed to connect|Connection refused|Connection reset|Operation timed out/
+boolean transientErr = code.startsWith("Non HTTP") || (code in ["502", "503", "504"]) || transientPattern.matcher(body).find()
+
+if (transientErr &amp;&amp; attempt &lt; maxAttempts) {
+    vars.put("login_retry", "true")
+    String label = prev.getSampleLabel()
+    prev.setSampleLabel(label + " [lần " + attempt + "/" + maxAttempts + " - lỗi kết nối, retry]")
+    log.warn(label + ": lỗi kết nối (lần " + attempt + "/" + maxAttempts + "), retry sau " + delayMs + "ms")
+    try {
+        Thread.sleep(delayMs)
+    } catch (InterruptedException ignored) {
+        vars.put("login_retry", "false")
+        Thread.currentThread().interrupt()
+    }
+} else {
+    vars.put("login_retry", "false")
+    if (transientErr) {
+        log.error(prev.getSampleLabel() + ": vẫn lỗi kết nối sau " + attempt + " lần, dừng retry")
+    } else if (attempt &gt; 1) {
+        log.info(prev.getSampleLabel() + ": thành công/không còn lỗi kết nối ở lần " + attempt)
+    }
+}
+</stringProp></JSR223PostProcessor>
+<hashTree/>
+</hashTree>
+</hashTree>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="2. Login RE" enabled="false"><stringProp name="comments">Created from cURL on 2024-12-03T17:18:49.674</stringProp><elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" enabled="true"><collectionProp name="Arguments.arguments"><elementProp name="" elementType="HTTPArgument"><stringProp name="Argument.name"/><stringProp name="Argument.value">{
     "email": "hadtv.nlsv.re+qc_20250225102054@gmail.com",
     "password": "hadtv.nlsv.re+qc_20250225102054@gmail.com"
@@ -1953,7 +2144,15 @@ log.info("✅ ai_result = " + vars.get("ai_result"))
         <stringProp name="TestPlan.comments">Login Admin</stringProp>
       </TestFragmentController>
       <hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="a. Login Admin" enabled="true"><stringProp name="comments"/><elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" enabled="true"><collectionProp name="Arguments.arguments"><elementProp name="" elementType="HTTPArgument"><stringProp name="Argument.name"/><stringProp name="Argument.value">{
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Retry - init a. Login Admin" enabled="true"><stringProp name="comments"/><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters"/><stringProp name="filename"/><stringProp name="cacheKey">true</stringProp><stringProp name="script">// Reset trạng thái retry login (sample này bị ẩn khỏi kết quả)
+SampleResult.setIgnore()
+vars.put("login_retry", "true")
+vars.put("login_retry_attempt", "0")
+</stringProp></JSR223Sampler>
+<hashTree/>
+<WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="Retry - While a. Login Admin" enabled="true"><stringProp name="comments"/><stringProp name="WhileController.condition">${__groovy(vars.get("login_retry") == "true")}</stringProp></WhileController>
+<hashTree>
+<HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="a. Login Admin" enabled="true"><stringProp name="comments"/><elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" enabled="true"><collectionProp name="Arguments.arguments"><elementProp name="" elementType="HTTPArgument"><stringProp name="Argument.name"/><stringProp name="Argument.value">{
     "login_name": "${loginEmail}",
     "step": 1
 }</stringProp><stringProp name="Argument.metadata">=</stringProp><boolProp name="HTTPArgument.always_encode">false</boolProp><boolProp name="HTTPArgument.use_equals">true</boolProp></elementProp></collectionProp></elementProp><stringProp name="HTTPSampler.domain">${baseUrl}</stringProp><stringProp name="HTTPSampler.port"/><stringProp name="HTTPSampler.protocol">https</stringProp><stringProp name="HTTPSampler.contentEncoding"/><stringProp name="HTTPSampler.path">${path_admin_login}</stringProp><stringProp name="HTTPSampler.method">POST</stringProp><boolProp name="HTTPSampler.follow_redirects">true</boolProp><boolProp name="HTTPSampler.auto_redirects">false</boolProp><boolProp name="HTTPSampler.use_keepalive">true</boolProp><boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp><boolProp name="HTTPSampler.BROWSER_COMPATIBLE_MULTIPART">false</boolProp><boolProp name="HTTPSampler.postBodyRaw">true</boolProp><elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs" guiclass="HTTPFileArgsPanel" testclass="HTTPFileArgs" enabled="true"><collectionProp name="HTTPFileArgs.files"/></elementProp></HTTPSamplerProxy>
@@ -1964,8 +2163,52 @@ log.info("✅ ai_result = " + vars.get("ai_result"))
           <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true"><stringProp name="comments"/><collectionProp name="HeaderManager.headers"><elementProp name="accept" elementType="Header"><stringProp name="Header.name">accept</stringProp><stringProp name="Header.value">application/json</stringProp></elementProp><elementProp name="accept-language" elementType="Header"><stringProp name="Header.name">accept-language</stringProp><stringProp name="Header.value">vi-VN,vi;q=0.9</stringProp></elementProp><elementProp name="authorization" elementType="Header"><stringProp name="Header.name">authorization</stringProp><stringProp name="Header.value">Bearer ${__P(static_token,)} </stringProp></elementProp><elementProp name="content-type" elementType="Header"><stringProp name="Header.name">content-type</stringProp><stringProp name="Header.value">application/json</stringProp></elementProp><elementProp name="origin" elementType="Header"><stringProp name="Header.name">origin</stringProp><stringProp name="Header.value">https://${adminUrl}</stringProp></elementProp><elementProp name="priority" elementType="Header"><stringProp name="Header.name">priority</stringProp><stringProp name="Header.value">u=1, i</stringProp></elementProp><elementProp name="referer" elementType="Header"><stringProp name="Header.name">referer</stringProp><stringProp name="Header.value">https://${adminUrl}/</stringProp></elementProp><elementProp name="sec-ch-ua" elementType="Header"><stringProp name="Header.name">sec-ch-ua</stringProp><stringProp name="Header.value">"Not)A;Brand";v="99", "Google Chrome";v="127", "Chromium";v="127"</stringProp></elementProp><elementProp name="sec-ch-ua-mobile" elementType="Header"><stringProp name="Header.name">sec-ch-ua-mobile</stringProp><stringProp name="Header.value">?0</stringProp></elementProp><elementProp name="sec-ch-ua-platform" elementType="Header"><stringProp name="Header.name">sec-ch-ua-platform</stringProp><stringProp name="Header.value">"Windows"</stringProp></elementProp><elementProp name="sec-fetch-dest" elementType="Header"><stringProp name="Header.name">sec-fetch-dest</stringProp><stringProp name="Header.value">empty</stringProp></elementProp><elementProp name="sec-fetch-mode" elementType="Header"><stringProp name="Header.name">sec-fetch-mode</stringProp><stringProp name="Header.value">cors</stringProp></elementProp><elementProp name="sec-fetch-site" elementType="Header"><stringProp name="Header.name">sec-fetch-site</stringProp><stringProp name="Header.value">same-site</stringProp></elementProp><elementProp name="user-agent" elementType="Header"><stringProp name="Header.name">user-agent</stringProp><stringProp name="Header.value">Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36</stringProp></elementProp><elementProp name="x-branch" elementType="Header"><stringProp name="Header.name">x-branch</stringProp><stringProp name="Header.value">vl24h.north</stringProp></elementProp><elementProp name="x-correlation-id" elementType="Header"><stringProp name="Header.name">x-correlation-id</stringProp><stringProp name="Header.value">b3947689-18c4-4be0-8b1c-3a6f218ec279</stringProp></elementProp><elementProp name="x-lang" elementType="Header"><stringProp name="Header.name">x-lang</stringProp><stringProp name="Header.value">vi</stringProp></elementProp><elementProp name="x-request-id" elementType="Header"><stringProp name="Header.name">x-request-id</stringProp><stringProp name="Header.value">17bbf4f4-7172-4def-be73-e7f5a3ae3faa</stringProp></elementProp></collectionProp></HeaderManager>
           <hashTree>
           </hashTree>
-        </hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="b. Login Admin" enabled="true"><stringProp name="comments"/><elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" enabled="true"><collectionProp name="Arguments.arguments"><elementProp name="" elementType="HTTPArgument"><stringProp name="Argument.name"/><stringProp name="Argument.value">{
+        <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor - retry login khi lỗi kết nối" enabled="true"><stringProp name="comments"/><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters"/><stringProp name="filename"/><stringProp name="cacheKey">true</stringProp><stringProp name="script">// Retry login khi lỗi kết nối/DNS tạm thời (UnknownHost, SocketException, 502/503/504...).
+// Dùng biến riêng login_retry* để không đè vòng retry api_retry của các bước khác.
+// Override: -Jlogin_retry_max=6 -Jlogin_retry_delay_ms=5000
+int maxAttempts = (props.getProperty("login_retry_max") ?: "6") as int
+long delayMs = (props.getProperty("login_retry_delay_ms") ?: "5000") as long
+
+int attempt = ((vars.get("login_retry_attempt") ?: "0") as int) + 1
+vars.put("login_retry_attempt", attempt as String)
+
+String body = prev.getResponseDataAsString() ?: ""
+String code = prev.getResponseCode() ?: ""
+def transientPattern = ~/(?i)cURL error (6|7|28|35|52|56)\b|Failed to connect|Connection refused|Connection reset|Operation timed out/
+boolean transientErr = code.startsWith("Non HTTP") || (code in ["502", "503", "504"]) || transientPattern.matcher(body).find()
+
+if (transientErr &amp;&amp; attempt &lt; maxAttempts) {
+    vars.put("login_retry", "true")
+    String label = prev.getSampleLabel()
+    prev.setSampleLabel(label + " [lần " + attempt + "/" + maxAttempts + " - lỗi kết nối, retry]")
+    log.warn(label + ": lỗi kết nối (lần " + attempt + "/" + maxAttempts + "), retry sau " + delayMs + "ms")
+    try {
+        Thread.sleep(delayMs)
+    } catch (InterruptedException ignored) {
+        vars.put("login_retry", "false")
+        Thread.currentThread().interrupt()
+    }
+} else {
+    vars.put("login_retry", "false")
+    if (transientErr) {
+        log.error(prev.getSampleLabel() + ": vẫn lỗi kết nối sau " + attempt + " lần, dừng retry")
+    } else if (attempt &gt; 1) {
+        log.info(prev.getSampleLabel() + ": thành công/không còn lỗi kết nối ở lần " + attempt)
+    }
+}
+</stringProp></JSR223PostProcessor>
+<hashTree/>
+</hashTree>
+</hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Retry - init b. Login Admin" enabled="true"><stringProp name="comments"/><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters"/><stringProp name="filename"/><stringProp name="cacheKey">true</stringProp><stringProp name="script">// Reset trạng thái retry login (sample này bị ẩn khỏi kết quả)
+SampleResult.setIgnore()
+vars.put("login_retry", "true")
+vars.put("login_retry_attempt", "0")
+</stringProp></JSR223Sampler>
+<hashTree/>
+<WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="Retry - While b. Login Admin" enabled="true"><stringProp name="comments"/><stringProp name="WhileController.condition">${__groovy(vars.get("login_retry") == "true")}</stringProp></WhileController>
+<hashTree>
+<HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="b. Login Admin" enabled="true"><stringProp name="comments"/><elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" enabled="true"><collectionProp name="Arguments.arguments"><elementProp name="" elementType="HTTPArgument"><stringProp name="Argument.name"/><stringProp name="Argument.value">{
     "id": "${id_var}",
     "login_name": "${loginEmail}",
     "status": 1,
@@ -1980,7 +2223,43 @@ log.info("✅ ai_result = " + vars.get("ai_result"))
           <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Regular Expression Extractor" enabled="true"><stringProp name="comments"/><stringProp name="RegexExtractor.useHeaders">false</stringProp><stringProp name="RegexExtractor.refname">token_auth</stringProp><stringProp name="RegexExtractor.regex">"refresh_token":"(.*?)"</stringProp><stringProp name="RegexExtractor.template">$1$</stringProp><stringProp name="RegexExtractor.match_number">1</stringProp><stringProp name="RegexExtractor.default">NOT_FOUND</stringProp><boolProp name="RegexExtractor.default_empty_value">false</boolProp></RegexExtractor>
           <hashTree>
           </hashTree>
-        </hashTree>
+        <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor - retry login khi lỗi kết nối" enabled="true"><stringProp name="comments"/><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters"/><stringProp name="filename"/><stringProp name="cacheKey">true</stringProp><stringProp name="script">// Retry login khi lỗi kết nối/DNS tạm thời (UnknownHost, SocketException, 502/503/504...).
+// Dùng biến riêng login_retry* để không đè vòng retry api_retry của các bước khác.
+// Override: -Jlogin_retry_max=6 -Jlogin_retry_delay_ms=5000
+int maxAttempts = (props.getProperty("login_retry_max") ?: "6") as int
+long delayMs = (props.getProperty("login_retry_delay_ms") ?: "5000") as long
+
+int attempt = ((vars.get("login_retry_attempt") ?: "0") as int) + 1
+vars.put("login_retry_attempt", attempt as String)
+
+String body = prev.getResponseDataAsString() ?: ""
+String code = prev.getResponseCode() ?: ""
+def transientPattern = ~/(?i)cURL error (6|7|28|35|52|56)\b|Failed to connect|Connection refused|Connection reset|Operation timed out/
+boolean transientErr = code.startsWith("Non HTTP") || (code in ["502", "503", "504"]) || transientPattern.matcher(body).find()
+
+if (transientErr &amp;&amp; attempt &lt; maxAttempts) {
+    vars.put("login_retry", "true")
+    String label = prev.getSampleLabel()
+    prev.setSampleLabel(label + " [lần " + attempt + "/" + maxAttempts + " - lỗi kết nối, retry]")
+    log.warn(label + ": lỗi kết nối (lần " + attempt + "/" + maxAttempts + "), retry sau " + delayMs + "ms")
+    try {
+        Thread.sleep(delayMs)
+    } catch (InterruptedException ignored) {
+        vars.put("login_retry", "false")
+        Thread.currentThread().interrupt()
+    }
+} else {
+    vars.put("login_retry", "false")
+    if (transientErr) {
+        log.error(prev.getSampleLabel() + ": vẫn lỗi kết nối sau " + attempt + " lần, dừng retry")
+    } else if (attempt &gt; 1) {
+        log.info(prev.getSampleLabel() + ": thành công/không còn lỗi kết nối ở lần " + attempt)
+    }
+}
+</stringProp></JSR223PostProcessor>
+<hashTree/>
+</hashTree>
+</hashTree>
       </hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Thread Group - Create Jobs" enabled="true"><stringProp name="comments"/><stringProp name="ThreadGroup.on_sample_error">continue</stringProp><elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true"><boolProp name="LoopController.continue_forever">false</boolProp><stringProp name="LoopController.loops">1</stringProp></elementProp><stringProp name="ThreadGroup.num_threads">1</stringProp><stringProp name="ThreadGroup.ramp_time">1</stringProp><boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp><boolProp name="ThreadGroup.delayedStart">false</boolProp><boolProp name="ThreadGroup.scheduler">false</boolProp><stringProp name="ThreadGroup.duration">0</stringProp><stringProp name="ThreadGroup.delay">0</stringProp></ThreadGroup>
       <hashTree>
@@ -2077,6 +2356,12 @@ vars.put("displayed_area", record.displayed_area)
 </stringProp></JSR223Sampler>
           <hashTree>
           </hashTree>
+<JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler - reset gpkd_ok" enabled="true"><stringProp name="comments"/><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters"/><stringProp name="filename"/><stringProp name="cacheKey">true</stringProp><stringProp name="script">// Reset cờ GPKD mỗi vòng công ty để không dùng lại kết quả của RE trước
+SampleResult.setIgnore()
+vars.put("gpkd_ok", "false")
+</stringProp></JSR223Sampler>
+<hashTree/>
+
           <ModuleController guiclass="ModuleControllerGui" testclass="ModuleController" testname="Module Controller - 1. RE - Account RE" enabled="true">
             <collectionProp name="ModuleController.node_path">
               <stringProp name="764597751">Test Plan</stringProp>
@@ -2086,7 +2371,9 @@ vars.put("displayed_area", record.displayed_area)
           </ModuleController>
           <hashTree>
           </hashTree>
-          <ModuleController guiclass="ModuleControllerGui" testclass="ModuleController" testname="Module Controller - 2. RE - saleOrder" enabled="true">
+          <IfController guiclass="IfControllerPanel" testclass="IfController" testname="If GPKD đã duyệt" enabled="true"><stringProp name="comments">RE chưa có GPKD thì mọi gói 7.x đều trả 1009 -&gt; bỏ qua, sang vòng công ty tiếp theo</stringProp><stringProp name="IfController.condition">${__groovy(vars.get("gpkd_ok") == "true")}</stringProp><boolProp name="IfController.evaluateAll">false</boolProp><boolProp name="IfController.useExpression">true</boolProp></IfController>
+<hashTree>
+<ModuleController guiclass="ModuleControllerGui" testclass="ModuleController" testname="Module Controller - 2. RE - saleOrder" enabled="true">
             <collectionProp name="ModuleController.node_path">
               <stringProp name="764597751">Test Plan</stringProp>
               <stringProp name="764597751">Test Plan</stringProp>
@@ -2104,6 +2391,14 @@ vars.put("displayed_area", record.displayed_area)
           </ModuleController>
           <hashTree>
           </hashTree>
+</hashTree>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="If GPKD chưa duyệt - log" enabled="true"><stringProp name="comments"></stringProp><stringProp name="IfController.condition">${__groovy(vars.get("gpkd_ok") != "true")}</stringProp><boolProp name="IfController.evaluateAll">false</boolProp><boolProp name="IfController.useExpression">true</boolProp></IfController>
+<hashTree>
+<JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler - log skip RE" enabled="true"><stringProp name="comments"/><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters"/><stringProp name="filename"/><stringProp name="cacheKey">true</stringProp><stringProp name="script">SampleResult.setIgnore()
+log.error("Bỏ qua saleOrder + Create jobs cho employer " + vars.get("re_account") + " vì GPKD chưa được duyệt")
+</stringProp></JSR223Sampler>
+<hashTree/>
+</hashTree>
         </hashTree>
       </hashTree>
     </hashTree>
